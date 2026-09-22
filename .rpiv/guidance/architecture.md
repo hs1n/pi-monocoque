@@ -44,7 +44,7 @@ rpiv-mono/
 │   └── test-utils/               — Private workspace package: shared test fixtures (not published)
 ├── test/                         — Repo-wide Vitest setup (homedir stub + env hygiene + pi-ai//compat mocks + beforeEach singleton resets)
 ├── scripts/                      — Lockstep release pipeline (release.mjs + sync-versions.js) + repo guards (check-no-decision-codes.mjs, check-slice-overlap.mjs)
-│                                 — fork additions: fork-pi-install.sh (local-path Pi install) + fork-license-audit.mjs (dependency license inventory)
+│                                 — fork additions: fork-pi-install.sh (local-path Pi install), fork-license-audit.mjs (dependency license inventory), fork-rename-scope.mjs (npm-scope rename), fork-own-skill.mjs (take over a bundled skill into ~/.agents/skills)
 ├── thoughts/shared/              — Pipeline artifacts: questions/, research/, solutions/, designs/, plans/, reviews/ (gitignored)
 ├── vitest.config.ts              — Single Vitest runner; `include: ['packages/*/**/*.test.ts']`, setupFiles `['./test/setup.ts']`
 ├── tsconfig.base.json            — Single shared TS config; no per-package tsconfig.json (rpiv-site has its own — excluded here)
@@ -77,6 +77,8 @@ rpiv-mono/
 | `node scripts/sync-versions.js` | Verify lockstep + rewrite intra-monorepo deps to `^<version>` |
 | `bash scripts/fork-pi-install.sh [-l] [--with btw,voice,warp,telemetry]` | **Fork-only.** Install this fork's packages into Pi by local path — the only supported install path here (`pi install git:<repo>` cannot work, see the banner). See `INSTALL-FORK.md` |
 | `node scripts/fork-license-audit.mjs .` | **Fork-only.** Dependency license inventory + copyleft/unknown flagging (Node built-ins only, no npx) |
+| `node scripts/fork-rename-scope.mjs <@scope>` | **Fork-only.** Rewrite the npm scope across the repo (idempotent, `--report` / `--dry-run`); re-run if the publishing account differs from the one assumed |
+| `node scripts/fork-own-skill.mjs <skill> [--list] [--check] [--remove <skill>]` | **Fork-only.** Copy a bundled skill into `~/.agents/skills` so it shadows the package one, carrying its `_shared/` deps. Refuses a project-level `.agents/skills`: Pi dispatches from there, but contract harvesting does not read it |
 
 Husky hooks (local-only):
 - `pre-commit` — runs `npm run check:decision-codes` (fail-fast contamination guard) then `npm run check` (format + typecheck); restages files biome may have rewritten
