@@ -3,6 +3,7 @@
  * and the guarded sibling registration.
  */
 
+import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, sep } from "node:path";
@@ -538,10 +539,12 @@ describe("registerSkillContractsSource", () => {
 
 describe("buildUserSkillContracts", () => {
 	const userSkillsDir = () => join(process.env.HOME!, ".pi", "agent", "skills");
+	const agentsSkillsDir = () => join(process.env.HOME!, ".agents", "skills");
 	let projectDir: string;
 
 	afterEach(() => {
 		rmSync(userSkillsDir(), { recursive: true, force: true });
+		rmSync(agentsSkillsDir(), { recursive: true, force: true });
 		if (projectDir) {
 			rmSync(projectDir, { recursive: true, force: true });
 			projectDir = "" as string;
@@ -597,6 +600,53 @@ Body here`,
 	it("returns [] when no user skill dirs exist", () => {
 		projectDir = mkdtempSync(join(tmpdir(), "rpiv-user-skill-empty-"));
 		expect(buildUserSkillContracts(projectDir)).toEqual([]);
+	});
+
+	// `.agents/skills` is a location Pi DISPATCHES from but the `loadSkills` helper
+	// does not read, so it has to be enumerated explicitly — otherwise a skill there
+	// runs with its contract invisible to the workflow engine.
+
+	it("returns contracts for user skills in ~/.agents/skills", () => {
+		projectDir = mkdtempSync(join(tmpdir(), "rpiv-user-skill-agents-home-"));
+		writeSkill(agentsSkillsDir(), "agents-home-review", CONTRACT_SKILL);
+		expect(buildUserSkillContracts(projectDir).map(([name]) => name)).toContain("agents-home-review");
+	});
+
+	it("returns contracts for project skills in <cwd>/.agents/skills", () => {
+		projectDir = mkdtempSync(join(tmpdir(), "rpiv-user-skill-agents-proj-"));
+		writeSkill(join(projectDir, ".agents", "skills"), "agents-proj-review", CONTRACT_SKILL);
+		expect(buildUserSkillContracts(projectDir).map(([name]) => name)).toContain("agents-proj-review");
+	});
+
+	it("walks ancestor .agents/skills up to the git repo root and no further", () => {
+		// The repo root is NESTED inside the outer dir, so a skill in the outer dir's
+		// `.agents/skills` is above the walk's stopping point and must not be read.
+		projectDir = mkdtempSync(join(tmpdir(), "rpiv-agents-outer-"));
+		const repoRoot = join(projectDir, "repo");
+		mkdirSync(repoRoot, { recursive: true });
+		execFileSync("git", ["init", "-q"], { cwd: repoRoot });
+		writeSkill(join(repoRoot, ".agents", "skills"), "at-repo-root", CONTRACT_SKILL);
+		writeSkill(join(projectDir, ".agents", "skills"), "above-repo-root", CONTRACT_SKILL);
+		const nested = join(repoRoot, "packages", "deep");
+		mkdirSync(nested, { recursive: true });
+		const names = buildUserSkillContracts(nested).map(([name]) => name);
+		expect(names).toContain("at-repo-root");
+		expect(names).not.toContain("above-repo-root");
+	});
+
+	it("prefers the nearest declaration when one name is declared twice", () => {
+		projectDir = mkdtempSync(join(tmpdir(), "rpiv-agents-nearest-"));
+		execFileSync("git", ["init", "-q"], { cwd: projectDir });
+		const inner = join(projectDir, "packages", "app");
+		mkdirSync(inner, { recursive: true });
+		writeSkill(join(projectDir, ".agents", "skills"), "shared-review", CONTRACT_SKILL);
+		writeSkill(
+			join(inner, ".agents", "skills"),
+			"shared-review",
+			CONTRACT_SKILL.replace("artifactKind: review", "artifactKind: plan"),
+		);
+		const found = new Map(buildUserSkillContracts(inner));
+		expect(found.get("shared-review")?.produces?.meta).toEqual({ artifactKind: "plan" });
 	});
 });
 

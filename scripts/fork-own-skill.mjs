@@ -21,12 +21,15 @@
  *     - Changed contract              -> one load-time collision message naming
  *                                        both owners. Never silent.
  *
- *   WHERE you put the copy matters. Harvesting does NOT read `<cwd>/.agents/skills`
- *   (verified against this fork's skill-contracts-source.ts + pi 0.85.1), so a
- *   copy there is DISPATCHED but its contract is INVISIBLE — a divergent contract
- *   would be ignored with no warning. Use `~/.agents/skills` (global) or
- *   `<cwd>/.pi/skills` (per project). This script defaults to the former and
- *   refuses the former's broken sibling.
+ *   WHERE you put the copy matters less than it used to. Harvesting originally
+ *   read only `<agentDir>/skills` + `<cwd>/.pi/skills` — pi's `loadSkills` helper
+ *   ignores `.agents/skills` entirely — so a copy under any `.agents/skills` was
+ *   dispatched while its contract stayed INVISIBLE, and a divergent contract was
+ *   ignored with no collision message. This fork now enumerates `.agents/skills`
+ *   too (`agentsSkillDirs` in skill-contracts-source.ts); upstream does not. All
+ *   four locations work here. Prefer `~/.agents/skills` (global) or
+ *   `<cwd>/.pi/skills` (per project): a PROJECT `.agents/skills` also depends on
+ *   that fork-local fix, and pi gates dispatching from it on project trust.
  *
  *   Skills are NOT self-contained: 25 of 30 reference sibling helpers as
  *   `${SKILL_DIR}/../_shared/<file>.mjs`. Copying only `SKILL.md` yields a skill
@@ -113,23 +116,22 @@ function readSkillMd(dir) {
 }
 
 /**
- * The one placement that is dispatched but NOT harvested: a project-level
- * `.agents/skills`. `~/.agents/skills` and any `.pi/skills` are fine.
+ * The one placement whose harvesting depends on this fork's `agentsSkillDirs`
+ * fix, and whose DISPATCH pi gates on project trust. Warned about, not refused.
  */
-function badTarget(target) {
+function projectAgentsTarget(target) {
 	if (target.startsWith(join(homedir(), ".agents", "skills"))) return false;
 	return target.split(/[\\/]/).join("/").endsWith(".agents/skills");
 }
 
 function ownSkill(name, opts) {
-	// Refuse the one placement that is dispatched but never harvested, BEFORE
-	// copying anything — see the header for why this is a silent-failure trap.
-	if (badTarget(opts.target)) {
-		console.error(`✗ ${opts.target} is a PROJECT-level .agents/skills.`);
-		console.error("  Pi dispatches from it, but contract harvesting does NOT read it, so the");
-		console.error("  skill's contract would be invisible to /wf (silent divergence).");
-		console.error("  Use ~/.agents/skills (global) or <cwd>/.pi/skills (per project).");
-		return false;
+	// Not refused: this fork harvests project `.agents/skills` (upstream does not)
+	// and pi gates dispatch from it on project trust — both worth saying out loud.
+	if (projectAgentsTarget(opts.target)) {
+		console.error(`! ${opts.target} is a PROJECT-level .agents/skills.`);
+		console.error("  Harvested only because of this fork's agentsSkillDirs fix (upstream's");
+		console.error("  buildUserSkillContracts does not read it), and pi dispatches from it only");
+		console.error("  when the project is trusted. ~/.agents/skills has neither caveat.");
 	}
 	const src = join(BUNDLED_DIR, name);
 	const srcMd = readSkillMd(src);

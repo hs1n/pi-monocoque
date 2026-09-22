@@ -78,7 +78,7 @@ rpiv-mono/
 | `bash scripts/fork-pi-install.sh [-l] [--with btw,voice,warp,telemetry]` | **Fork-only.** Install this fork's packages into Pi by local path — the only supported install path here (`pi install git:<repo>` cannot work, see the banner). See `INSTALL-FORK.md` |
 | `node scripts/fork-license-audit.mjs .` | **Fork-only.** Dependency license inventory + copyleft/unknown flagging (Node built-ins only, no npx) |
 | `node scripts/fork-rename-scope.mjs <@scope>` | **Fork-only.** Rewrite the npm scope across the repo (idempotent, `--report` / `--dry-run`); re-run if the publishing account differs from the one assumed |
-| `node scripts/fork-own-skill.mjs <skill> [--list] [--check] [--remove <skill>]` | **Fork-only.** Copy a bundled skill into `~/.agents/skills` so it shadows the package one, carrying its `_shared/` deps. Refuses a project-level `.agents/skills`: Pi dispatches from there, but contract harvesting does not read it |
+| `node scripts/fork-own-skill.mjs <skill> [--list] [--check] [--remove <skill>]` | **Fork-only.** Copy a bundled skill into `~/.agents/skills` so it shadows the package one, carrying its `_shared/` deps. A project-level `.agents/skills` target warns: it is harvested only because of this fork's `agentsSkillDirs` fix in `skill-contracts-source.ts`, and Pi gates dispatching from it on project trust |
 
 Husky hooks (local-only):
 - `pre-commit` — runs `npm run check:decision-codes` (fail-fast contamination guard) then `npm run check` (format + typecheck); restages files biome may have rewritten

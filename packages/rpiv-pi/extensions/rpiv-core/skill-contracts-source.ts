@@ -11,8 +11,9 @@
  * declare one.
  */
 
-import { readFileSync, realpathSync } from "node:fs";
-import { isAbsolute, relative, sep } from "node:path";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { homedir } from "node:os";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { getAgentDir, loadSkills, loadSkillsFromDir, parseFrontmatter } from "@earendil-works/pi-coding-agent";
 import type { ConsumesSpec, ProducesSpec, SchemaCompatResult, SkillContract } from "@hs1n/rpiv-workflow/registration";
 import { BUNDLED_SKILLS_DIR } from "./paths.js";
@@ -169,11 +170,56 @@ export function isBundledSkillPath(filePath: string): boolean {
 	}
 }
 
+/** Walk up from `start` to the git repo root, or to the filesystem root. */
+function findGitRepoRoot(start: string): string | null {
+	let dir = resolve(start);
+	for (;;) {
+		if (existsSync(join(dir, ".git"))) return dir;
+		const parent = dirname(dir);
+		if (parent === dir) return null;
+		dir = parent;
+	}
+}
+
 /**
- * Build skill contracts from user-installed skills by enumerating the SAME
- * default locations Pi's own loader reads (`<agentDir>/skills` +
- * `<cwd>/.pi/skills`), via Pi's exported `loadSkills` — so name-collision
- * precedence matches what Pi actually dispatches.
+ * Every `.agents/skills` directory Pi reads, nearest first, ending with the
+ * always-on user one (`~/.agents/skills`).
+ *
+ * Pi's resource loader enumerates these for DISPATCH — its
+ * `collectAncestorAgentsSkillDirs` walks cwd up to the git repo root — but the
+ * `loadSkills` helper this module uses reads only `<agentDir>/skills` and
+ * `<cwd>/.pi/skills`. Without this walk a skill under `.agents/skills` is
+ * dispatched while its `contract:` stays invisible to the workflow engine, so a
+ * divergent contract would be ignored with no collision message to surface it.
+ *
+ * Pi gates the PROJECT entries on project trust; this enumeration does not,
+ * matching how `loadSkills` already treats project `.pi/skills` here. Ordering
+ * is nearest-first so that, when the same name is declared twice in the user
+ * set, the more specific declaration is the one Pi's loader keeps.
+ */
+export function agentsSkillDirs(cwd: string): string[] {
+	const start = resolve(cwd);
+	const root = findGitRepoRoot(start);
+	const userDir = resolve(homedir(), ".agents", "skills");
+	const dirs: string[] = [];
+	let dir = start;
+	for (;;) {
+		const candidate = join(dir, ".agents", "skills");
+		if (resolve(candidate) !== userDir) dirs.push(candidate);
+		if (root !== null && dir === root) break;
+		const parent = dirname(dir);
+		if (parent === dir) break;
+		dir = parent;
+	}
+	dirs.push(userDir);
+	return dirs;
+}
+
+/**
+ * Build skill contracts from user-installed skills by enumerating the locations
+ * Pi actually dispatches from: `<agentDir>/skills`, `<cwd>/.pi/skills` (both via
+ * `loadSkills`), plus the `.agents/skills` tree — cwd up to the git repo root,
+ * then `~/.agents/skills` — which `loadSkills` does not read at all.
  *
  * Filesystem-based rather than `pi.getCommands()`: Pi invalidates every
  * captured `pi` handle on any session replacement or `/reload` ("extension
@@ -190,7 +236,12 @@ export function isBundledSkillPath(filePath: string): boolean {
 export function buildUserSkillContracts(cwd: string = process.cwd()): Array<[string, SkillContract]> {
 	let skills: ReadonlyArray<{ name: string; filePath: string }>;
 	try {
-		skills = loadSkills({ cwd, agentDir: getAgentDir(), skillPaths: [], includeDefaults: true }).skills;
+		skills = loadSkills({
+			cwd,
+			agentDir: getAgentDir(),
+			skillPaths: agentsSkillDirs(cwd),
+			includeDefaults: true,
+		}).skills;
 	} catch {
 		return [];
 	}

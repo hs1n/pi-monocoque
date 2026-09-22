@@ -7,6 +7,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Fork: a user skill under `.agents/skills` is dispatched by Pi but its `contract:` was never harvested.** `buildUserSkillContracts` enumerated Pi's skill locations through the `loadSkills` helper, which reads only `<agentDir>/skills` and `<cwd>/.pi/skills`. Pi's resource loader separately walks `<cwd>/.agents/skills` up to the git repo root plus `~/.agents/skills`, and dispatches from them — so a skill in any `.agents/skills` ran while the workflow engine kept whatever contract it already had for that name. A divergent `contract:` was ignored with no collision message, because the registry's `user-skills` owner never saw the file at all; the failure surfaced downstream, at a consumer of an artifact the skill never wrote. `buildUserSkillContracts` now passes `agentsSkillDirs(cwd)` (the same ancestor walk, nearest first, ending at `~/.agents/skills`) as `skillPaths`, so name dedup and specificity follow Pi's dispatch order. Every `.agents/skills` location was independently broken — the user-level one as much as the project-level one, despite the source comment claiming `loadSkills` reads "the SAME default locations Pi's own loader reads". A same-name override with a different contract now records the usual `last writer wins` collision instead of diverging silently. Pinned by four cases: `~/.agents/skills`, `<cwd>/.agents/skills`, the ancestor walk's git-root stop boundary, and nearest-declaration precedence for a name declared twice.
+
 ## [2.11.0] - 2026-09-21
 
 ### Changed
