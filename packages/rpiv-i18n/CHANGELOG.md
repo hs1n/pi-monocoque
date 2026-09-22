@@ -15,6 +15,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **The `zh` label reads `简体中文` instead of `中文`.** Same list, same code, same maps — only the ambiguous label changed, so the two Chinese entries are now distinguishable by script rather than by trial. Alphabetical order by code is preserved (`zh`, then `zh-TW`).
 
+### Fixed
+
+- **`LANG`/`LC_ALL` no longer lose the region, so a Traditional-Chinese environment resolves to `zh-TW`.** Detection took `value.split("_")[0].split(".")[0]`, which collapsed `zh_TW.UTF-8` to `zh` — the Simplified map — before the region-qualified code `zh-TW` existed, and `pt_BR.UTF-8` to `pt` even though `pt-BR` was listed. The region is now kept when the qualified code is one of `SUPPORTED_LOCALES`, and the bare language is the fallback. That order is load-bearing rather than incidental: the list is mostly bare codes (`de`, `es`, `fr`, `ru`, `uk`) with only `pt-BR` and `zh-TW` qualified, so keeping the region unconditionally would send `de_DE.UTF-8` to the unsupported `de-DE` and silently back to English. Hyphenated values (`zh-TW`) and lowercase regions are normalized. The persisted-config step still outranks the environment, and `C`/`POSIX`/unset still resolve to undefined (silent English).
+
 ## [2.11.0] - 2026-09-21
 
 ## [2.10.1] - 2026-09-13

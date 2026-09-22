@@ -106,6 +106,36 @@ describe("detectLocaleFromConfigAndEnv", () => {
 		expect(detectLocaleFromConfigAndEnv()).toBe("es");
 	});
 
+	it("keeps a region when the qualified code is supported", () => {
+		delete process.env.LC_ALL;
+		process.env.LANG = "zh_TW.UTF-8";
+		expect(detectLocaleFromConfigAndEnv()).toBe("zh-TW");
+	});
+
+	it("keeps a region for the other qualified locale", () => {
+		delete process.env.LC_ALL;
+		process.env.LANG = "pt_BR.UTF-8";
+		expect(detectLocaleFromConfigAndEnv()).toBe("pt-BR");
+	});
+
+	it("accepts the hyphenated env form", () => {
+		delete process.env.LC_ALL;
+		process.env.LANG = "zh-TW";
+		expect(detectLocaleFromConfigAndEnv()).toBe("zh-TW");
+	});
+
+	it("drops an unsupported region instead of falling through to English", () => {
+		delete process.env.LC_ALL;
+		process.env.LANG = "de_DE.UTF-8";
+		expect(detectLocaleFromConfigAndEnv()).toBe("de");
+	});
+
+	it("resolves a region-qualified language to its bare supported code", () => {
+		delete process.env.LC_ALL;
+		process.env.LANG = "zh_CN.UTF-8";
+		expect(detectLocaleFromConfigAndEnv()).toBe("zh");
+	});
+
 	it("rejects C locale", () => {
 		delete process.env.LC_ALL;
 		process.env.LANG = "C";

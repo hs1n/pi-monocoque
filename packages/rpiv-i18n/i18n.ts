@@ -206,10 +206,26 @@ export function saveLocaleConfig(locale: string | undefined): boolean {
 // Locale detection (no flag — flag is read in index.ts which has pi access)
 // ---------------------------------------------------------------------------
 
+/**
+ * Resolve a `LANG`/`LC_ALL` value (e.g. `zh_TW.UTF-8`) to a locale code.
+ *
+ * The region is kept only when the resulting code is actually supported, then
+ * the bare language is the fallback. That order matters: supported codes are
+ * mostly bare (`de`, `es`, `fr`, `ru`, `uk`) with only `pt-BR` and `zh-TW`
+ * region-qualified, so unconditionally keeping the region would send a German
+ * user (`de_DE.UTF-8` → `de-DE`, unsupported) back to English. Without the
+ * region at all, a Taiwanese user (`zh_TW.UTF-8`) silently got the Simplified
+ * map behind `zh`.
+ */
 function parseLangEnv(value: string | undefined): string | undefined {
 	if (!value) return undefined;
-	const lang = value.split("_")[0]?.split(".")[0];
+	const raw = value.split(".")[0]?.replace("-", "_");
+	const [lang, region] = raw?.split("_") ?? [];
 	if (!lang || lang === "C" || lang === "POSIX") return undefined;
+	if (region) {
+		const qualified = `${lang}-${region.toUpperCase()}`;
+		if (SUPPORTED_LOCALES.some((l) => l.code === qualified)) return qualified;
+	}
 	return lang;
 }
 
