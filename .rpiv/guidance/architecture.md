@@ -2,6 +2,36 @@
 
 Monorepo for Pi CLI plugins in the `@juicesharp/rpiv-*` family. Lockstep versions, single install, single publish pipeline. Targets Pi Agent CLI (`@earendil-works/pi-coding-agent`), not Claude Code.
 
+> **This checkout is a fork of upstream, not upstream itself.** It is
+> `hs1n/pi-monocoque`, forked from `juicesharp/rpiv-mono` (kept as the `upstream`
+> remote; `origin` is the fork). Everything below this banner is upstream's framing
+> and is accurate about the code; these are the deltas an agent working here must not
+> get wrong:
+>
+> - **Provenance and obligations** — `FORK_NOTICE.md`. MIT requires upstream's
+>   copyright notices to stay; `LICENSE` and every `packages/*/LICENSE` are unmodified.
+>   The README/roadmap/docs prose is upstream's and states the *upstream* author's
+>   views. `rpiv`, `rpiv-pi`, `juicesharp`, `rpiv-pi.com`, and the npm scope
+>   `@juicesharp` identify upstream — that scope is not ours.
+> - **Installing into Pi — `pi install git:<this repo>` does not work and must not be
+>   used.** Pi's git source clones the repo and treats the clone root as the package
+>   root, with no subdirectory support, and this monorepo root declares neither a `pi`
+>   manifest nor the conventional resource dirs, so a root install loads zero
+>   resources. It also fails before that: pi runs `npm install --omit=dev`, and the
+>   root's `prepare: husky` needs a devDependency. Install each package by local path
+>   with `scripts/fork-pi-install.sh` — see `INSTALL-FORK.md`. Local paths are recorded
+>   in Pi settings, not copied, so Pi loads live from this checkout and `/reload` picks
+>   up edits without reinstalling.
+> - **Never run `/rpiv-setup` in a session that loads this fork.** Its `SIBLINGS`
+>   registry installs the *upstream registry* copies, which would load alongside the
+>   local ones. `scripts/fork-pi-install.sh` mirrors that registry with local paths.
+> - **Nothing here can be published as-is.** Every package is still named
+>   `@juicesharp/rpiv-*`. Treat `node scripts/release.mjs` as inoperative: it commits and
+>   tags *before* publishing, so a scope mismatch leaves a half-finished release.
+> - **Remotes**: `origin` is SSH (`git@github.com:hs1n/pi-monocoque.git`) and needs the
+>   key configured in `~/.ssh/config`; `upstream` is HTTPS on purpose (public read-only,
+>   no key required).
+
 # Architecture
 
 ```
@@ -14,6 +44,7 @@ rpiv-mono/
 │   └── test-utils/               — Private workspace package: shared test fixtures (not published)
 ├── test/                         — Repo-wide Vitest setup (homedir stub + env hygiene + pi-ai//compat mocks + beforeEach singleton resets)
 ├── scripts/                      — Lockstep release pipeline (release.mjs + sync-versions.js) + repo guards (check-no-decision-codes.mjs, check-slice-overlap.mjs)
+│                                 — fork additions: fork-pi-install.sh (local-path Pi install) + fork-license-audit.mjs (dependency license inventory)
 ├── thoughts/shared/              — Pipeline artifacts: questions/, research/, solutions/, designs/, plans/, reviews/ (gitignored)
 ├── vitest.config.ts              — Single Vitest runner; `include: ['packages/*/**/*.test.ts']`, setupFiles `['./test/setup.ts']`
 ├── tsconfig.base.json            — Single shared TS config; no per-package tsconfig.json (rpiv-site has its own — excluded here)
@@ -44,6 +75,8 @@ rpiv-mono/
 | `npm run coverage` | Vitest with V8 coverage |
 | `node scripts/release.mjs <patch\|minor\|major\|x.y.z>` | Cut a lockstep release — see `.rpiv/guidance/scripts/architecture.md` |
 | `node scripts/sync-versions.js` | Verify lockstep + rewrite intra-monorepo deps to `^<version>` |
+| `bash scripts/fork-pi-install.sh [-l] [--with btw,voice,warp,telemetry]` | **Fork-only.** Install this fork's packages into Pi by local path — the only supported install path here (`pi install git:<repo>` cannot work, see the banner). See `INSTALL-FORK.md` |
+| `node scripts/fork-license-audit.mjs .` | **Fork-only.** Dependency license inventory + copyleft/unknown flagging (Node built-ins only, no npx) |
 
 Husky hooks (local-only):
 - `pre-commit` — runs `npm run check:decision-codes` (fail-fast contamination guard) then `npm run check` (format + typecheck); restages files biome may have rewritten
