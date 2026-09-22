@@ -1,11 +1,11 @@
 name: Deploy Site
 
+# Fork note: manual-only (upstream triggers this on push to main). Upstream deploys
+# rpiv-pi.com from this workflow; this fork does not operate that domain, and
+# publishing upstream's site from here would misrepresent where it came from.
+# Run it deliberately only after repointing `site` in
+# packages/rpiv-site/astro.config.mjs at an origin you actually own.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'packages/rpiv-site/**'
-      - '.github/workflows/deploy-site.yml'
   workflow_dispatch:
 
 concurrency:

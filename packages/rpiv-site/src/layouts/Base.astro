@@ -43,8 +43,8 @@ const jsonLd = {
 	"@graph": [
 		{
 			"@type": "WebSite",
-			"@id": "https://rpiv-pi.com/#website",
-			url: "https://rpiv-pi.com/",
+			"@id": new URL("/#website", Astro.site).toString(),
+			url: new URL("/", Astro.site).toString(),
 			name: "rpiv-pi",
 			description,
 			inLanguage: "en",
@@ -55,7 +55,7 @@ const jsonLd = {
 			applicationCategory: "DeveloperApplication",
 			operatingSystem: "macOS, Linux, Windows",
 			description,
-			url: "https://rpiv-pi.com/",
+			url: new URL("/", Astro.site).toString(),
 			offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
 			license: "https://opensource.org/licenses/MIT",
 		},

@@ -1,8 +1,17 @@
 # rpiv-mono
 
-[![CI](https://img.shields.io/github/actions/workflow/status/juicesharp/rpiv-mono/ci.yml?branch=main&label=CI)](https://github.com/juicesharp/rpiv-mono/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/juicesharp/rpiv-mono/branch/main/graph/badge.svg?v=2)](https://codecov.io/gh/juicesharp/rpiv-mono)
-[![tests](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/juicesharp/rpiv-mono/badges/tests.json)](https://github.com/juicesharp/rpiv-mono/actions/workflows/ci.yml)
+> **This repository is a personal fork** of [juicesharp/rpiv-mono](https://github.com/juicesharp/rpiv-mono),
+> maintained as [hs1n/pi-monocoque](https://github.com/hs1n/pi-monocoque). It is not affiliated with,
+> endorsed by, or supported by the upstream author. Everything below is upstream's original text,
+> kept verbatim so attribution stays intact — including the *Roadmap*, *Who built this*, and
+> *Status and expectations* sections, which express the upstream author's views, not this fork's.
+>
+> - What this fork changes and why: [FORK_NOTICE.md](./FORK_NOTICE.md)
+> - How to install it into Pi: [INSTALL-FORK.md](./INSTALL-FORK.md) — note that
+>   `pi install git:<this repo>` cannot work on this monorepo; install from a checkout instead.
+
+[![fork of juicesharp/rpiv-mono](https://img.shields.io/badge/fork%20of-juicesharp%2Frpiv--mono-blue)](https://github.com/juicesharp/rpiv-mono)
+[![CI](https://img.shields.io/github/actions/workflow/status/hs1n/pi-monocoque/ci.yml?branch=main&label=CI)](https://github.com/hs1n/pi-monocoque/actions/workflows/ci.yml)
 
 Fifteen packages in one npm workspace: the **rpiv-pi** pipeline, the [Pi Agent](https://github.com/badlogic/pi-mono) extensions it composes, and the internal packages holding them up. Twelve publish to npm; three never leave the repo. Kept together so orchestration and tool surfaces evolve and ship in lockstep.
 
