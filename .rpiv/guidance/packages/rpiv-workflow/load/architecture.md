@@ -5,7 +5,7 @@ Layered jiti loader for `defineWorkflow` overlays. Discovers built-in + user + p
 
 ## Dependencies
 - **`jiti`**: ESM-aware `.ts` import without a build step; module cache OFF so `/reload` picks up edits (fs transform cache stays on — content-hash validated, edit-safe)
-- **`@juicesharp/rpiv-config`**: `configPath(...)` resolves `~/.config/rpiv-workflow/` for the user layer
+- **`@hs1n/rpiv-config`**: `configPath(...)` resolves `~/.config/rpiv-workflow/` for the user layer
 - **`../api`, `../built-ins`, `../layers`, `../validate-workflow`, `../skill-contract` + `../skill-contracts`, `../stage-identity`, `../validate/issue`, `../internal-utils`**: `Workflow` type, built-in registry + provider error drain, `ConfigLayer` union, validation pass, contract-registry machinery, `isDispatchingStage`/`resolveSkill`, `WorkflowValidationIssue`, `formatError`
 
 ## Consumers

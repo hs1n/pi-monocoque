@@ -115,7 +115,7 @@ vi.mock("../state/voice-session.js", () => ({ VoiceSession: mocks.VoiceSession }
 vi.mock("../state/i18n-bridge.js", () => ({
 	t: (key: string, _fallback: string) => key,
 	getActiveLocale: mocks.getActiveLocale,
-	I18N_NAMESPACE: "@juicesharp/rpiv-voice",
+	I18N_NAMESPACE: "@hs1n/rpiv-voice",
 }));
 
 const {

@@ -9,7 +9,7 @@
 import type { Api, Model } from "@earendil-works/pi-ai";
 import { getSupportedThinkingLevels } from "@earendil-works/pi-ai";
 import type { SelectItem } from "@earendil-works/pi-tui";
-import { loadJsonConfigWithLegacyFallback, modelKey } from "@juicesharp/rpiv-config";
+import { loadJsonConfigWithLegacyFallback, modelKey } from "@hs1n/rpiv-config";
 import { type ModelsConfigSchema, THINKING_LEVEL_VALUES, type ThinkingLevelValue } from "../models-config.js";
 import {
 	CHECK,

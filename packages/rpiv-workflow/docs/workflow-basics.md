@@ -80,10 +80,10 @@ Resume folds the JSONL trail back into run state and re-enters at the pending st
 └── packs/                    # User-level packs
 ```
 
-Every workflow file is TypeScript, loaded via `jiti` (no build step required). Import the authoring DSL from `@juicesharp/rpiv-workflow`:
+Every workflow file is TypeScript, loaded via `jiti` (no build step required). Import the authoring DSL from `@hs1n/rpiv-workflow`:
 
 ```typescript
-import { defineWorkflow, produces, acts, gate, gt, eq } from "@juicesharp/rpiv-workflow";
+import { defineWorkflow, produces, acts, gate, gt, eq } from "@hs1n/rpiv-workflow";
 ```
 
 ## Where files resolve
@@ -118,7 +118,7 @@ The config file (`config.ts`) is the one TypeScript file you hand-edit. It accep
 
 ```typescript
 // 1. A single Workflow
-import { defineWorkflow, produces, acts } from "@juicesharp/rpiv-workflow";
+import { defineWorkflow, produces, acts } from "@hs1n/rpiv-workflow";
 export default defineWorkflow({
   name: "ship",
   start: "implement",
@@ -144,7 +144,7 @@ Pack files (`packs/*.ts`) are installable bundles others can drop in. They accep
 
 ```typescript
 // .rpiv/workflows/packs/my-pipeline.ts
-import { defineWorkflow, produces, acts } from "@juicesharp/rpiv-workflow";
+import { defineWorkflow, produces, acts } from "@hs1n/rpiv-workflow";
 export default defineWorkflow({
   name: "my-pipeline",
   start: "research",
@@ -225,7 +225,7 @@ These advisories sunset roughly three release cycles after 1.0.
 A minimal workflow that chains two skills:
 
 ```typescript
-import { defineWorkflow, produces, acts } from "@juicesharp/rpiv-workflow";
+import { defineWorkflow, produces, acts } from "@hs1n/rpiv-workflow";
 
 export default defineWorkflow({
   name: "review-and-ship",

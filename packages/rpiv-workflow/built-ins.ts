@@ -8,14 +8,14 @@
  * The runner itself ships ZERO built-in workflows. That's deliberate: this
  * package is skill-agnostic, and shipping examples that name skills the
  * user may not have installed would surface as confusing "skill not found"
- * errors. Packages like `@juicesharp/rpiv-pi` opt in by calling
+ * errors. Packages like `@hs1n/rpiv-pi` opt in by calling
  * `registerBuiltIns(...)` from their extension entry point with workflows
  * that name their own bundled skills.
  *
  * The registry array is anchored on a `Symbol.for` slot on `globalThis`
  * (via `globalSlot`). Pi may load this module more than once — once for the
  * rpiv-workflow extension itself, and once via the rpiv-pi
- * `import { registerBuiltIns } from "@juicesharp/rpiv-workflow"`
+ * `import { registerBuiltIns } from "@hs1n/rpiv-workflow"`
  * cross-package resolution — and module-local state would be siloed between
  * those copies. `globalThis[KEY]` is process-wide and survives the dup load.
  */
@@ -23,8 +23,8 @@
 import type { Workflow } from "./api.js";
 import { globalSlot, lazyProviderRegistry } from "./internal-utils.js";
 
-const REGISTRY_KEY = Symbol.for("@juicesharp/rpiv-workflow:built-ins");
-const FAILURES_KEY = Symbol.for("@juicesharp/rpiv-workflow:built-in-provider-failures");
+const REGISTRY_KEY = Symbol.for("@hs1n/rpiv-workflow:built-ins");
+const FAILURES_KEY = Symbol.for("@hs1n/rpiv-workflow:built-in-provider-failures");
 
 const getRegistry = globalSlot(REGISTRY_KEY, () => [] as Workflow[]);
 const getFailures = globalSlot(FAILURES_KEY, () => [] as unknown[]);
@@ -37,7 +37,7 @@ const getFailures = globalSlot(FAILURES_KEY, () => [] as unknown[]);
 // `/wf`, but the error is NOT swallowed silently — `loadWorkflows` surfaces it as
 // a LoadIssue so a buggy provider is debuggable. Same posture as the
 // skill-contracts registry.
-const providers = lazyProviderRegistry("@juicesharp/rpiv-workflow:built-in-providers", {
+const providers = lazyProviderRegistry("@hs1n/rpiv-workflow:built-in-providers", {
 	onError: (err) => {
 		getFailures().push(err);
 	},

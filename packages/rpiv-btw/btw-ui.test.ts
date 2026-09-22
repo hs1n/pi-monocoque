@@ -1,6 +1,6 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { type TUI, visibleWidth } from "@earendil-works/pi-tui";
-import { makeTui } from "@juicesharp/rpiv-test-utils";
+import { makeTui } from "@hs1n/rpiv-test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { BtwTurn } from "./btw.js";
 import { BtwOverlayController, showBtwOverlay } from "./btw-ui.js";

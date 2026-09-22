@@ -34,19 +34,19 @@ describe("findMissingSiblings", () => {
 	});
 
 	it("filters out non-string entries defensively", () => {
-		writeSettings({ packages: [null, 42, "@juicesharp/rpiv-todo"] });
+		writeSettings({ packages: [null, 42, "@hs1n/rpiv-todo"] });
 		const missing = findMissingSiblings();
-		expect(missing.find((s) => s.matches.test("@juicesharp/rpiv-todo"))).toBeUndefined();
+		expect(missing.find((s) => s.matches.test("@hs1n/rpiv-todo"))).toBeUndefined();
 	});
 
 	it("matches case-insensitively", () => {
 		writeSettings({ packages: ["@JUICESHARP/RPIV-TODO"] });
 		const missing = findMissingSiblings();
-		expect(missing.find((s) => s.matches.test("@juicesharp/rpiv-todo"))).toBeUndefined();
+		expect(missing.find((s) => s.matches.test("@hs1n/rpiv-todo"))).toBeUndefined();
 	});
 
 	it("rpiv-args word-boundary: treats rpiv-args-extended as non-install", () => {
-		writeSettings({ packages: ["@juicesharp/rpiv-args-extended"] });
+		writeSettings({ packages: ["@hs1n/rpiv-args-extended"] });
 		const missing = findMissingSiblings();
 		expect(missing.find((s) => s.pkg.endsWith("/rpiv-args"))).toBeDefined();
 	});

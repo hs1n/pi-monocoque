@@ -1,4 +1,4 @@
-# @juicesharp/rpiv-test-utils
+# @hs1n/rpiv-test-utils
 
 The shared fixture library the tests in this monorepo import — mock [Pi Agent](https://github.com/badlogic/pi-mono) extension APIs, scripted child sessions, synthetic transcripts, and host-environment stubs. It is internal to this repo: `private: true`, never published to npm, and never loaded by the Pi host.
 
@@ -16,10 +16,10 @@ Full export list with signatures and defaults: [docs/api.md](./docs/api.md). Shi
 
 ## Used by
 
-Every workspace package except [rpiv-site](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-site) — 13 packages, 89 files, all of them `*.test.ts`. npm workspaces symlinks the package into `node_modules/`, so no `devDependencies` entry is needed. Import it by bare name:
+Every workspace package except [rpiv-site](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-site) — 13 packages, 89 files, all of them `*.test.ts`. npm workspaces symlinks the package into `node_modules/`, so no `devDependencies` entry is needed. Import it by bare name:
 
 ```ts
-import { createMockPi, stubGitExec } from "@juicesharp/rpiv-test-utils";
+import { createMockPi, stubGitExec } from "@hs1n/rpiv-test-utils";
 ```
 
 The fixtures are vitest-only — every factory calls `vi`, and the package is consumed as TypeScript source, so plain node or another runner will not load it. A test file has to match `packages/*/**/*.test.ts` for the root `vitest.config.ts` to pick it up. Run from the repo root:

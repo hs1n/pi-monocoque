@@ -1,6 +1,6 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { configPath } from "@juicesharp/rpiv-config";
+import { configPath } from "@hs1n/rpiv-config";
 import { beforeEach, describe, expect, it } from "vitest";
 import { getConfigPath, readConfig, WebToolsConfigSchema, writeConfig } from "./config.js";
 

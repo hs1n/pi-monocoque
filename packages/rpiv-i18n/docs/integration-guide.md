@@ -6,9 +6,9 @@ render time. For the API surface alone, see
 [sdk-reference.md](./sdk-reference.md).
 
 Three production exemplars in this monorepo follow the exact shape below —
-[rpiv-todo](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-todo),
-[rpiv-ask-user-question](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-ask-user-question),
-and [rpiv-voice](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-voice).
+[rpiv-todo](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-todo),
+[rpiv-ask-user-question](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-ask-user-question),
+and [rpiv-voice](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-voice).
 Read one alongside this guide.
 
 End state on disk:
@@ -30,11 +30,11 @@ my-extension/
 ```json
 {
   "peerDependencies": {
-    "@juicesharp/rpiv-i18n": "*",
+    "@hs1n/rpiv-i18n": "*",
     "@earendil-works/pi-coding-agent": "*"
   },
   "peerDependenciesMeta": {
-    "@juicesharp/rpiv-i18n": { "optional": true }
+    "@hs1n/rpiv-i18n": { "optional": true }
   }
 }
 ```
@@ -78,7 +78,7 @@ type I18nSDK = { scope: (namespace: string) => ScopeFn };
 
 let scopeImpl: ScopeFn;
 try {
-  const sdk = (await import("@juicesharp/rpiv-i18n")) as I18nSDK;
+  const sdk = (await import("@hs1n/rpiv-i18n")) as I18nSDK;
   scopeImpl = sdk.scope(I18N_NAMESPACE);
 } catch {
   // SDK not installed — every t(key, fallback) returns the fallback verbatim.
@@ -93,7 +93,7 @@ namespaces or add a convenience helper, you touch one place.
 
 **Why dynamic import?** A static ESM import is hoisted and evaluated at module
 load — if the SDK is not on disk, your whole extension fails to load with
-`Cannot find module '@juicesharp/rpiv-i18n'`. The dynamic `await import()` inside
+`Cannot find module '@hs1n/rpiv-i18n'`. The dynamic `await import()` inside
 a try/catch lets module load proceed, and the identity-fallback closure keeps
 render sites working in English. Top-level `await` is required because `t` is
 consumed synchronously by downstream modules.
@@ -112,7 +112,7 @@ type I18nLoader = {
 };
 
 try {
-  const sdk = (await import("@juicesharp/rpiv-i18n/loader")) as I18nLoader;
+  const sdk = (await import("@hs1n/rpiv-i18n/loader")) as I18nLoader;
   sdk.registerLocalesFromDir(I18N_NAMESPACE, import.meta.url, { label: "my-extension" });
 } catch {
   // SDK absent — extension still loads with English-only UI.
@@ -213,7 +213,7 @@ a missing `files[]` entry or a wrong namespace. Smoke-test against a live shell:
 ```sh
 # from your extension's directory
 pi install ./                                  # register the package directory
-pi install npm:@juicesharp/rpiv-i18n           # if not already installed
+pi install npm:@hs1n/rpiv-i18n           # if not already installed
 pi                                             # launch the session
 > /languages                                   # pick a non-English locale
 > <invoke a command from your extension>       # confirm the strings flip

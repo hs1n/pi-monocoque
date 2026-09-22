@@ -20,8 +20,8 @@ const createWorkflowQuestionTransport = vi.fn((_cwd: string) => ({
 	asked: transportAsked,
 	resolved: transportResolved,
 }));
-vi.mock("@juicesharp/rpiv-warp", async (importOriginal) => {
-	const actual = await importOriginal<typeof import("@juicesharp/rpiv-warp")>();
+vi.mock("@hs1n/rpiv-warp", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("@hs1n/rpiv-warp")>();
 	return { ...actual, createWorkflowQuestionTransport };
 });
 
@@ -272,18 +272,18 @@ describe("__resetWorkflowQuestionWarpBridge", () => {
 
 describe("clean-install no-op (rpiv-warp absent)", () => {
 	afterEach(() => {
-		vi.doUnmock("@juicesharp/rpiv-warp");
+		vi.doUnmock("@hs1n/rpiv-warp");
 		vi.resetModules();
 	});
 
 	it("registers, subscribes, and is a silent no-op when the module is unresolvable", async () => {
 		// Isolate the dynamic-import resolution the bridge performs: reset the module
 		// cache so the throwing doMock is honored, then re-import the bridge so its
-		// internal `import("@juicesharp/rpiv-warp")` resolves against it. This is the
+		// internal `import("@hs1n/rpiv-warp")` resolves against it. This is the
 		// LAST describe so the module-cache disruption it introduces never leaks into
 		// a later test (the afterEach restores it regardless).
 		vi.resetModules();
-		vi.doMock("@juicesharp/rpiv-warp", () => {
+		vi.doMock("@hs1n/rpiv-warp", () => {
 			const err = Object.assign(new Error("Cannot find package"), { code: "ERR_MODULE_NOT_FOUND" });
 			throw err;
 		});

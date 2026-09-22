@@ -7,7 +7,7 @@
  * risk-blind boundary against confirmDue's ON-TOP risk composition.
  */
 
-import { fs as fsHandle, type Output, type RunView } from "@juicesharp/rpiv-workflow/registration";
+import { fs as fsHandle, type Output, type RunView } from "@hs1n/rpiv-workflow/registration";
 import { describe, expect, it } from "vitest";
 import {
 	confirmDue,

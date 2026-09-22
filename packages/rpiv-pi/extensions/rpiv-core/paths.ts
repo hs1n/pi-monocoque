@@ -71,6 +71,6 @@ export function loadBundledSkillNames(dir: string): ReadonlySet<string> {
  *
  * The TS-native workflow runner does NOT enforce a skill-name allowlist at
  * load time; Pi resolves the skill at run time and surfaces a clear error
- * if it can't load. See `@juicesharp/rpiv-workflow`'s `api.ts` `skill` field.
+ * if it can't load. See `@hs1n/rpiv-workflow`'s `api.ts` `skill` field.
  */
 export const BUNDLED_SKILL_NAMES: ReadonlySet<string> = loadBundledSkillNames(BUNDLED_SKILLS_DIR);

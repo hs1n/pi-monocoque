@@ -1,11 +1,11 @@
-# @juicesharp/rpiv-i18n
+# @hs1n/rpiv-i18n
 
-[![npm version](https://img.shields.io/npm/v/@juicesharp/rpiv-i18n.svg)](https://www.npmjs.com/package/@juicesharp/rpiv-i18n)
+[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-i18n.svg)](https://www.npmjs.com/package/@hs1n/rpiv-i18n)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
-  <a href="https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-i18n">
-    <img src="https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-i18n/docs/cover.png" alt="rpiv-i18n cover: a three-line API stack — registerStrings, scope, translate — turning an English hint into its German equivalent" width="50%">
+  <a href="https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n">
+    <img src="https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-i18n/docs/cover.png" alt="rpiv-i18n cover: a three-line API stack — registerStrings, scope, translate — turning an English hint into its German equivalent" width="50%">
   </a>
 </div>
 
@@ -17,7 +17,7 @@ their own TUI strings translatable — three lines, with English fallback per ke
 ## Install
 
 ```sh
-pi install npm:@juicesharp/rpiv-i18n
+pi install npm:@hs1n/rpiv-i18n
 ```
 
 Restart your Pi session.
@@ -53,12 +53,12 @@ pi --locale uk
 | `uk` | Українська |
 | `zh` | 中文 |
 
-To localize your own extension, add `@juicesharp/rpiv-i18n` to your
+To localize your own extension, add `@hs1n/rpiv-i18n` to your
 `peerDependencies` (marked optional), then at extension load:
 
 ```ts
-import { scope } from "@juicesharp/rpiv-i18n";
-import { registerLocalesFromDir } from "@juicesharp/rpiv-i18n/loader";
+import { scope } from "@hs1n/rpiv-i18n";
+import { registerLocalesFromDir } from "@hs1n/rpiv-i18n/loader";
 
 registerLocalesFromDir("@my-org/cool-tool", import.meta.url);
 export const t = scope("@my-org/cool-tool");
@@ -119,13 +119,13 @@ Resolution order: `--locale` → config file → `LANG` → `LC_ALL` → English
 
 ## Reference
 
-- [SDK reference](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-i18n/docs/sdk-reference.md)
-  — every export from `@juicesharp/rpiv-i18n` and `/loader`, the fallback
+- [SDK reference](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-i18n/docs/sdk-reference.md)
+  — every export from `@hs1n/rpiv-i18n` and `/loader`, the fallback
   contract, the detection chain, and the `globalThis` escape hatch.
-- [Integration guide](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-i18n/docs/integration-guide.md)
+- [Integration guide](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-i18n/docs/integration-guide.md)
   — step-by-step guide to localizing your own Pi extension, from optional peer
   dependency to a live smoke test.
-- [Contributing translations](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-i18n/docs/translating.md)
+- [Contributing translations](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-i18n/docs/translating.md)
   — what to translate, key naming, file shape, PR checklist.
 
 ## Requirements
@@ -137,11 +137,11 @@ are Unix conventions and are not exercised on Windows.
 
 ## Related
 
-- [@juicesharp/rpiv-pi](https://www.npmjs.com/package/@juicesharp/rpiv-pi) — the
+- [@hs1n/rpiv-pi](https://www.npmjs.com/package/@hs1n/rpiv-pi) — the
   umbrella package; its `/rpiv-setup` installs this one for you.
-- [@juicesharp/rpiv-todo](https://www.npmjs.com/package/@juicesharp/rpiv-todo),
-  [@juicesharp/rpiv-ask-user-question](https://www.npmjs.com/package/@juicesharp/rpiv-ask-user-question),
-  and [@juicesharp/rpiv-voice](https://www.npmjs.com/package/@juicesharp/rpiv-voice)
+- [@hs1n/rpiv-todo](https://www.npmjs.com/package/@hs1n/rpiv-todo),
+  [@hs1n/rpiv-ask-user-question](https://www.npmjs.com/package/@hs1n/rpiv-ask-user-question),
+  and [@hs1n/rpiv-voice](https://www.npmjs.com/package/@hs1n/rpiv-voice)
   — extensions that follow your `/languages` choice today. Each treats this
   package as an optional peer and stays online in English without it.
 

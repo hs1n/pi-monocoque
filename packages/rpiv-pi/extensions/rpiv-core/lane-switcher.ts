@@ -19,7 +19,7 @@ import type {
 	KeybindingsManager,
 } from "@earendil-works/pi-coding-agent";
 import type { EditorTheme, KeyId, TUI } from "@earendil-works/pi-tui";
-import type { WorkflowHostContext } from "@juicesharp/rpiv-workflow";
+import type { WorkflowHostContext } from "@hs1n/rpiv-workflow";
 import { showLaneConsole } from "./lane-console.js";
 import { LaneDock } from "./lane-dock.js";
 import { LaneDockEditor } from "./lane-dock-editor.js";
@@ -158,7 +158,7 @@ export function registerLaneSwitcher(pi: ExtensionAPI): void {
 						// Guarded dynamic import — degrades silently when rpiv-workflow is absent
 						// (isModuleNotFound); /rpiv-setup guides the user. The /runner entry keeps the
 						// loader/DSL graph off the import (sibling-import-graph permits the dynamic form).
-						const runner = await import("@juicesharp/rpiv-workflow/runner");
+						const runner = await import("@hs1n/rpiv-workflow/runner");
 						// Observer-only ctx: the detached executor provider supplies spawnChild/
 						// maxConcurrency (registered on the root session_start by workflow-execution-host).
 						// The double cast is required — the object omits spawnChild/maxConcurrency, so a

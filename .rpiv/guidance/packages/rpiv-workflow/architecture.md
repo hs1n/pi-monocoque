@@ -1,7 +1,7 @@
 # rpiv-workflow
 
 ## Monorepo Context
-Published Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@juicesharp/rpiv-*` family. Listed in `siblings.ts`; suggested by `/rpiv-setup` and pre-pinned in rpiv-pi's `peerDependencies`. Loaded by Pi via `pi.extensions: ["./extension.ts"]` — a thin entry pulling only the two registrars; the barrel `index.ts` stays the embedder API surface.
+Published Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family. Listed in `siblings.ts`; suggested by `/rpiv-setup` and pre-pinned in rpiv-pi's `peerDependencies`. Loaded by Pi via `pi.extensions: ["./extension.ts"]` — a thin entry pulling only the two registrars; the barrel `index.ts` stays the embedder API surface.
 
 ## Responsibility
 Chain Pi skills into typed multi-stage workflows. Owns the `/wf` slash command (flag grammar → parse → load → run), the jiti-based config loader, the runner + state JSONL writer, and the authoring DSL (`defineWorkflow`, `produces`/`acts`/`terminal`, `gate`, `defineRoute`, loop constructors `fanout`/`iterate`/`assess` + the `fanin()` read modifier, `progress` lap hooks). Execution is detached: every stage runs in its own spawned child session; the interactive session is launcher/observer only. Skill-agnostic — the runner dispatches `/skill:<name>` via Pi's native skill loader and ships ZERO built-in workflows. Sibling packages (`rpiv-pi`) contribute workflows via `registerBuiltIns(...)` / `registerBuiltInsProvider(...)`.
@@ -11,10 +11,10 @@ Chain Pi skills into typed multi-stage workflows. Owns the `/wf` slash command (
 
 ## Dependencies
 - **`@earendil-works/pi-coding-agent`** (peer): structural host types only, no value imports. **`@standard-schema/spec`** (peer): standard-schema interop for the validation surface
-- **`typebox`** (dependency): `outputSchema` validation for `produces()` stages — declared directly (not a peer), so installs that don't materialize peers still validate outputs (`typebox-adapter.ts`). **`jiti`** (dependency): loads user `.ts` overlays without a build step. **`@juicesharp/rpiv-config`** (dependency): `configPath` for the user layer
+- **`typebox`** (dependency): `outputSchema` validation for `produces()` stages — declared directly (not a peer), so installs that don't materialize peers still validate outputs (`typebox-adapter.ts`). **`jiti`** (dependency): loads user `.ts` overlays without a build step. **`@hs1n/rpiv-config`** (dependency): `configPath` for the user layer
 
 ## Consumers
-- **`@juicesharp/rpiv-pi`** — registers a lazy provider via `registerBuiltInsProvider` from the `/startup` entry (`registerBuiltIns(builtInWorkflows)` = build/vet/polish/ship, built on first `/wf`, not startup); auto-wires bucket-narrowed `rpivBucketOutcome(bucket)` onto contract-backed `produces()` stages at load time via `registerOutcomeDeriver` (`skill-contracts/extension-points.ts`, re-exported through `/registration` + `/startup`); stages with explicit outcomes (e.g. the verdict outcomes in rpiv-pi's `built-in-workflows.ts`) keep theirs
+- **`@hs1n/rpiv-pi`** — registers a lazy provider via `registerBuiltInsProvider` from the `/startup` entry (`registerBuiltIns(builtInWorkflows)` = build/vet/polish/ship, built on first `/wf`, not startup); auto-wires bucket-narrowed `rpivBucketOutcome(bucket)` onto contract-backed `produces()` stages at load time via `registerOutcomeDeriver` (`skill-contracts/extension-points.ts`, re-exported through `/registration` + `/startup`); stages with explicit outcomes (e.g. the verdict outcomes in rpiv-pi's `built-in-workflows.ts`) keep theirs
 
 ## Module Structure
 ```
@@ -47,7 +47,7 @@ events.ts, triggers.ts, routing.ts, audit.ts/audit-ctx.ts/audit-rows.ts, handle.
       — Runtime plumbing: lifecycle hooks, triggers, routing exec, audit layer, chain-state authorities,
         built-in registry, message constants, docs system-prompt protocol; failure-path resilience below
 └── internal.ts — Test-only exports (getBuiltIns, recordStage, runsDir, takeRouteNote, __resetStrikeBudgets, …)
-                  reached via `@juicesharp/rpiv-workflow/internal`
+                  reached via `@hs1n/rpiv-workflow/internal`
 ```
 
 ## Layer Vocabulary

@@ -23,7 +23,7 @@
  *
  * Clean-install contract: a static top-level VALUE import of the rpiv-workflow
  * barrel crashes the extension when the sibling is absent. So the listener is
- * registered via a DYNAMIC `import("@juicesharp/rpiv-workflow/startup")` (the thin
+ * registered via a DYNAMIC `import("@hs1n/rpiv-workflow/startup")` (the thin
  * `/startup` entry that also backs the execution-host provider) guarded by
  * `isModuleNotFound`.
  *
@@ -59,7 +59,7 @@ import { isModuleNotFound } from "./utils.js";
  * module, and a module-local guard would let a second registration stack onto the
  * process-global lifecycle registry. One slot → at most one listener, ever.
  */
-const GUARD_SLOT = Symbol.for("@juicesharp/rpiv-pi:laneProgressGuard");
+const GUARD_SLOT = Symbol.for("@hs1n/rpiv-pi:laneProgressGuard");
 
 interface ProgressGuard {
 	dispose: (() => void) | undefined;
@@ -131,7 +131,7 @@ export async function registerLaneProgress(): Promise<void> {
 	try {
 		// Thin `/startup` entry (re-exports registerLifecycle) — keeps the
 		// loader/DSL/runner graph off startup and avoids the barrel-import race.
-		const { registerLifecycle, summarizeRun } = await import("@juicesharp/rpiv-workflow/startup");
+		const { registerLifecycle, summarizeRun } = await import("@hs1n/rpiv-workflow/startup");
 		g.dispose = registerLifecycle({
 			// Seed run-INSTANCE identity keyed by runId. A resume REUSES the runId, so a
 			// runId-only gate is racy — but `reconstructState` hands the resumed successor a

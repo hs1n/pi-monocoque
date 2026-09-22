@@ -23,7 +23,7 @@ import {
 	truncateHead,
 } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
-import { validateGuidanceFields } from "@juicesharp/rpiv-config";
+import { validateGuidanceFields } from "@hs1n/rpiv-config";
 import { Type } from "typebox";
 import { getConfigPath, readConfig, type WebToolsConfig, writeConfig } from "./providers/config.js";
 import { createSearchProvider } from "./providers/factory.js";
@@ -74,7 +74,7 @@ const saveConfig = writeConfig;
 // Executor guidance — overrides + defaults
 // ---------------------------------------------------------------------------
 
-// validateGuidanceFields is now imported from @juicesharp/rpiv-config
+// validateGuidanceFields is now imported from @hs1n/rpiv-config
 
 export const DEFAULT_WEB_SEARCH_SNIPPET = "Search the web for up-to-date information";
 export const DEFAULT_WEB_SEARCH_GUIDELINES: string[] = [

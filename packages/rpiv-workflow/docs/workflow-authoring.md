@@ -1,6 +1,6 @@
 # Workflow Authoring Reference
 
-Complete reference for the `@juicesharp/rpiv-workflow` authoring DSL. A workflow is a typed graph: named entry point, a `stages` record, and an `edges` table that maps each stage to another stage name, `"stop"`, or a predicate function.
+Complete reference for the `@hs1n/rpiv-workflow` authoring DSL. A workflow is a typed graph: named entry point, a `stages` record, and an `edges` table that maps each stage to another stage name, `"stop"`, or a predicate function.
 
 ## Table of Contents
 
@@ -36,7 +36,7 @@ Complete reference for the `@juicesharp/rpiv-workflow` authoring DSL. A workflow
 Identity passthrough for type inference. Same idiom as `defineConfig` in Vite/Astro — zero runtime cost.
 
 ```typescript
-import { defineWorkflow } from "@juicesharp/rpiv-workflow";
+import { defineWorkflow } from "@hs1n/rpiv-workflow";
 
 export default defineWorkflow({
   name: "my-workflow",       // What users type: /wf my-workflow
@@ -62,7 +62,7 @@ Three factories for two stage kinds. Each factory returns a `StageDef` — pass 
 `kind: "produces"`. The skill writes a file the next stage reads. Halts the chain if the path doesn't appear in the transcript. **Requires an `outcome`** — load-time validation rejects a `produces` stage without one.
 
 ```typescript
-import { produces, typeboxSchema } from "@juicesharp/rpiv-workflow";
+import { produces, typeboxSchema } from "@hs1n/rpiv-workflow";
 import { Type } from "typebox";
 
 // Basic — just declare the outcome
@@ -122,7 +122,7 @@ All three share the introspectable facet (`source`, `unit`) and the policy knobs
 `fanout()` computes the full unit list once, then runs each unit as its own session. On an **`acts`** stage the units are pure side-effects (one bare audit row each). On a **`produces`** stage each unit is *collecting* — it runs the full collect → validate → publish path and appends its `Output` to `state.named[outcome.name]`, so a collecting fanout **requires `outcome.name`**. An empty `units()` return falls through to the single-stage path (no loop).
 
 ```typescript
-import { acts, fanout, type Unit } from "@juicesharp/rpiv-workflow";
+import { acts, fanout, type Unit } from "@hs1n/rpiv-workflow";
 
 // rpiv-pi's FRONTMATTER_PHASE_FANOUT — one implement session per plan phase.
 const FRONTMATTER_PHASE_FANOUT = fanout({
@@ -155,7 +155,7 @@ A **`Unit`** is `{ prompt, label, id?, deps? }`: `prompt` is the body sent to th
 `iterate()` pulls one unit at a time: the runner calls your `IterateFn` per unit, feeding it the validated `Output`s of every prior unit in this generation. Return the next unit, or `null`/`undefined` to terminate. Every unit runs the stage's `outcome` collector exactly like a one-shot `produces` pass — so it **requires `kind: "produces"` + an `outcome` with a `name`**, and a downstream stage can read every accumulated output straight from `state.named[outcome.name]`.
 
 ```typescript
-import { iterate, produces } from "@juicesharp/rpiv-workflow";
+import { iterate, produces } from "@hs1n/rpiv-workflow";
 
 // rpiv-pi's REVIEW_PHASE_ITERATE — one blueprint pass per review phase,
 // each building on the plans the phases it depends on already produced.
@@ -199,7 +199,7 @@ A first-call `null` is a zero-unit no-op: nothing published, primary unchanged, 
 `assess()` runs the stage as a **model-judged until-done loop**: each round runs a producer session (this stage's skill + outcome) then a judge session (`opts.judge`). A sync `done(verdict)` predicate decides termination; `feedForward` carries the just-judged round into the next producer prompt. The producer is a collecting unit every round, so assess also **requires `kind: "produces"` + an `outcome` with a `name`**. Unlike fanout/iterate, the cap **soft-stops by default** (`onCap: "advance"`).
 
 ```typescript
-import { assess, judge, produces } from "@juicesharp/rpiv-workflow";
+import { assess, judge, produces } from "@hs1n/rpiv-workflow";
 
 const BREAKDOWN_ASSESS = assess({
   judge: judge({ skill: "grade-breakdown", outcome: verdictOutcome }),
@@ -270,7 +270,7 @@ Loops are observed through unit-generic lifecycle hooks (register via `registerL
 **verify** attaches a post-condition judge to a `produces` stage: after each attempt completes (collected, validated, persisted), the judge session grades the attempt's primary artifact and `done(verdict)` gates advancement — true → the chain advances with the attempt's producer pair; false → a fresh retry attempt (prompt arg built by `feedForward`) up to `max` attempts (default 1 = gate-only), then the workflow halts with "verification failed". A pass on the final attempt is a normal completion. Requires `kind: "produces"` + an `outcome` with a `name`; composes with `reads` and with `prompt` dispatch (attempt 0 sends the stage's resolved `prompt` raw; retries send `feedForward`'s output raw — for prompt dispatch it is the complete retry message, not a skill arg); mutually exclusive with `loop`, `run`, and `sessionPolicy: "continue"`. `verify` shares the `JudgedRepetition` field vocabulary with `assess` — `done` (the pass predicate), `max` (the attempt budget), and `feedForward` — one set of names for both judged-repetition shapes.
 
 ```ts
-import { judge, produces, verify } from "@juicesharp/rpiv-workflow";
+import { judge, produces, verify } from "@hs1n/rpiv-workflow";
 
 // Gate-only: one attempt; a failing verdict halts the workflow.
 const GATED = produces({
@@ -317,8 +317,8 @@ edges: {
 A single judge agreeing with itself is not a check — that is self-preference bias. **`panel()`** turns one judge into N independent skeptics and reduces their verdicts to one decision with a **fold**. It is a `Judge`-shaped *value*, not a new site: it slots into any slot a `judge` does — `assess({ judge })` or `verify({ judge })` — with **zero per-site code**, because every judge site dispatches through one expander (`panelMembers`) and reads the fold opaquely via its existing `done` predicate. A plain `judge` is simply a panel of one.
 
 ```ts
-import { judge, majority, panel, produces, verify } from "@juicesharp/rpiv-workflow";
-import type { PanelVerdict } from "@juicesharp/rpiv-workflow";
+import { judge, majority, panel, produces, verify } from "@hs1n/rpiv-workflow";
+import type { PanelVerdict } from "@hs1n/rpiv-workflow";
 
 // Three independent skeptics — distinct lenses beat N copies (correctness, security, repro).
 const REVIEW_PANEL = panel({
@@ -405,7 +405,7 @@ The fold publishes **decision data**, not a file artifact. It lands on its own n
 `kind: "side-effect"`. The skill's side effect IS the work (commit, implement). The next stage inherits the prior artifact list forward.
 
 ```typescript
-import { acts } from "@juicesharp/rpiv-workflow";
+import { acts } from "@hs1n/rpiv-workflow";
 
 // Basic side-effect
 acts()
@@ -427,7 +427,7 @@ acts({ outcome: gitCommitOutcome })
 `kind: "side-effect"` with `inheritsArtifacts: false`. A side-effect stage that does NOT inherit the upstream artifact. Its prompt receives `originalInput` (the run's brief) instead of an upstream artifact handle. The rolling primary slot is cleared on success so anything downstream also starts without an inherited handle.
 
 ```typescript
-import { terminal } from "@juicesharp/rpiv-workflow";
+import { terminal } from "@hs1n/rpiv-workflow";
 
 // Final notification stage
 terminal()
@@ -442,7 +442,7 @@ Some stages don't need an LLM. The `.script` accessor on each factory runs a pur
 **`produces.script`** — returns the `Output` envelope's value-channel fields directly:
 
 ```typescript
-import { produces, fs, type ScriptContext } from "@juicesharp/rpiv-workflow";
+import { produces, fs, type ScriptContext } from "@hs1n/rpiv-workflow";
 
 const merge = produces.script({
   outputSchema: typeboxSchema(Type.Object({ planPath: Type.String() })),
@@ -467,7 +467,7 @@ const merge = produces.script({
 **`acts.script`** — returns `void`:
 
 ```typescript
-import { acts, type ScriptContext } from "@juicesharp/rpiv-workflow";
+import { acts, type ScriptContext } from "@hs1n/rpiv-workflow";
 
 const bumpVersion = acts.script({
   run: async (ctx: ScriptContext) => {
@@ -483,7 +483,7 @@ const bumpVersion = acts.script({
 **`terminal.script`** — like `acts.script` but clears the rolling primary slot:
 
 ```typescript
-import { terminal, type ScriptContext } from "@juicesharp/rpiv-workflow";
+import { terminal, type ScriptContext } from "@hs1n/rpiv-workflow";
 
 const notifySlack = terminal.script({
   run: async (ctx: ScriptContext) => {
@@ -606,7 +606,7 @@ A conditional edge is an **`EdgeFn`**: a `(ctx) => string` predicate carrying a 
 Branches evaluated against `Number(output.data[field])` in declaration order; first match wins. The third argument, `otherwise`, is **required** — the no-match fallback must be deliberate, and omitting it throws at construction. Helpers (`gt`/`gte`/`lt`/`lte`/`eq`) take a `number` — non-numeric fields route with `defineRoute` instead.
 
 ```typescript
-import { gate, gt, eq } from "@juicesharp/rpiv-workflow";
+import { gate, gt, eq } from "@hs1n/rpiv-workflow";
 
 edges: {
   "code-review": gate("blockers_count", {
@@ -623,7 +623,7 @@ edges: {
 `match(field, branches, opts?)` maps each target stage to the **discrete value** that routes to it. The field is compared by strict `===` in declaration order; first match wins. Where `gate` keys on a `Number(...)` threshold, `match` keys on a string/number/boolean equal — the enum classifier `gate` can't express.
 
 ```typescript
-import { match } from "@juicesharp/rpiv-workflow";
+import { match } from "@hs1n/rpiv-workflow";
 
 edges: {
   triage: match("severity", { escalate: "p0", fix: "p1", backlog: "p2" }),
@@ -650,7 +650,7 @@ A channel-sourced route validates the *channel's* data, not the source stage's o
 The body is plain TS, so there is no separate string/enum helper — compare the field directly. Every value the body can return must appear in `targets`, or the validator flags the edge. Auto-marks the route as reading `output.data` (the source stage needs an `outputSchema`); pass `{ readsData: false }` for a state-only route.
 
 ```typescript
-import { defineRoute } from "@juicesharp/rpiv-workflow";
+import { defineRoute } from "@hs1n/rpiv-workflow";
 
 edges: {
   review: defineRoute(["commit", "revise", "escalate"], ({ output }) => {
@@ -733,7 +733,7 @@ Grouped by discovery model:
 Use `defineCollector` and `defineParser` to build your own:
 
 ```typescript
-import { defineCollector, opaque } from "@juicesharp/rpiv-workflow";
+import { defineCollector, opaque } from "@hs1n/rpiv-workflow";
 
 export const myCollector = defineCollector((ctx) => {
   // ctx.branch, ctx.cwd, etc.
@@ -889,7 +889,7 @@ A bare-string read resolves to the channel's **latest** entry (`array.at(-1)`). 
 Wrap a name in `fanin(name)` to read **every accumulated entry** of the channel, in run order:
 
 ```typescript
-import { acts, fanin, fanout, produces } from "@juicesharp/rpiv-workflow";
+import { acts, fanin, fanout, produces } from "@hs1n/rpiv-workflow";
 
 // fan-out: one collecting unit per plan phase → each appends to state.named["drafts"]
 draft: produces({
@@ -962,7 +962,7 @@ A fresh-session stage starts a clean Pi conversation. It only sees (1) the rolli
 import {
   acts, unionCollectors,
   workspaceDiffCollector, transcriptPathCollector,
-} from "@juicesharp/rpiv-workflow";
+} from "@hs1n/rpiv-workflow";
 
 acts({
   skill: "frontend-design",
@@ -984,7 +984,7 @@ The fresh downstream session now receives the touched files *and* a notes file c
 **Default to sync** for pure shape contracts. **Reach for async** when correctness needs I/O (file existence checks, endpoint validation).
 
 ```typescript
-import { typeboxSchema } from "@juicesharp/rpiv-workflow";
+import { typeboxSchema } from "@hs1n/rpiv-workflow";
 import { Type } from "typebox";
 
 outputSchema: typeboxSchema(Type.Object({
@@ -996,7 +996,7 @@ A schema rejection on `outputSchema` honours `onInvalid` (`"retry"` by default, 
 
 ## Complete example
 
-A full workflow with custom outcomes and conditional routing. This example uses only `@juicesharp/rpiv-workflow` primitives — no external convention packages:
+A full workflow with custom outcomes and conditional routing. This example uses only `@hs1n/rpiv-workflow` primitives — no external convention packages:
 
 ```typescript
 import {
@@ -1004,7 +1004,7 @@ import {
   typeboxSchema, gitCommitOutcome,
   directoryPathCollector, jsonBodyParser, transcriptPathCollector,
   toolCallCollector, fs,
-} from "@juicesharp/rpiv-workflow";
+} from "@hs1n/rpiv-workflow";
 import { Type } from "typebox";
 
 // Custom outcome: detect a markdown file the agent writes to a plans directory

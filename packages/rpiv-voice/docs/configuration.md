@@ -127,7 +127,7 @@ Decode threads are the counter-example to this list: they *are* the tunable knob
 
 ## How the recognition language is chosen
 
-When `@juicesharp/rpiv-i18n` is installed and your active locale's base code is one of
+When `@hs1n/rpiv-i18n` is installed and your active locale's base code is one of
 `de`, `en`, `es`, `fr`, `it`, `ja`, `pt`, `ru`, `uk`, `zh`, the engine is built with that
 language as a fixed hint. This is more accurate than auto-detection and skips the
 first-utterance detection delay, but it also means the language is baked in for the

@@ -1,7 +1,7 @@
 /**
  * rpiv-flavoured artifact collection — the `.rpiv/artifacts/<bucket>/<file>.md`
  * convention all rpiv-pi skills emit into. This module owns the
- * convention; the framework (`@juicesharp/rpiv-workflow`) ships only
+ * convention; the framework (`@hs1n/rpiv-workflow`) ships only
  * the primitives (`ArtifactCollector`, `ArtifactParser`, handle
  * constructors, `defineCollector`, etc.) and stays layout-agnostic.
  *
@@ -47,7 +47,7 @@ import {
 	type ParseContext,
 	transcriptPathCollector,
 	// Runner-free entry — keeps the ~530ms engine off the startup path.
-} from "@juicesharp/rpiv-workflow/registration";
+} from "@hs1n/rpiv-workflow/registration";
 
 // ---------------------------------------------------------------------------
 // Collectors — text-scan over assistant transcript

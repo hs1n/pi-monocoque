@@ -1,6 +1,6 @@
 import { type ExtensionUIContext, initTheme, type Theme } from "@earendil-works/pi-coding-agent";
 import { visibleWidth } from "@earendil-works/pi-tui";
-import { createMockUI } from "@juicesharp/rpiv-test-utils";
+import { createMockUI } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { LaneDock } from "./lane-dock.js";
 import type { ViewerMessage } from "./lane-transcript.js";

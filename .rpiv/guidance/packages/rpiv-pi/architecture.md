@@ -3,7 +3,7 @@
 Pi CLI plugin package: extends the Pi coding agent with TypeScript runtime infrastructure, slash commands, and Markdown-based AI workflow skills.
 
 ## Monorepo Context
-Umbrella package in `rpiv-mono`. Lockstep version with the rest of the `@juicesharp/rpiv-*` family. All releases cut from monorepo root via `node scripts/release.mjs` — never `npm version` here individually. Sibling source lives at `../<name>/`; their tools are wired in via `extensions/rpiv-core/siblings.ts` (regex-based filesystem detection — no runtime imports; the registry also covers pinned third-party runtime deps such as the `@tintinweb/pi-subagents` dispatcher).
+Umbrella package in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family. All releases cut from monorepo root via `node scripts/release.mjs` — never `npm version` here individually. Sibling source lives at `../<name>/`; their tools are wired in via `extensions/rpiv-core/siblings.ts` (regex-based filesystem detection — no runtime imports; the registry also covers pinned third-party runtime deps such as the `@tintinweb/pi-subagents` dispatcher).
 
 # Architecture
 
@@ -33,7 +33,7 @@ Sibling-plugin commands are registered by the siblings themselves once installed
 
 # Business Context
 
-rpiv-pi augments Pi with a research → design → implement skill pipeline plus the runtime infrastructure those skills depend on (guidance injection, git-context injection, bundled-agent sync, session capture, model management, lane observability). rpiv-core also contributes four built-in `/wf` workflows (build/vet/polish/ship) to the `@juicesharp/rpiv-workflow` sibling via `registerBuiltInWorkflows` — the build workflow's `code-splice` stage shells out to `skills/_shared/stitch-elaborations.mjs` to fold per-phase elaborations back into the plan — and a model-management subsystem (`/rpiv-models`, per-skill/preset model + effort overrides, `models.json`). `/wf` stages run in detached child sessions with bounded parallel fan-out (`sdk-workflow-host.ts` — the sole module importing Pi SDK session machinery; the interactive session stays a launcher/observer), monitored via an always-on lane dock below the editor and the `/lanes` browser, with per-lane question parking and an optional Warp question-lifecycle bridge (`workflow-question-warp-bridge.ts`). Tool surfaces live in sibling plugins.
+rpiv-pi augments Pi with a research → design → implement skill pipeline plus the runtime infrastructure those skills depend on (guidance injection, git-context injection, bundled-agent sync, session capture, model management, lane observability). rpiv-core also contributes four built-in `/wf` workflows (build/vet/polish/ship) to the `@hs1n/rpiv-workflow` sibling via `registerBuiltInWorkflows` — the build workflow's `code-splice` stage shells out to `skills/_shared/stitch-elaborations.mjs` to fold per-phase elaborations back into the plan — and a model-management subsystem (`/rpiv-models`, per-skill/preset model + effort overrides, `models.json`). `/wf` stages run in detached child sessions with bounded parallel fan-out (`sdk-workflow-host.ts` — the sole module importing Pi SDK session machinery; the interactive session stays a launcher/observer), monitored via an always-on lane dock below the editor and the `/lanes` browser, with per-lane question parking and an optional Warp question-lifecycle bridge (`workflow-question-warp-bridge.ts`). Tool surfaces live in sibling plugins.
 
 ## Failure-Path Resilience (host counterparts)
 

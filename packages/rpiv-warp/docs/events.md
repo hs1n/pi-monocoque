@@ -111,11 +111,11 @@ Example `stop` body:
 ## Workflow-question transport
 
 `rpiv-warp` also exports a direct-call API used by
-[`@juicesharp/rpiv-pi`](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-pi)
+[`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi)
 to badge parked workflow questions independently of the launcher session:
 
 ```ts
-import { createWorkflowQuestionTransport } from "@juicesharp/rpiv-warp";
+import { createWorkflowQuestionTransport } from "@hs1n/rpiv-warp";
 
 const transport = createWorkflowQuestionTransport(process.cwd());
 transport.asked("run-1");     // session_start + question_asked, session_id = "run-1"

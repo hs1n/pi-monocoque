@@ -52,7 +52,7 @@ describe("pruneLegacySiblings", () => {
 
 	it("only non-legacy entries → pruned: [], file unchanged", () => {
 		writeSettings({
-			packages: ["npm:pi-perplexity", "npm:@juicesharp/rpiv-todo", "npm:@tintinweb/pi-subagents"],
+			packages: ["npm:pi-perplexity", "npm:@hs1n/rpiv-todo", "npm:@tintinweb/pi-subagents"],
 		});
 		const before = readSettingsRaw();
 		expect(pruneLegacySiblings()).toEqual({ pruned: [] });
@@ -79,7 +79,7 @@ describe("pruneLegacySiblings", () => {
 			packages: [
 				"npm:pi-perplexity",
 				"npm:@tintinweb/pi-subagents",
-				"npm:@juicesharp/rpiv-todo",
+				"npm:@hs1n/rpiv-todo",
 				"/Users/x/rpiv-mono/packages/rpiv-pi",
 				null,
 				42,
@@ -92,7 +92,7 @@ describe("pruneLegacySiblings", () => {
 			packages: [
 				"npm:pi-perplexity",
 				"npm:@tintinweb/pi-subagents",
-				"npm:@juicesharp/rpiv-todo",
+				"npm:@hs1n/rpiv-todo",
 				"/Users/x/rpiv-mono/packages/rpiv-pi",
 				null,
 				42,
@@ -152,7 +152,7 @@ describe("findLegacySiblings (read-only scan)", () => {
 
 	it("only non-legacy entries → []", () => {
 		writeSettings({
-			packages: ["npm:pi-perplexity", "npm:@juicesharp/rpiv-todo", "npm:@tintinweb/pi-subagents"],
+			packages: ["npm:pi-perplexity", "npm:@hs1n/rpiv-todo", "npm:@tintinweb/pi-subagents"],
 		});
 		expect(findLegacySiblings()).toEqual([]);
 	});
@@ -160,7 +160,7 @@ describe("findLegacySiblings (read-only scan)", () => {
 	it("returns legacy entries without mutating settings.json", () => {
 		writeSettings({
 			defaultProvider: "zai",
-			packages: ["npm:pi-subagents", "npm:@juicesharp/rpiv-todo"],
+			packages: ["npm:pi-subagents", "npm:@hs1n/rpiv-todo"],
 		});
 		const before = readSettingsRaw();
 		expect(findLegacySiblings()).toEqual(["npm:pi-subagents"]);

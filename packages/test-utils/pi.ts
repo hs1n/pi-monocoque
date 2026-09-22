@@ -10,7 +10,7 @@ import type {
 	ToolDefinition,
 	ToolInfo,
 } from "@earendil-works/pi-coding-agent";
-import type { ModelSelection, WorkflowHostContext, WorkflowSessionContext } from "@juicesharp/rpiv-workflow";
+import type { ModelSelection, WorkflowHostContext, WorkflowSessionContext } from "@hs1n/rpiv-workflow";
 import { vi } from "vitest";
 import type { MockTheme } from "./theme.js";
 

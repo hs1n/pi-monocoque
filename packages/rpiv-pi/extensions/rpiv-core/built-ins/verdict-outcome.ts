@@ -21,7 +21,7 @@
  * its confirm twin may share one instance per channel.
  */
 
-import { jsonBodyParser, type Outcome } from "@juicesharp/rpiv-workflow/registration";
+import { jsonBodyParser, type Outcome } from "@hs1n/rpiv-workflow/registration";
 import { VERDICT_DIR } from "./shared.js";
 import { verdictCollector } from "./verdict-collector.js";
 

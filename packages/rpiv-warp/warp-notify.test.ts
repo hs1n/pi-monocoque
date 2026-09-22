@@ -1,5 +1,5 @@
 import * as fs from "node:fs";
-import { mockStdout } from "@juicesharp/rpiv-test-utils";
+import { mockStdout } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 
 vi.mock("node:fs", async () => {

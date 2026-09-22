@@ -1,7 +1,7 @@
 # Configuration reference
 
 Every option
-[`@juicesharp/rpiv-todo`](https://www.npmjs.com/package/@juicesharp/rpiv-todo)
+[`@hs1n/rpiv-todo`](https://www.npmjs.com/package/@hs1n/rpiv-todo)
 reads, where the file lives, and exactly what happens when a value is wrong.
 
 ## Where the file lives
@@ -105,6 +105,6 @@ guideline bullets are used.
 | `HOME` | Anchors `~/.config` when `XDG_CONFIG_HOME` does not apply. |
 
 `rpiv-todo` reads no environment variables of its own. If you have
-[`@juicesharp/rpiv-i18n`](https://www.npmjs.com/package/@juicesharp/rpiv-i18n)
+[`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n)
 installed, that package has its own locale configuration and its own env-var
 chain — see its README.

@@ -12,9 +12,9 @@ import {
 	drainSkillContractCollisions,
 	flushSkillContractProviders,
 	harvestStageContracts,
-} from "@juicesharp/rpiv-workflow/internal";
-import type { ConsumesSpec, ProducesSpec, SkillContract } from "@juicesharp/rpiv-workflow/registration";
-import { defineWorkflow, produces } from "@juicesharp/rpiv-workflow/registration";
+} from "@hs1n/rpiv-workflow/internal";
+import type { ConsumesSpec, ProducesSpec, SkillContract } from "@hs1n/rpiv-workflow/registration";
+import { defineWorkflow, produces } from "@hs1n/rpiv-workflow/registration";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { builtInWorkflows } from "./built-in-workflows.js";
 import { BUNDLED_SKILLS_DIR } from "./paths.js";
@@ -380,7 +380,7 @@ describe("bundled skill contracts", () => {
 	});
 
 	it("registerSkillContractsSource registers the plans composition comparator eagerly", async () => {
-		const { getCompositionComparators } = await import("@juicesharp/rpiv-workflow/internal");
+		const { getCompositionComparators } = await import("@hs1n/rpiv-workflow/internal");
 		await registerSkillContractsSource();
 		expect(getCompositionComparators().has("plans")).toBe(true);
 	});
@@ -518,14 +518,14 @@ describe("artifactKindComparator (plans channel)", () => {
 describe("registerSkillContractsSource", () => {
 	describe("when the rpiv-workflow sibling is absent", () => {
 		afterEach(() => {
-			vi.doUnmock("@juicesharp/rpiv-workflow/startup");
+			vi.doUnmock("@hs1n/rpiv-workflow/startup");
 			vi.resetModules();
 		});
 
 		it("no-ops without throwing", async () => {
 			vi.resetModules();
-			vi.doMock("@juicesharp/rpiv-workflow/startup", () => {
-				throw Object.assign(new Error("Cannot find package '@juicesharp/rpiv-workflow'"), {
+			vi.doMock("@hs1n/rpiv-workflow/startup", () => {
+				throw Object.assign(new Error("Cannot find package '@hs1n/rpiv-workflow'"), {
 					code: "ERR_MODULE_NOT_FOUND",
 				});
 			});
@@ -622,14 +622,14 @@ describe("isBundledSkillPath", () => {
 describe("registerUserSkillContractsSource", () => {
 	describe("when the rpiv-workflow sibling is absent", () => {
 		afterEach(() => {
-			vi.doUnmock("@juicesharp/rpiv-workflow/startup");
+			vi.doUnmock("@hs1n/rpiv-workflow/startup");
 			vi.resetModules();
 		});
 
 		it("no-ops without throwing", async () => {
 			vi.resetModules();
-			vi.doMock("@juicesharp/rpiv-workflow/startup", () => {
-				throw Object.assign(new Error("Cannot find package '@juicesharp/rpiv-workflow'"), {
+			vi.doMock("@hs1n/rpiv-workflow/startup", () => {
+				throw Object.assign(new Error("Cannot find package '@hs1n/rpiv-workflow'"), {
 					code: "ERR_MODULE_NOT_FOUND",
 				});
 			});
@@ -668,9 +668,7 @@ contract:
 Body`,
 		);
 		// Simulate what the loader does: register the user-skill contract provider, then flush
-		const { registerSkillContractsProvider, registerSkillContracts } = await import(
-			"@juicesharp/rpiv-workflow/startup"
-		);
+		const { registerSkillContractsProvider, registerSkillContracts } = await import("@hs1n/rpiv-workflow/startup");
 		registerSkillContractsProvider(() => {
 			registerSkillContracts(buildUserSkillContracts(tmpDir), "user-skills");
 		});
@@ -698,7 +696,7 @@ describe("owner collision: user-skills vs rpiv-pi", () => {
 	});
 
 	it("surfaces collision when user-skill contract diverges from bundled", async () => {
-		const { registerSkillContracts } = await import("@juicesharp/rpiv-workflow/startup");
+		const { registerSkillContracts } = await import("@hs1n/rpiv-workflow/startup");
 		const bundled: SkillContract = {
 			source: "declared",
 			produces: { kind: "produces", meta: { artifactKind: "review" } },

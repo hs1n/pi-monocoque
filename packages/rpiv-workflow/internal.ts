@@ -12,7 +12,7 @@
  *
  * Anything that consumers can rely on for production work lives on
  * `./index.js`. This file is reachable as
- * `@juicesharp/rpiv-workflow/internal` via the package's `exports`
+ * `@hs1n/rpiv-workflow/internal` via the package's `exports`
  * field — keep that path stable so the rpiv-pi test + repo-wide
  * setup don't break.
  *

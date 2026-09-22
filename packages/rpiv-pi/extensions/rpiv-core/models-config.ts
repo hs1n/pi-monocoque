@@ -13,7 +13,7 @@
  */
 
 import type { ModelThinkingLevel, ThinkingLevel } from "@earendil-works/pi-ai";
-import { configPath, loadJsonConfigWithLegacyFallback, validateConfig } from "@juicesharp/rpiv-config";
+import { configPath, loadJsonConfigWithLegacyFallback, validateConfig } from "@hs1n/rpiv-config";
 import { type Static, Type } from "typebox";
 
 // ---------------------------------------------------------------------------

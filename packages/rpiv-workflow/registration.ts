@@ -233,7 +233,7 @@ export { DEFAULT_TRIGGER, type RunTrigger } from "./triggers.js";
 export { typeboxSchema } from "./typebox-adapter.js";
 // `RunState` is deliberately NOT here — it is runner-private; user contexts
 // use the deep-readonly `RunView`. Test fixtures that must construct one
-// import it from `@juicesharp/rpiv-workflow/internal`.
+// import it from `@hs1n/rpiv-workflow/internal`.
 export type { RunTermination } from "./types.js";
 export { type SchemaValidationFailure, validateOutputData } from "./validate-output.js";
 export {

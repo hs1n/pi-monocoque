@@ -1,4 +1,4 @@
-import { makeSpawnStub } from "@juicesharp/rpiv-test-utils";
+import { makeSpawnStub } from "@hs1n/rpiv-test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("node:child_process", () => ({ spawn: vi.fn() }));

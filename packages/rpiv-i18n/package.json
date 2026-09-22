@@ -1,5 +1,5 @@
 {
-	"name": "@juicesharp/rpiv-i18n",
+	"name": "@hs1n/rpiv-i18n",
 	"version": "2.11.0",
 	"description": "Pi extension. The localization foundation for rpiv-* skills: locale detection, the /languages command, the --locale flag, and a cross-package locale registry.",
 	"keywords": [
@@ -11,15 +11,15 @@
 	],
 	"type": "module",
 	"license": "MIT",
-	"author": "juicesharp",
+	"author": "hs1n",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/juicesharp/rpiv-mono.git",
+		"url": "git+https://github.com/hs1n/pi-monocoque.git",
 		"directory": "packages/rpiv-i18n"
 	},
-	"homepage": "https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-i18n#readme",
+	"homepage": "https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n#readme",
 	"bugs": {
-		"url": "https://github.com/juicesharp/rpiv-mono/issues"
+		"url": "https://github.com/hs1n/pi-monocoque/issues"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -44,16 +44,19 @@
 		"./loader": "./loader.ts"
 	},
 	"pi": {
-		"image": "https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-i18n/docs/cover.png",
+		"image": "https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-i18n/docs/cover.png",
 		"extensions": [
 			"./index.ts"
 		]
 	},
 	"dependencies": {
-		"@juicesharp/rpiv-config": "^2.11.0"
+		"@hs1n/rpiv-config": "^2.11.0"
 	},
 	"peerDependencies": {
 		"@earendil-works/pi-coding-agent": "*",
 		"@earendil-works/pi-tui": "*"
-	}
+	},
+	"contributors": [
+		"juicesharp <https://github.com/juicesharp>"
+	]
 }

@@ -3,7 +3,7 @@
  * insertion order IS its linear stage order — `Object.keys(stages)` gives
  * the natural read order for previews and traversal alike.
  *
- * Route edges use `gate(...)` from `@juicesharp/rpiv-workflow`, which
+ * Route edges use `gate(...)` from `@hs1n/rpiv-workflow`, which
  * attaches `.targets` metadata so reachability checks and graph
  * introspectors can enumerate possible branches without probing.
  *
@@ -33,7 +33,7 @@ import {
 	type RunView,
 	setRouteNote,
 	type Workflow,
-} from "@juicesharp/rpiv-workflow/registration";
+} from "@hs1n/rpiv-workflow/registration";
 import { rpivBucketOutcome } from "./artifact-collector.js";
 import {
 	allDimensionsPass,

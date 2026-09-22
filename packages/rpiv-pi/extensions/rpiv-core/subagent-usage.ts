@@ -31,7 +31,7 @@
  * − output)` since the payload omits it. A missing/malformed `tokens` is a no-op.
  *
  * Mirrors `run-lane-registry.ts`'s process-global slot discipline: a
- * `globalThis[Symbol.for("@juicesharp/rpiv-pi:subagentUsage")]` slot (NOT a
+ * `globalThis[Symbol.for("@hs1n/rpiv-pi:subagentUsage")]` slot (NOT a
  * module-level variable) so every re-loaded rpiv-pi instance shares ONE accumulator.
  * `__resetSubagentUsage` clears it in place (slot identity preserved) and is wired
  * into `test/setup.ts` beforeEach.
@@ -57,7 +57,7 @@ interface SubagentState {
 	readonly runs: Map<string, Map<string, LaneUsage>>;
 }
 
-const SUBAGENT_SLOT = Symbol.for("@juicesharp/rpiv-pi:subagentUsage");
+const SUBAGENT_SLOT = Symbol.for("@hs1n/rpiv-pi:subagentUsage");
 
 /** Read the single process-global subagent accumulator, lazily creating it. */
 function state(): SubagentState {

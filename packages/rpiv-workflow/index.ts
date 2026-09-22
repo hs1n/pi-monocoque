@@ -1,13 +1,13 @@
 /**
  * rpiv-workflow — public API barrel for embedders. The Pi extension `default`
  * entry lives in the thin `./extension.ts` (not here); startup-time siblings
- * should import the runner-free `@juicesharp/rpiv-workflow/registration` entry.
+ * should import the runner-free `@hs1n/rpiv-workflow/registration` entry.
  *
  * Skill-agnostic: the runner sends `/skill:<name>` via Pi's native skill
  * dispatch — workflows can name any skill installed in Pi's search path
  * (`~/.pi/agent/skills/`, `<cwd>/.pi/skills/`, or settings-declared
  * `skillPaths[]`). This package ships ZERO built-in workflows. Bundles
- * like `@juicesharp/rpiv-pi` opt in by calling `registerBuiltIns(...)`
+ * like `@hs1n/rpiv-pi` opt in by calling `registerBuiltIns(...)`
  * from their own extension entry.
  *
  * ─── Audience map ────────────────────────────────────────────────────────
@@ -33,10 +33,10 @@
  *     `RunWorkflowOptions.lifecycle`).
  *   - Inspecting past runs (JSONL) → `./state/index.js` (`listRuns`,
  *     `readHeader`, `runFileFor`, …). Row WRITES are runner-owned;
- *     `recordStage` lives on `@juicesharp/rpiv-workflow/internal`
+ *     `recordStage` lives on `@hs1n/rpiv-workflow/internal`
  *     (test-only).
  *
- * Per-module deep imports (`from "@juicesharp/rpiv-workflow/api.js"`)
+ * Per-module deep imports (`from "@hs1n/rpiv-workflow/api.js"`)
  * are NOT supported across the package boundary.
  *
  * ─── Pi-coupling boundary ───────────────────────────────────────────────
@@ -62,7 +62,7 @@
  *
  * The package no longer imports any value from
  * `@earendil-works/pi-coding-agent` — `parseFrontmatter` moved to
- * `@juicesharp/rpiv-pi` along with the rpiv-flavoured outcome
+ * `@hs1n/rpiv-pi` along with the rpiv-flavoured outcome
  * (`rpivArtifactMdOutcome`). The peer dep stays for `pi-tui` types
  * structural-compatibility only.
  *

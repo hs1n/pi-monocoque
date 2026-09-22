@@ -5,7 +5,7 @@
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { validateGuidanceFields } from "@juicesharp/rpiv-config";
+import { validateGuidanceFields } from "@hs1n/rpiv-config";
 import { Type } from "typebox";
 import { loadAdvisorConfig } from "./config.js";
 import { executeAdvisor } from "./execute.js";

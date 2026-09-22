@@ -15,7 +15,7 @@ agents.ts / skills.ts — Merge spec + visitor-copy collections; CapabilityTiers
 workflows.ts     — Hand-maintained mirror of all four built-in workflows (build/vet/polish/ship — the complete set): module-private WORKFLOWS exposed via getWorkflows(); WorkflowStage flags (fanout/gate/fix/human), backward-edge loops, showcase flag
 counts.ts        — Build-time landing stat counts (SurfaceCounts, getSurfaceCounts) derived from skillSpecs, the TIER_BY_NAME roster via getAgentsByTier, getWorkflows, and SIBLING_NAMES — a stat and the section it links to can never disagree
 posts.ts / docs.ts / reading-time.ts — Published-content filters (single source of truth for "published"), sorted; `reading-time.ts` is a pure `words / 200` estimator (floor=1) extracted so Vitest can test it without `astro:content`
-siblings.ts      — Sibling catalog: reads each sibling's package.json; `shortPeers` strips `@earendil-works/`/`@juicesharp/` scopes and drops `rpiv-*` peers (external weight only); adds curated role labels
+siblings.ts      — Sibling catalog: reads each sibling's package.json; `shortPeers` strips any npm scope (`@earendil-works/`, and the workspace's own — `@hs1n/` since the fork renamed it) and drops `rpiv-*` peers (external weight only); adds curated role labels
 compat.ts / version.ts — Cross-package version surface: rpiv-pi `version` (JSON import; throws if missing) + tested @earendil-works/pi-coding-agent pin read from root package.json devDependencies (throws if absent/empty)
 inlineMd.ts      — Renders a tiny inline-Markdown subset (`code` + `**bold**`), HTML-escaping the rest, for reference-page frontmatter strings
 ```

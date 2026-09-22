@@ -7,7 +7,7 @@ built on it.
 ## Usage
 
 ```ts
-import { verifyShipManifest } from "@juicesharp/rpiv-test-utils";
+import { verifyShipManifest } from "@hs1n/rpiv-test-utils";
 import { describe, expect, it } from "vitest";
 
 describe("publish manifest", () => {
@@ -87,7 +87,7 @@ never surface it. Only entries pointing at nothing at all are reported.
 
 ## This package's own manifest
 
-`@juicesharp/rpiv-test-utils` is `private: true`, and that field is load-bearing. Lockstep versioning
+`@hs1n/rpiv-test-utils` is `private: true`, and that field is load-bearing. Lockstep versioning
 bumps this package with the rest of the repo, and only `private` keeps `npm publish -ws` from
 shipping it.
 

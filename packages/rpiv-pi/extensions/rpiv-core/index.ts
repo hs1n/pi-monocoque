@@ -6,7 +6,7 @@
  *
  * Tool-owning plugins are siblings (see siblings.ts); install via /rpiv-setup.
  *
- * Workflow runtime + `/wf` command live in `@juicesharp/rpiv-workflow`. We
+ * Workflow runtime + `/wf` command live in `@hs1n/rpiv-workflow`. We
  * contribute three built-in workflows (build / polish / vet) via the
  * sibling's `registerBuiltIns` programmatic API so they're available to
  * users running `/wf` without authoring their own.
@@ -77,7 +77,7 @@ export default function (pi: ExtensionAPI) {
 	// presence — they read models.json directly.
 	registerSkillBracket(pi);
 	// These rpiv-workflow-dependent registrars each dynamically
-	// `import("@juicesharp/rpiv-workflow")` (or its `/startup` sub-entry). Firing
+	// `import("@hs1n/rpiv-workflow")` (or its `/startup` sub-entry). Firing
 	// them concurrently makes jiti (Pi's dev loader) hand the second caller a
 	// half-initialized barrel namespace whose re-export getters (e.g.
 	// registerBuiltIns) read from a not-yet-evaluated submodule and throw "Cannot
@@ -90,7 +90,7 @@ export default function (pi: ExtensionAPI) {
 		console.error(`[rpiv-core] failed to register ${label}:`, err);
 
 	// Register the rpiv-workflow-dependent stacks STRICTLY in sequence — each
-	// awaits the previous to settle so the concurrent `import("@juicesharp/rpiv-workflow")`
+	// awaits the previous to settle so the concurrent `import("@hs1n/rpiv-workflow")`
 	// race described above can't occur. Each step swallows its own failure (the others
 	// must still run) and degrades gracefully when the sibling is absent. Fire-and-forget:
 	// the workflow registry is read lazily at `/wf` time, long after this settles.

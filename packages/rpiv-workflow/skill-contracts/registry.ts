@@ -15,10 +15,10 @@
 import { deepEqual, globalSlot, lazyProviderRegistry } from "../internal-utils.js";
 import type { SkillContract, SkillContractMap } from "../skill-contract.js";
 
-const REGISTRY_KEY = Symbol.for("@juicesharp/rpiv-workflow:skill-contracts");
-const FAILURES_KEY = Symbol.for("@juicesharp/rpiv-workflow:skill-contract-failures");
-const COLLISIONS_KEY = Symbol.for("@juicesharp/rpiv-workflow:skill-contract-collisions");
-const OWNERS_KEY = Symbol.for("@juicesharp/rpiv-workflow:skill-contract-owners");
+const REGISTRY_KEY = Symbol.for("@hs1n/rpiv-workflow:skill-contracts");
+const FAILURES_KEY = Symbol.for("@hs1n/rpiv-workflow:skill-contract-failures");
+const COLLISIONS_KEY = Symbol.for("@hs1n/rpiv-workflow:skill-contract-collisions");
+const OWNERS_KEY = Symbol.for("@hs1n/rpiv-workflow:skill-contract-owners");
 
 const getRegistry = globalSlot(REGISTRY_KEY, () => new Map<string, SkillContract>());
 /** name → owner label of whoever last registered it (for prune-on-reload + collision detection). */
@@ -34,7 +34,7 @@ const getFailures = globalSlot(FAILURES_KEY, () => [] as unknown[]);
 // a malformed source degrades to a partial/empty registry instead of crashing
 // `/wf`, but the error is NOT swallowed silently: `loadWorkflows` surfaces it
 // as a LoadIssue so a buggy provider is debuggable.
-const providers = lazyProviderRegistry("@juicesharp/rpiv-workflow:skill-contract-providers", {
+const providers = lazyProviderRegistry("@hs1n/rpiv-workflow:skill-contract-providers", {
 	onError: (err) => {
 		getFailures().push(err);
 	},

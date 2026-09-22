@@ -11,7 +11,7 @@ import {
 	type PromptFn,
 	type RunView,
 	type ScriptContext,
-} from "@juicesharp/rpiv-workflow/registration";
+} from "@hs1n/rpiv-workflow/registration";
 import { haltPreflight, latestFsArtifact, readArtifactFile } from "./shared.js";
 
 /** Bucket directory the goal capture writes into — build's verbatim-brief channel. */

@@ -1,5 +1,5 @@
 /**
- * @juicesharp/rpiv-btw — Pi extension entry point.
+ * @hs1n/rpiv-btw — Pi extension entry point.
  *
  * Registers /btw command + 2 lifecycle hooks (message_end snapshot,
  * session_compact/tree invalidation). No tool, no model picker, no disk

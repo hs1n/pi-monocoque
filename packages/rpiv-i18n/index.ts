@@ -1,5 +1,5 @@
 /**
- * @juicesharp/rpiv-i18n — Pi extension entry point.
+ * @hs1n/rpiv-i18n — Pi extension entry point.
  *
  * Wires:
  *   - --locale CLI flag (pi.registerFlag)

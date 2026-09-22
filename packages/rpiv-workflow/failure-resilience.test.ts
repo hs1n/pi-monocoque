@@ -14,7 +14,7 @@
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createMockSessionChain, mockAssistantMessage } from "@juicesharp/rpiv-test-utils";
+import { createMockSessionChain, mockAssistantMessage } from "@hs1n/rpiv-test-utils";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { defineWorkflow, type FanoutFn, produces } from "./api.js";

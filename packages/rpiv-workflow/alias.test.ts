@@ -104,10 +104,10 @@ describe("aliasSkills", () => {
 		// Reference identity ratifies (a) the export exists on the main barrel and
 		// (b) it points at the same function as the deep-path import — catches a
 		// future barrel-clean PR that silently drops the export. Workspaces resolve
-		// `@juicesharp/rpiv-workflow` via the `node_modules/@juicesharp/rpiv-workflow`
+		// `@hs1n/rpiv-workflow` via the `node_modules/@hs1n/rpiv-workflow`
 		// symlink back to this package; Node deduplicates by realpath, so both
 		// imports land on the same module instance.
-		const { aliasSkills: fromBarrel } = await import("@juicesharp/rpiv-workflow");
+		const { aliasSkills: fromBarrel } = await import("@hs1n/rpiv-workflow");
 		expect(fromBarrel).toBe(aliasSkills);
 	});
 });

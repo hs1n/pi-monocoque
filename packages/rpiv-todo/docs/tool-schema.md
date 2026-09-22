@@ -2,7 +2,7 @@
 
 Complete parameter schema, status machine, response envelope, and error strings
 for the `todo` tool registered by
-[`@juicesharp/rpiv-todo`](https://www.npmjs.com/package/@juicesharp/rpiv-todo).
+[`@hs1n/rpiv-todo`](https://www.npmjs.com/package/@hs1n/rpiv-todo).
 
 ## Actions
 

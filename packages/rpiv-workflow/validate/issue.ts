@@ -91,7 +91,7 @@ export const ISSUE_DEFS = {
 		"error",
 		() =>
 			'has kind "produces" but no `outcome` — there is no framework default for produces stages. ' +
-			"Wire `outcome: rpivArtifactMdOutcome` (from @juicesharp/rpiv-pi) or supply your own `{ collector, parser? }`.",
+			"Wire `outcome: rpivArtifactMdOutcome` (from @hs1n/rpiv-pi) or supply your own `{ collector, parser? }`.",
 	),
 	"inherits-artifacts-on-produces": def(
 		"warning",

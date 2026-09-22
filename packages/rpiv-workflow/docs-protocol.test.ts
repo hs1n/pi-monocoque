@@ -1,4 +1,4 @@
-import { createMockPi } from "@juicesharp/rpiv-test-utils";
+import { createMockPi } from "@hs1n/rpiv-test-utils";
 import { describe, expect, it } from "vitest";
 import { getDocsProtocol, handleBeforeAgentStart, registerDocsProtocol } from "./docs-protocol.js";
 

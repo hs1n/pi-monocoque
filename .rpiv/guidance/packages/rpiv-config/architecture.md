@@ -1,7 +1,7 @@
 # rpiv-config
 
 ## Monorepo Context
-Published plain library in `rpiv-mono`. Lockstep version with the rest of the `@juicesharp/rpiv-*` family — never bump independently. NOT a Pi extension — no `pi` field, no `siblings.ts` entry, not auto-suggested by `/rpiv-setup`. Opt-in dependency: siblings add it to their `dependencies` explicitly.
+Published plain library in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. NOT a Pi extension — no `pi` field, no `siblings.ts` entry, not auto-suggested by `/rpiv-setup`. Opt-in dependency: siblings add it to their `dependencies` explicitly.
 
 ## Responsibility
 Shared JSON config I/O utilities for rpiv-mono sibling packages: load/save with crash-resistant defaults, path resolution, guidance-field validation, env-var fallback, and TypeBox-driven schema validation. Stateless — no module-level singletons, no globalThis caches, no side effects.
@@ -10,16 +10,16 @@ Shared JSON config I/O utilities for rpiv-mono sibling packages: load/save with 
 - **`typebox`** (direct dependency — moved from peer): `Value` (Clean, Clone, Create) for schema-driven validation; `TObject` / `Static` for type inference
 
 ## Consumers
-- **`@juicesharp/rpiv-todo`**: `loadJsonConfigWithLegacyFallback`, `validateGuidanceFields`, `GuidanceFields` (type)
-- **`@juicesharp/rpiv-ask-user-question`**: `loadJsonConfigWithLegacyFallback`, `validateGuidanceFields`, `GuidanceFields` (type)
-- **`@juicesharp/rpiv-warp`**: `loadJsonConfigWithLegacyFallback`, `configPath`
-- **`@juicesharp/rpiv-advisor`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`, `validateGuidanceFields`, `modelKey`, `parseModelKey`, `GuidanceFields` (type)
-- **`@juicesharp/rpiv-web-tools`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`, `validateGuidanceFields`, `GuidanceFieldsSchema`
-- **`@juicesharp/rpiv-voice`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`
-- **`@juicesharp/rpiv-i18n`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`
-- **`@juicesharp/rpiv-pi`** (rpiv-core): `configPath`, `loadJsonConfigWithLegacyFallback`, `validateConfig`, `parseModelKey`, `modelKey`, `saveJsonConfig`
-- **`@juicesharp/rpiv-workflow`**: `configPath`
-- **`@juicesharp/rpiv-telemetry`**: `configPath`, `loadJsonConfigWithLegacyFallback`, `readEnvVar`, `saveJsonConfig`, `validateConfig`
+- **`@hs1n/rpiv-todo`**: `loadJsonConfigWithLegacyFallback`, `validateGuidanceFields`, `GuidanceFields` (type)
+- **`@hs1n/rpiv-ask-user-question`**: `loadJsonConfigWithLegacyFallback`, `validateGuidanceFields`, `GuidanceFields` (type)
+- **`@hs1n/rpiv-warp`**: `loadJsonConfigWithLegacyFallback`, `configPath`
+- **`@hs1n/rpiv-advisor`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`, `validateGuidanceFields`, `modelKey`, `parseModelKey`, `GuidanceFields` (type)
+- **`@hs1n/rpiv-web-tools`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`, `validateGuidanceFields`, `GuidanceFieldsSchema`
+- **`@hs1n/rpiv-voice`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`
+- **`@hs1n/rpiv-i18n`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`
+- **`@hs1n/rpiv-pi`** (rpiv-core): `configPath`, `loadJsonConfigWithLegacyFallback`, `validateConfig`, `parseModelKey`, `modelKey`, `saveJsonConfig`
+- **`@hs1n/rpiv-workflow`**: `configPath`
+- **`@hs1n/rpiv-telemetry`**: `configPath`, `loadJsonConfigWithLegacyFallback`, `readEnvVar`, `saveJsonConfig`, `validateConfig`
 
 No consumer imports plain `loadJsonConfig` anymore — all config-reading siblings migrated to `loadJsonConfigWithLegacyFallback`.
 

@@ -14,12 +14,7 @@
  * handle "config blew up at startup."
  */
 
-import {
-	configPath,
-	GuidanceFieldsSchema,
-	loadJsonConfigWithLegacyFallback,
-	saveJsonConfig,
-} from "@juicesharp/rpiv-config";
+import { configPath, GuidanceFieldsSchema, loadJsonConfigWithLegacyFallback, saveJsonConfig } from "@hs1n/rpiv-config";
 import { type Static, Type } from "typebox";
 import { Value } from "typebox/value";
 

@@ -10,7 +10,7 @@ import {
 	type Output,
 	type RunView,
 	type ScriptContext,
-} from "@juicesharp/rpiv-workflow/registration";
+} from "@hs1n/rpiv-workflow/registration";
 import {
 	evidenceCitesFileLine,
 	freshVerdicts,

@@ -1,18 +1,18 @@
-# @juicesharp/rpiv-config
+# @hs1n/rpiv-config
 
-[![npm version](https://img.shields.io/npm/v/@juicesharp/rpiv-config.svg)](https://www.npmjs.com/package/@juicesharp/rpiv-config)
+[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-config.svg)](https://www.npmjs.com/package/@hs1n/rpiv-config)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Shared JSON config I/O for the `@juicesharp/rpiv-*` packages — XDG-aware path resolution, loads
+Shared JSON config I/O for the `@hs1n/rpiv-*` packages — XDG-aware path resolution, loads
 that return `{}` instead of throwing, saves that report failure and chmod to `0600`, and
 TypeBox-driven defaults. It is an internal utility of the
-[rpiv-mono](https://github.com/juicesharp/rpiv-mono) monorepo, published only so its sibling
+[rpiv-mono](https://github.com/hs1n/pi-monocoque) monorepo, published only so its sibling
 packages can depend on it: there is no CLI, and it registers nothing with [Pi Agent](https://github.com/badlogic/pi-mono).
 
 ## Install
 
 ```sh
-npm install @juicesharp/rpiv-config
+npm install @hs1n/rpiv-config
 ```
 
 ESM only. The package ships TypeScript source — `exports` points at `./index.ts`, with no
@@ -22,7 +22,7 @@ ESM only. The package ships TypeScript source — `exports` points at `./index.t
 ## Quick start
 
 ```ts
-import { configPath, loadJsonConfig } from "@juicesharp/rpiv-config";
+import { configPath, loadJsonConfig } from "@hs1n/rpiv-config";
 
 const path = configPath("rpiv-todo"); // ~/.config/rpiv-todo/config.json
 const config = loadJsonConfig<{ theme?: string }>(path); // {} if the file is missing
@@ -52,19 +52,19 @@ Eleven exports, all stateless — no singletons, no caches, no import-time side 
 
 | Package | Uses |
 | --- | --- |
-| [`rpiv-pi`](https://www.npmjs.com/package/@juicesharp/rpiv-pi) | Path resolution, model-key codec, schema validation for model config |
-| [`rpiv-advisor`](https://www.npmjs.com/package/@juicesharp/rpiv-advisor) | Model-key codec, guidance fields, config load/save |
-| [`rpiv-web-tools`](https://www.npmjs.com/package/@juicesharp/rpiv-web-tools) | Provider config load/save, guidance schema and validation |
-| [`rpiv-telemetry`](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-telemetry) (internal, never published) | Config load/save, schema validation, env-var reads |
-| [`rpiv-voice`](https://www.npmjs.com/package/@juicesharp/rpiv-voice) | Config load/save |
-| [`rpiv-i18n`](https://www.npmjs.com/package/@juicesharp/rpiv-i18n) | Config load/save |
-| [`rpiv-todo`](https://www.npmjs.com/package/@juicesharp/rpiv-todo) | Config load, guidance fields |
-| [`rpiv-ask-user-question`](https://www.npmjs.com/package/@juicesharp/rpiv-ask-user-question) | Config load, guidance fields |
-| [`rpiv-warp`](https://www.npmjs.com/package/@juicesharp/rpiv-warp) | Config load |
-| [`rpiv-workflow`](https://www.npmjs.com/package/@juicesharp/rpiv-workflow) | Path resolution |
+| [`rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi) | Path resolution, model-key codec, schema validation for model config |
+| [`rpiv-advisor`](https://www.npmjs.com/package/@hs1n/rpiv-advisor) | Model-key codec, guidance fields, config load/save |
+| [`rpiv-web-tools`](https://www.npmjs.com/package/@hs1n/rpiv-web-tools) | Provider config load/save, guidance schema and validation |
+| [`rpiv-telemetry`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-telemetry) (internal, never published) | Config load/save, schema validation, env-var reads |
+| [`rpiv-voice`](https://www.npmjs.com/package/@hs1n/rpiv-voice) | Config load/save |
+| [`rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n) | Config load/save |
+| [`rpiv-todo`](https://www.npmjs.com/package/@hs1n/rpiv-todo) | Config load, guidance fields |
+| [`rpiv-ask-user-question`](https://www.npmjs.com/package/@hs1n/rpiv-ask-user-question) | Config load, guidance fields |
+| [`rpiv-warp`](https://www.npmjs.com/package/@hs1n/rpiv-warp) | Config load |
+| [`rpiv-workflow`](https://www.npmjs.com/package/@hs1n/rpiv-workflow) | Path resolution |
 
 These are versioned in lockstep with this package.
 
 ## License
 
-MIT — see [LICENSE](https://github.com/juicesharp/rpiv-mono/blob/main/LICENSE).
+MIT — see [LICENSE](https://github.com/hs1n/pi-monocoque/blob/main/LICENSE).

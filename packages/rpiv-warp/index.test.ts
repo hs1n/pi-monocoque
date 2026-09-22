@@ -5,7 +5,7 @@ import {
 	createMockPi,
 	makeAssistantMessage,
 	makeUserMessage,
-} from "@juicesharp/rpiv-test-utils";
+} from "@hs1n/rpiv-test-utils";
 import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 
 vi.mock("node:fs", async () => {

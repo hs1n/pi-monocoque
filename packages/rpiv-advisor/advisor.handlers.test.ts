@@ -1,4 +1,4 @@
-import { createMockCtx, createMockPi } from "@juicesharp/rpiv-test-utils";
+import { createMockCtx, createMockPi } from "@hs1n/rpiv-test-utils";
 import { describe, expect, it, vi } from "vitest";
 import { reconcileAdvisorTool } from "./advisor/handlers.js";
 import { ADVISOR_TOOL_NAME } from "./advisor/index.js";

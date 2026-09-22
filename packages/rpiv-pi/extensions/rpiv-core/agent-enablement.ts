@@ -149,7 +149,7 @@ export function mergeFlowSeqAdditions(existing: string | undefined, additions: r
 
 /**
  * Derive installed extension names from package spec strings:
- * `npm:@juicesharp/rpiv-warp` → `rpiv-warp` — the last path segment after
+ * `npm:@hs1n/rpiv-warp` → `rpiv-warp` — the last path segment after
  * any protocol prefix, lowercased (the directory ↔ npm ↔ extension-name
  * family convention). Non-string entries are the caller's to filter.
  */

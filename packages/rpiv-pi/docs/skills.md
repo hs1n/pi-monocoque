@@ -1,6 +1,6 @@
 # Skills reference
 
-Every skill `@juicesharp/rpiv-pi` ships, what it consumes, what it writes, and
+Every skill `@hs1n/rpiv-pi` ships, what it consumes, what it writes, and
 whether the model may reach for it on its own.
 
 ## How to read these tables

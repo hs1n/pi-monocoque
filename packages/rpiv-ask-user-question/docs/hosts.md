@@ -69,7 +69,7 @@ Some parts of the dialog exist only under the right conditions:
 | Preview pane at all | Single-select questions only |
 | Collapse shortcut | `collapseKey` is not `"off"` |
 | Full overlay hide on collapse | The host also exposes raw terminal input (the only path that can reopen a hidden overlay); without it, collapsing shrinks the dialog to a visible one-line row instead |
-| Localized chrome | `@juicesharp/rpiv-i18n` is installed |
+| Localized chrome | `@hs1n/rpiv-i18n` is installed |
 
 ## Loading and startup cost
 

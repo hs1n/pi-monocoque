@@ -1,4 +1,4 @@
-import { createMockCtx, createMockPi, mockStdout } from "@juicesharp/rpiv-test-utils";
+import { createMockCtx, createMockPi, mockStdout } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { QuestionnaireResult } from "./tool/types.js";
 

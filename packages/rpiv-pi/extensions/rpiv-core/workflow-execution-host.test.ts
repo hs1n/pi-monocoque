@@ -13,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Mock the rpiv-workflow /startup seam so registration is observable without the
 // real provider box — registerWorkflowExecutionHostProvider() imports it lazily.
 const registerWorkflowExecutionHost = vi.fn();
-vi.mock("@juicesharp/rpiv-workflow/startup", () => ({ registerWorkflowExecutionHost }));
+vi.mock("@hs1n/rpiv-workflow/startup", () => ({ registerWorkflowExecutionHost }));
 
 import { createLaneRelayUiContext } from "./lane-relay-ui.js";
 import { SINGLE_UNIT_KEY } from "./run-lane-registry.js";

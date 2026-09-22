@@ -19,7 +19,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ExtensionUIContext } from "@earendil-works/pi-coding-agent";
-import type { WorkflowHostContext } from "@juicesharp/rpiv-workflow";
+import type { WorkflowHostContext } from "@hs1n/rpiv-workflow";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
@@ -549,7 +549,7 @@ describe("child extension filtering (A)", () => {
 	it("denylists rpiv-warp by path; tool/skill extensions pass", () => {
 		expect(CHILD_AMBIENT_EXTENSION_DENYLIST).toContain("rpiv-warp");
 		expect(isAmbientChildExtension(ext("/repo/packages/rpiv-warp/index.ts"))).toBe(true);
-		expect(isAmbientChildExtension(ext("/x/node_modules/@juicesharp/rpiv-warp/index.ts"))).toBe(true);
+		expect(isAmbientChildExtension(ext("/x/node_modules/@hs1n/rpiv-warp/index.ts"))).toBe(true);
 		expect(isAmbientChildExtension(ext("/repo/packages/rpiv-ask-user-question/index.ts"))).toBe(false);
 		expect(isAmbientChildExtension(ext("/repo/packages/rpiv-web-tools/index.ts"))).toBe(false);
 	});

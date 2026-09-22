@@ -1,4 +1,4 @@
-import { applyLocale, registerStrings } from "@juicesharp/rpiv-i18n";
+import { applyLocale, registerStrings } from "@hs1n/rpiv-i18n";
 import { beforeEach, describe, expect, it } from "vitest";
 import { formatStatusLabel, I18N_NAMESPACE, t } from "./i18n-bridge.js";
 
@@ -41,6 +41,6 @@ describe("i18n-bridge", () => {
 	});
 
 	it("namespace constant is the canonical package name", () => {
-		expect(I18N_NAMESPACE).toBe("@juicesharp/rpiv-todo");
+		expect(I18N_NAMESPACE).toBe("@hs1n/rpiv-todo");
 	});
 });

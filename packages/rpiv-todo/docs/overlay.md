@@ -1,7 +1,7 @@
 # Overlay and `/todos` display
 
 How
-[`@juicesharp/rpiv-todo`](https://www.npmjs.com/package/@juicesharp/rpiv-todo)
+[`@hs1n/rpiv-todo`](https://www.npmjs.com/package/@hs1n/rpiv-todo)
 renders the task list — when the overlay appears, what each glyph means, how
 overflow is trimmed, and which strings localize.
 
@@ -114,7 +114,7 @@ tasks. Tombstoned tasks are never listed.
 
 The overlay heading, the `+N more` summary, the collapse hint, the `/todos`
 section headers, and the status words all localize through
-[`@juicesharp/rpiv-i18n`](https://www.npmjs.com/package/@juicesharp/rpiv-i18n)
+[`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n)
 when that package is installed. Bundled locales: `de`, `en`, `es`, `fr`, `pt`,
 `pt-BR`, `ru`, `uk`, `zh`.
 
@@ -124,6 +124,6 @@ schema descriptions — stays English by design.
 The SDK is a soft optional peer, loaded through a dynamic import at module init.
 When it is absent, every call site returns its inline English literal and the
 extension stays online: no warning, no crash. Install it at any time with
-`pi install npm:@juicesharp/rpiv-i18n` and restart the session. To add or
+`pi install npm:@hs1n/rpiv-i18n` and restart the session. To add or
 override a translation, drop a `locales/<code>.json` file mirroring `en.json` —
-see the `@juicesharp/rpiv-i18n` README's "Contributing translations" section.
+see the `@hs1n/rpiv-i18n` README's "Contributing translations" section.

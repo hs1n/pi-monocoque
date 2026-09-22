@@ -1,11 +1,6 @@
 import type { Api, AssistantMessage, Model, Usage } from "@earendil-works/pi-ai";
 import { estimateTokens, type SessionEntry } from "@earendil-works/pi-coding-agent";
-import {
-	buildSessionEntries,
-	makeAssistantMessage,
-	makeToolResult,
-	makeUserMessage,
-} from "@juicesharp/rpiv-test-utils";
+import { buildSessionEntries, makeAssistantMessage, makeToolResult, makeUserMessage } from "@hs1n/rpiv-test-utils";
 import { describe, expect, it } from "vitest";
 import {
 	BTW_CONTEXT_RESERVE,

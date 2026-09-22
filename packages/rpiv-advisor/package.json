@@ -1,5 +1,5 @@
 {
-	"name": "@juicesharp/rpiv-advisor",
+	"name": "@hs1n/rpiv-advisor",
 	"version": "2.11.0",
 	"description": "Pi extension. A second opinion the model can request from a stronger reviewer model before it acts.",
 	"keywords": [
@@ -10,15 +10,15 @@
 	],
 	"type": "module",
 	"license": "MIT",
-	"author": "juicesharp",
+	"author": "hs1n",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/juicesharp/rpiv-mono.git",
+		"url": "git+https://github.com/hs1n/pi-monocoque.git",
 		"directory": "packages/rpiv-advisor"
 	},
-	"homepage": "https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-advisor#readme",
+	"homepage": "https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-advisor#readme",
 	"bugs": {
-		"url": "https://github.com/juicesharp/rpiv-mono/issues"
+		"url": "https://github.com/hs1n/pi-monocoque/issues"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -41,18 +41,21 @@
 		"!**/*.test.ts"
 	],
 	"pi": {
-		"image": "https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-advisor/docs/cover.png",
+		"image": "https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-advisor/docs/cover.png",
 		"extensions": [
 			"./index.ts"
 		]
 	},
 	"dependencies": {
-		"@juicesharp/rpiv-config": "^2.11.0",
+		"@hs1n/rpiv-config": "^2.11.0",
 		"typebox": "^1.1.24"
 	},
 	"peerDependencies": {
 		"@earendil-works/pi-ai": "*",
 		"@earendil-works/pi-coding-agent": "*",
 		"@earendil-works/pi-tui": "*"
-	}
+	},
+	"contributors": [
+		"juicesharp <https://github.com/juicesharp>"
+	]
 }

@@ -8,7 +8,7 @@ Named subagent profile library — isolated, single-purpose LLM workers dispatch
 
 ## Dependencies
 - **Subagent dispatcher** (peer): provides `Agent` + `get_subagent_result` + `steer_subagent` and the per-agent isolation runtime
-- **`@juicesharp/rpiv-web-tools`**: provides `web_search`/`web_fetch` to the External tier only
+- **`@hs1n/rpiv-web-tools`**: provides `web_search`/`web_fetch` to the External tier only
 
 ## Consumers
 Skills only — agents are never user-invoked:

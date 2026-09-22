@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { configPath } from "@juicesharp/rpiv-config";
-import { createMockCtx, createMockPi } from "@juicesharp/rpiv-test-utils";
+import { configPath } from "@hs1n/rpiv-config";
+import { createMockCtx, createMockPi } from "@hs1n/rpiv-test-utils";
 import { beforeEach, describe, expect, it, type vi } from "vitest";
 import registerWebTools, {
 	DEFAULT_WEB_FETCH_GUIDELINES,

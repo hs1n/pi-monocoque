@@ -4,7 +4,7 @@
  * per-gate pass predicates. Pure state-reading folds — no fs I/O, no LLM.
  */
 import { basename } from "node:path";
-import { handleToString, type Output, type ProgressValue, type RunView } from "@juicesharp/rpiv-workflow/registration";
+import { handleToString, type Output, type ProgressValue, type RunView } from "@hs1n/rpiv-workflow/registration";
 import { FILE_LINE_CITATION_RE, latestFsArtifact } from "./shared.js";
 
 /**

@@ -6,12 +6,12 @@
  * `registerStrings` literal in every extension, they import this subpath and
  * call `registerLocalesFromDir(namespace, import.meta.url, { label })`.
  *
- * Lives under the `@juicesharp/rpiv-i18n/loader` subpath (separate from the
- * SDK entry) so a consumer doing `await import("@juicesharp/rpiv-i18n/loader")`
+ * Lives under the `@hs1n/rpiv-i18n/loader` subpath (separate from the
+ * SDK entry) so a consumer doing `await import("@hs1n/rpiv-i18n/loader")`
  * does not pull `i18n-ui.ts` and the pi-tui dependency into its load graph
  * just to register strings.
  *
- * Soft-peer contract preserved: when `@juicesharp/rpiv-i18n` is not installed
+ * Soft-peer contract preserved: when `@hs1n/rpiv-i18n` is not installed
  * at all, the consumer's outer `try { await import(...) }` rejects before this
  * module is even loaded, so nothing here runs. When it IS installed but at a
  * version that predates this file, the consumer's `sdk.registerLocalesFromDir`

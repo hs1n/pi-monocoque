@@ -8,7 +8,7 @@
  */
 import { mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
-import { handleToString, type Output, type RunView, type ScriptContext } from "@juicesharp/rpiv-workflow/registration";
+import { handleToString, type Output, type RunView, type ScriptContext } from "@hs1n/rpiv-workflow/registration";
 import { gitDirtyEntries, goalBaselinePath, readGoalBaseline, scopeExcess } from "./goal-baseline.js";
 import { phaseFiles, planPhaseRecords, withTestTwins } from "./plan-phases.js";
 import {

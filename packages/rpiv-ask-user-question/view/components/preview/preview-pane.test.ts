@@ -1,6 +1,6 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { CURSOR_MARKER, visibleWidth } from "@earendil-works/pi-tui";
-import { makeTheme } from "@juicesharp/rpiv-test-utils";
+import { makeTheme } from "@hs1n/rpiv-test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 let markdownConstructed = 0;
@@ -23,7 +23,7 @@ vi.mock("@earendil-works/pi-tui", async (orig) => {
 	return { ...actual, Markdown: FakeMarkdown };
 });
 
-import { applyLocale, registerStrings } from "@juicesharp/rpiv-i18n";
+import { applyLocale, registerStrings } from "@hs1n/rpiv-i18n";
 import { I18N_NAMESPACE } from "../../../state/i18n-bridge.js";
 import type { QuestionData } from "../../../tool/types.js";
 import { OptionListView } from "../option-list-view.js";

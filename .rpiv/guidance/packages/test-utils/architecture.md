@@ -1,4 +1,4 @@
-# test-utils (@juicesharp/rpiv-test-utils)
+# test-utils (@hs1n/rpiv-test-utils)
 
 ## Monorepo Context
 Private workspace package under `packages/test-utils/`. Joins lockstep via `sync-versions.js readdirSync("packages")`; `"private": true` blocks `npm publish`. NOT a Pi sibling — no `pi.extensions` field, not listed in `siblings.ts`. Consumed only by `*.test.ts` files across the monorepo.
@@ -8,12 +8,12 @@ Shared test fixtures: factory stubs for the Pi `ExtensionAPI` / `ExtensionContex
 
 ## Dependencies
 - Pi runtime peers (`@earendil-works/pi-coding-agent`, `@earendil-works/pi-ai`) — for the type surface tests assert against
-- **`@juicesharp/rpiv-workflow`** — type-ONLY imports (`ModelSelection`, `WorkflowHostContext`, `WorkflowSessionContext`) in `pi.ts` and `concurrent-host.ts`, so fixtures satisfy the detached-execution host port
+- **`@hs1n/rpiv-workflow`** — type-ONLY imports (`ModelSelection`, `WorkflowHostContext`, `WorkflowSessionContext`) in `pi.ts` and `concurrent-host.ts`, so fixtures satisfy the detached-execution host port
 - `vitest` — for `vi` mocks and `expect` contract assertions
 - `@earendil-works/pi-tui` and `typebox` — declared peers, never imported; `contract.ts` introspects `tool.parameters` structurally (`type`/`required`/`properties`), so tool-contract assertions stay schema-library-agnostic
 
 ## Consumers
-- **`packages/*/**.test.ts`**: bare-name imports via `@juicesharp/rpiv-test-utils` only — the `exports` map enables per-concern subpaths, but no test uses them today
+- **`packages/*/**.test.ts`**: bare-name imports via `@hs1n/rpiv-test-utils` only — the `exports` map enables per-concern subpaths, but no test uses them today
 - **`test/setup.ts`**: does NOT import from here directly — setup drives resets via the production packages' own exports
 
 ## Module Structure
@@ -62,8 +62,8 @@ Each double fits its concern — they do NOT share one contract. `stubFetch` is 
 
 <important if="you are wiring test-utils into a new package's test suite">
 ## Consuming test-utils From a New Package
-1. No `devDependencies` entry needed — npm workspaces symlinks `@juicesharp/rpiv-test-utils` into `node_modules/` at install time
-2. Import by bare name (`from "@juicesharp/rpiv-test-utils"`) for the barrel, OR via subpath (`from "@juicesharp/rpiv-test-utils/contract"`) for targeted concerns
+1. No `devDependencies` entry needed — npm workspaces symlinks `@hs1n/rpiv-test-utils` into `node_modules/` at install time
+2. Import by bare name (`from "@hs1n/rpiv-test-utils"`) for the barrel, OR via subpath (`from "@hs1n/rpiv-test-utils/contract"`) for targeted concerns
 3. If your production module owns module-level singleton state, export a reset AND wire it into `test/setup.ts` `beforeEach` — otherwise isolation leaks across files
 4. For replay-axis tests, build a synthetic branch with `buildSessionEntries`, hand it to `createMockCtx`, then call your package's `reconstruct*State(ctx)`
 5. For workflow-runner tests that spawn children, script `createMockSessionChain` steps (or use `createFakeConcurrentHost` for parallel-dispatch assertions) — do NOT hand-stub `spawnChild`

@@ -56,7 +56,7 @@ export interface WorkflowExecutionProvider {
 // Use the SAME globalThis[Symbol.for(...)] slot mechanism as
 // `registerLifecycle`/the built-in registry (internal-utils.globalSlot), NOT a
 // plain module-level `let`. rpiv-pi reaches this seam via a dynamic
-// `import("@juicesharp/rpiv-workflow/startup")` while the runner reaches it via a
+// `import("@hs1n/rpiv-workflow/startup")` while the runner reaches it via a
 // static `../execution-host.js`; if those ever resolve to two module instances
 // of rpiv-workflow (peer-dependency duplication), a module-local `let` would put
 // `register` and `get` on DIFFERENT slots and the lookup would silently return
@@ -68,7 +68,7 @@ export interface WorkflowExecutionProvider {
 // lazily-initialised getter. Because the provider must be resettable to
 // `undefined` (and globalSlot never re-runs init once seeded), anchor a MUTABLE
 // BOX, exactly like the lifecycle flush-box pattern (internal-utils.ts).
-const getProviderBox = globalSlot(Symbol.for("@juicesharp/rpiv-workflow:executionHostProvider"), () => ({
+const getProviderBox = globalSlot(Symbol.for("@hs1n/rpiv-workflow:executionHostProvider"), () => ({
 	provider: undefined as WorkflowExecutionProvider | undefined,
 }));
 

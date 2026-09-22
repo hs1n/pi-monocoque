@@ -1,6 +1,6 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { visibleWidth } from "@earendil-works/pi-tui";
-import { makeTheme } from "@juicesharp/rpiv-test-utils";
+import { makeTheme } from "@hs1n/rpiv-test-utils";
 import { describe, expect, it, vi } from "vitest";
 import { TabBar, type TabBarProps } from "./tab-bar.js";
 

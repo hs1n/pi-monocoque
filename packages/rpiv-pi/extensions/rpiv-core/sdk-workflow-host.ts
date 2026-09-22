@@ -49,8 +49,8 @@ import {
 	type SessionShutdownEvent,
 	SettingsManager,
 } from "@earendil-works/pi-coding-agent";
-import { parseModelKey } from "@juicesharp/rpiv-config";
-import type { ModelSelection, WorkflowHostContext, WorkflowSessionContext } from "@juicesharp/rpiv-workflow";
+import { parseModelKey } from "@hs1n/rpiv-config";
+import type { ModelSelection, WorkflowHostContext, WorkflowSessionContext } from "@hs1n/rpiv-workflow";
 import { armBashWatchdog, type BashWatchdog } from "./bash-timeout.js";
 import { createLaneRelayUiContext } from "./lane-relay-ui.js";
 import { createLaneSessionView } from "./lane-streaming.js";

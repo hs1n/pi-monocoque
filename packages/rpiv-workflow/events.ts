@@ -120,7 +120,7 @@ export interface LoopCapInfo {
  *
  * @example Per-call observation from an embedder
  * ```ts
- * import { runWorkflow, type LifecycleListeners } from "@juicesharp/rpiv-workflow";
+ * import { runWorkflow, type LifecycleListeners } from "@hs1n/rpiv-workflow";
  *
  * const listeners: LifecycleListeners = {
  *   onWorkflowStart: (ctx) =>
@@ -144,7 +144,7 @@ export interface LoopCapInfo {
  *
  * @example Cross-package fan-out via `registerLifecycle`
  * ```ts
- * import { registerLifecycle } from "@juicesharp/rpiv-workflow";
+ * import { registerLifecycle } from "@hs1n/rpiv-workflow";
  *
  * const dispose = registerLifecycle({
  *   onWorkflowStart: (ctx) => widget.open(ctx.runId, ctx.workflow),
@@ -258,7 +258,7 @@ export class LifecycleDispatcher {
  * sibling cross-package resolution) shares one registry. Same pattern
  * `registerBuiltIns` uses for the workflow registry.
  */
-const REGISTRY_KEY = Symbol.for("@juicesharp/rpiv-workflow:lifecycle");
+const REGISTRY_KEY = Symbol.for("@hs1n/rpiv-workflow:lifecycle");
 
 const getRegistry = globalSlot(REGISTRY_KEY, () => [] as LifecycleListeners[]);
 

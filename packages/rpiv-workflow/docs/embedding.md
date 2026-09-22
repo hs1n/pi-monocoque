@@ -1,6 +1,6 @@
 # Embedding the Workflow Runtime
 
-How to drive `@juicesharp/rpiv-workflow` from code instead of `/wf`: the host ports you implement, the registrars siblings call at extension load, the programmatic runner, and the lifecycle stream.
+How to drive `@hs1n/rpiv-workflow` from code instead of `/wf`: the host ports you implement, the registrars siblings call at extension load, the programmatic runner, and the lifecycle stream.
 
 ## Table of Contents
 
@@ -18,16 +18,16 @@ How to drive `@juicesharp/rpiv-workflow` from code instead of `/wf`: the host po
 ## Entry points
 
 The package publishes five entry points. Per-module deep imports
-(`from "@juicesharp/rpiv-workflow/api.js"`) are **not** supported across the
+(`from "@hs1n/rpiv-workflow/api.js"`) are **not** supported across the
 package boundary.
 
 | Entry | Contents | When to import it |
 | --- | --- | --- |
-| `@juicesharp/rpiv-workflow` | Everything in `/registration` plus the runner (`runWorkflow`, `runWorkflowByName`, `resumeWorkflow`, `resumeWorkflowByRunId`), the budget defaults (`MAX_BACKWARD_JUMPS`, `MAX_LAPS`, `MAX_ITERATIONS`), `validateRunBudgets` and its `RunBudgetOptions` type | Embedders that execute runs |
-| `@juicesharp/rpiv-workflow/registration` | The runner-free surface: DSL, loader, outcomes, handles, validators, host port types. The single canonical enumeration of the public API | Authoring, loading, validating — skips the ~530 ms engine graph |
-| `@juicesharp/rpiv-workflow/startup` | Only the registrars a sibling wires at extension load (~9 ms) | Extension `default` exports |
-| `@juicesharp/rpiv-workflow/runner` | The runner surface on its own, plus `StagePreflightError`, the budget defaults (`MAX_BACKWARD_JUMPS`, `MAX_LAPS`, `MAX_ITERATIONS`), `validateRunBudgets` and its `RunBudgetOptions` type | Callers that already hold the DSL elsewhere |
-| `@juicesharp/rpiv-workflow/internal` | Test-only seams (`recordStage`, registry resets) | Tests |
+| `@hs1n/rpiv-workflow` | Everything in `/registration` plus the runner (`runWorkflow`, `runWorkflowByName`, `resumeWorkflow`, `resumeWorkflowByRunId`), the budget defaults (`MAX_BACKWARD_JUMPS`, `MAX_LAPS`, `MAX_ITERATIONS`), `validateRunBudgets` and its `RunBudgetOptions` type | Embedders that execute runs |
+| `@hs1n/rpiv-workflow/registration` | The runner-free surface: DSL, loader, outcomes, handles, validators, host port types. The single canonical enumeration of the public API | Authoring, loading, validating — skips the ~530 ms engine graph |
+| `@hs1n/rpiv-workflow/startup` | Only the registrars a sibling wires at extension load (~9 ms) | Extension `default` exports |
+| `@hs1n/rpiv-workflow/runner` | The runner surface on its own, plus `StagePreflightError`, the budget defaults (`MAX_BACKWARD_JUMPS`, `MAX_LAPS`, `MAX_ITERATIONS`), `validateRunBudgets` and its `RunBudgetOptions` type | Callers that already hold the DSL elsewhere |
+| `@hs1n/rpiv-workflow/internal` | Test-only seams (`recordStage`, registry resets) | Tests |
 
 The Pi extension `default` entry is `./extension.ts`, not the barrel — loading
 the extension registers `/wf` and the docs-protocol hook without evaluating the
@@ -50,7 +50,7 @@ Pi's `ExtensionAPI` structurally satisfies `WorkflowHost` and its
 `ExtensionCommandContext` satisfies the observer surface — embedders pass their
 existing Pi handles through unchanged. The full executor port
 (`spawnChild` + `maxConcurrency`) is satisfied by `SdkWorkflowHost` in
-[`@juicesharp/rpiv-pi`](https://www.npmjs.com/package/@juicesharp/rpiv-pi). A
+[`@hs1n/rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi). A
 compile-time tripwire (`host.test.ts`) fails immediately if Pi's types ever drift
 below the observer port; the executor-satisfaction assertion lives in rpiv-pi,
 because rpiv-workflow must not import rpiv-pi.
@@ -84,8 +84,8 @@ Sibling packages contribute workflows into the lowest merge layer at extension
 load. User and project overlays still override them by workflow name.
 
 ```ts
-import { registerBuiltIns } from "@juicesharp/rpiv-workflow/startup";
-import type { WorkflowHost } from "@juicesharp/rpiv-workflow/registration";
+import { registerBuiltIns } from "@hs1n/rpiv-workflow/startup";
+import type { WorkflowHost } from "@hs1n/rpiv-workflow/registration";
 import { myWorkflows } from "./my-workflows.js";
 
 export default function (host: WorkflowHost): void {
@@ -98,7 +98,7 @@ form with a dynamic import, so definitions are built on the first `/wf` rather
 than on every session start:
 
 ```ts
-import { registerBuiltIns, registerBuiltInsProvider } from "@juicesharp/rpiv-workflow/startup";
+import { registerBuiltIns, registerBuiltInsProvider } from "@hs1n/rpiv-workflow/startup";
 
 export default function (): void {
   registerBuiltInsProvider(async () => {
@@ -125,7 +125,7 @@ sessions, an optional run-level abort signal, and a teardown the runner calls in
 `finally`. An optional `resolveModel({ stage, skill })` on the provider fills each
 child's `ModelSelection`.
 
-The slot is anchored on `Symbol.for("@juicesharp/rpiv-workflow:executionHostProvider")`,
+The slot is anchored on `Symbol.for("@hs1n/rpiv-workflow:executionHostProvider")`,
 so a duplicated module instance still resolves to the same registration. **When no
 provider is registered, the live ctx executes stages directly** — the runtime
 degrades gracefully for non-Pi embedders and tests.
@@ -133,7 +133,7 @@ degrades gracefully for non-Pi embedders and tests.
 ## Programmatic runner
 
 ```ts
-import { runWorkflow } from "@juicesharp/rpiv-workflow";
+import { runWorkflow } from "@hs1n/rpiv-workflow";
 
 const result = await runWorkflow(ctx, {   // ctx: WorkflowHostContext
   workflow: myFlow,
@@ -171,7 +171,7 @@ JSONL file was ever created.
 one call:
 
 ```ts
-import { runWorkflowByName } from "@juicesharp/rpiv-workflow";
+import { runWorkflowByName } from "@hs1n/rpiv-workflow";
 
 const result = await runWorkflowByName(ctx, "research", "add dark mode", { host: piHost });
 if (!result.success) ctx.ui.notify(result.error ?? "workflow failed", "error");
@@ -190,7 +190,7 @@ failure envelope listing the available workflows. The fourth argument is
 already names its workflow, so you supply only the id:
 
 ```ts
-import { resumeWorkflowByRunId, listRuns, readLastStage } from "@juicesharp/rpiv-workflow";
+import { resumeWorkflowByRunId, listRuns, readLastStage } from "@hs1n/rpiv-workflow";
 
 // listRuns returns filesystem order and carries no outcome — sort by `ts`, then
 // ask the trail's last stage row whether the run actually finished.
@@ -255,8 +255,8 @@ overlay widget, a metrics emitter, a side-effect bridge — register a listener
 bundle at extension load:
 
 ```ts
-import { registerLifecycle } from "@juicesharp/rpiv-workflow/startup";
-import type { WorkflowHost } from "@juicesharp/rpiv-workflow/registration";
+import { registerLifecycle } from "@hs1n/rpiv-workflow/startup";
+import type { WorkflowHost } from "@hs1n/rpiv-workflow/registration";
 
 export default function (host: WorkflowHost): void {
   const dispose = registerLifecycle({
@@ -304,7 +304,7 @@ back-pressure for free. Throws are caught and surfaced via
 Every fired event walks the global registry in registration order, then the
 per-call bundle. Multiple bundles coexist and one throwing does not affect
 siblings. The registry is anchored on
-`Symbol.for("@juicesharp/rpiv-workflow:lifecycle")`, mirroring the built-in
+`Symbol.for("@hs1n/rpiv-workflow:lifecycle")`, mirroring the built-in
 registry, so cross-package module resolution shares one slot. Snapshot semantics:
 each event observes the registry as it stands at that instant — a registration made
 mid-event applies to subsequent events, not the in-flight one.

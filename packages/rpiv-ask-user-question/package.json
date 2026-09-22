@@ -1,5 +1,5 @@
 {
-	"name": "@juicesharp/rpiv-ask-user-question",
+	"name": "@hs1n/rpiv-ask-user-question",
 	"version": "2.11.0",
 	"description": "Pi extension. A structured questionnaire the model can put to you when it would otherwise guess, with typed options instead of free-form replies.",
 	"keywords": [
@@ -13,15 +13,15 @@
 		"./events": "./events.ts"
 	},
 	"license": "MIT",
-	"author": "juicesharp",
+	"author": "hs1n",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/juicesharp/rpiv-mono.git",
+		"url": "git+https://github.com/hs1n/pi-monocoque.git",
 		"directory": "packages/rpiv-ask-user-question"
 	},
-	"homepage": "https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-ask-user-question#readme",
+	"homepage": "https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-ask-user-question#readme",
 	"bugs": {
-		"url": "https://github.com/juicesharp/rpiv-mono/issues"
+		"url": "https://github.com/hs1n/pi-monocoque/issues"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -79,23 +79,26 @@
 		"view/tab-content-strategy.ts"
 	],
 	"pi": {
-		"image": "https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-ask-user-question/docs/cover.png",
+		"image": "https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-ask-user-question/docs/cover.png",
 		"extensions": [
 			"./index.ts"
 		]
 	},
 	"peerDependencies": {
-		"@juicesharp/rpiv-i18n": "*",
+		"@hs1n/rpiv-i18n": "*",
 		"@earendil-works/pi-coding-agent": "*",
 		"@earendil-works/pi-tui": "*"
 	},
 	"peerDependenciesMeta": {
-		"@juicesharp/rpiv-i18n": {
+		"@hs1n/rpiv-i18n": {
 			"optional": true
 		}
 	},
 	"dependencies": {
-		"@juicesharp/rpiv-config": "^2.11.0",
+		"@hs1n/rpiv-config": "^2.11.0",
 		"typebox": "^1.1.24"
-	}
+	},
+	"contributors": [
+		"juicesharp <https://github.com/juicesharp>"
+	]
 }

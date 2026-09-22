@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { createMockPi } from "@juicesharp/rpiv-test-utils";
+import { createMockPi } from "@hs1n/rpiv-test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { registerAskUserQuestionTool } from "./ask-user-question.js";
 import type { AskUserQuestionConfig } from "./config.js";

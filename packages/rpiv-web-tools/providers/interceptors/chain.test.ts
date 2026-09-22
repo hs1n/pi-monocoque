@@ -7,8 +7,8 @@
 
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { configPath } from "@juicesharp/rpiv-config";
-import { createMockCtx, createMockPi, stubFetch } from "@juicesharp/rpiv-test-utils";
+import { configPath } from "@hs1n/rpiv-config";
+import { createMockCtx, createMockPi, stubFetch } from "@hs1n/rpiv-test-utils";
 import { beforeEach, describe, expect, it } from "vitest";
 import registerWebTools from "../../index.js";
 

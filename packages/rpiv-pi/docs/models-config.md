@@ -1,6 +1,6 @@
 # Model configuration
 
-How to give Pi a model provider, and how `@juicesharp/rpiv-pi` routes individual
+How to give Pi a model provider, and how `@hs1n/rpiv-pi` routes individual
 agents, skills, and workflow stages to different models and reasoning levels.
 
 ## Part 1 — giving Pi a provider

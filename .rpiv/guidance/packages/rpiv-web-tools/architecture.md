@@ -1,7 +1,7 @@
 # rpiv-web-tools
 
 ## Monorepo Context
-Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@juicesharp/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`. Provides `web_search`/`web_fetch` consumed by the web-search-class agent in `rpiv-pi/agents/`.
+Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`. Provides `web_search`/`web_fetch` consumed by the web-search-class agent in `rpiv-pi/agents/`.
 
 ## Responsibility
 Pi extension exposing two tools (`web_search`, `web_fetch`) and one `/web-tools` slash command for configuration. Search is backed by a registry of ten configurable providers (selected per-call, by env, or via `config.provider` — see below) — hosted REST vendors (Brave, Tavily, Serper, Exa, You.com, Jina, Firecrawl, Perplexity) plus self-hosted (SearXNG, Ollama). Fetch dispatches three ways (URL interceptors → provider native fetch → generic HTML-to-text fallback), with truncation-and-temp-file-spill for context-safe payload sizes.
@@ -10,7 +10,7 @@ Pi extension exposing two tools (`web_search`, `web_fetch`) and one `/web-tools`
 - **`@earendil-works/pi-coding-agent`** (peer): `ExtensionAPI`, truncation helpers, default size limits
 - **`@earendil-works/pi-tui`** (peer): rendering primitives
 - **`typebox`**: tool parameter + config schemas — regular dependency, not a peer (moved so installers that skip peer materialization still resolve it)
-- **`@juicesharp/rpiv-config`**: `configPath`, `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `validateGuidanceFields`, `GuidanceFieldsSchema`
+- **`@hs1n/rpiv-config`**: `configPath`, `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `validateGuidanceFields`, `GuidanceFieldsSchema`
 - **Ten configurable search providers** (hosted REST vendors + self-hosted SearXNG/Ollama): credentialed; key resolved env-first, config-second
 - Node built-ins for config persistence + temp-file spill
 

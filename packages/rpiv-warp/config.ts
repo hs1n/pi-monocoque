@@ -1,4 +1,4 @@
-import { configPath, loadJsonConfigWithLegacyFallback } from "@juicesharp/rpiv-config";
+import { configPath, loadJsonConfigWithLegacyFallback } from "@hs1n/rpiv-config";
 
 export const CONFIG_PATH = configPath("rpiv-warp");
 

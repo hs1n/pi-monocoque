@@ -143,8 +143,8 @@ describe("resolveAgentEnablement", () => {
 
 describe("installedExtensionNames", () => {
 	it("derives the extension name from npm-scoped spec strings", () => {
-		expect(installedExtensionNames(["npm:@juicesharp/rpiv-warp"])).toEqual(new Set(["rpiv-warp"]));
-		expect(installedExtensionNames(["@juicesharp/rpiv-web-tools", "rpiv-todo"])).toEqual(
+		expect(installedExtensionNames(["npm:@hs1n/rpiv-warp"])).toEqual(new Set(["rpiv-warp"]));
+		expect(installedExtensionNames(["@hs1n/rpiv-web-tools", "rpiv-todo"])).toEqual(
 			new Set(["rpiv-web-tools", "rpiv-todo"]),
 		);
 	});

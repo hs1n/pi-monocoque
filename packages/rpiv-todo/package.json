@@ -1,5 +1,5 @@
 {
-	"name": "@juicesharp/rpiv-todo",
+	"name": "@hs1n/rpiv-todo",
 	"version": "2.11.0",
 	"description": "Pi extension. A todo list for the model, rendered as a live overlay that survives /reload and conversation compaction.",
 	"keywords": [
@@ -10,15 +10,15 @@
 	],
 	"type": "module",
 	"license": "MIT",
-	"author": "juicesharp",
+	"author": "hs1n",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/juicesharp/rpiv-mono.git",
+		"url": "git+https://github.com/hs1n/pi-monocoque.git",
 		"directory": "packages/rpiv-todo"
 	},
-	"homepage": "https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-todo#readme",
+	"homepage": "https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-todo#readme",
 	"bugs": {
-		"url": "https://github.com/juicesharp/rpiv-mono/issues"
+		"url": "https://github.com/hs1n/pi-monocoque/issues"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -52,24 +52,27 @@
 		"view/format.ts"
 	],
 	"pi": {
-		"image": "https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-todo/docs/cover.png",
+		"image": "https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-todo/docs/cover.png",
 		"extensions": [
 			"./index.ts"
 		]
 	},
 	"peerDependencies": {
-		"@juicesharp/rpiv-i18n": "*",
+		"@hs1n/rpiv-i18n": "*",
 		"@earendil-works/pi-ai": "*",
 		"@earendil-works/pi-coding-agent": "*",
 		"@earendil-works/pi-tui": "*"
 	},
 	"peerDependenciesMeta": {
-		"@juicesharp/rpiv-i18n": {
+		"@hs1n/rpiv-i18n": {
 			"optional": true
 		}
 	},
 	"dependencies": {
-		"@juicesharp/rpiv-config": "^2.11.0",
+		"@hs1n/rpiv-config": "^2.11.0",
 		"typebox": "^1.1.24"
-	}
+	},
+	"contributors": [
+		"juicesharp <https://github.com/juicesharp>"
+	]
 }

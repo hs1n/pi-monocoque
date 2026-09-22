@@ -15,7 +15,7 @@
 
 import type { Api, Model } from "@earendil-works/pi-ai";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { loadJsonConfigWithLegacyFallback, modelKey, saveJsonConfig } from "@juicesharp/rpiv-config";
+import { loadJsonConfigWithLegacyFallback, modelKey, saveJsonConfig } from "@hs1n/rpiv-config";
 import {
 	CONFIG_PATH,
 	invalidateModelsConfigCache,

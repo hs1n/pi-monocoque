@@ -1,5 +1,5 @@
 import { DynamicBorder, type Theme } from "@earendil-works/pi-coding-agent";
-import { makeTheme } from "@juicesharp/rpiv-test-utils";
+import { makeTheme } from "@hs1n/rpiv-test-utils";
 import { describe, expect, it } from "vitest";
 import { TabBar } from "./components/tab-bar.js";
 

@@ -1,11 +1,11 @@
 /**
  * Guarded registration of rpiv-pi's built-in workflows into the
- * `@juicesharp/rpiv-workflow` runtime registry.
+ * `@hs1n/rpiv-workflow` runtime registry.
  *
  * rpiv-workflow is a SIBLING (see siblings.ts) — a peerDependency that a clean
- * `npm install @juicesharp/rpiv-pi` does NOT pull in; users add it via
+ * `npm install @hs1n/rpiv-pi` does NOT pull in; users add it via
  * /rpiv-setup. So rpiv-core must never statically import it: a top-level
- * `import … from "@juicesharp/rpiv-workflow"` makes the WHOLE extension fail to
+ * `import … from "@hs1n/rpiv-workflow"` makes the WHOLE extension fail to
  * load when the sibling is absent, which in turn suppresses the very
  * /rpiv-setup command and missing-sibling banner that tell the user to install
  * it — a chicken-and-egg that strands clean installs.
@@ -32,7 +32,7 @@ export async function registerBuiltInWorkflows(): Promise<void> {
 		// `built-in-workflows.js` (the authoring-DSL graph) builds the four
 		// definitions on first `/wf`, not at startup. Missing sibling →
 		// ERR_MODULE_NOT_FOUND → no-op (no `/wf` without it).
-		const { registerBuiltInsProvider, registerBuiltIns } = await import("@juicesharp/rpiv-workflow/startup");
+		const { registerBuiltInsProvider, registerBuiltIns } = await import("@hs1n/rpiv-workflow/startup");
 		registerBuiltInsProvider(async () => {
 			const { builtInWorkflows } = await import("./built-in-workflows.js");
 			registerBuiltIns(builtInWorkflows);

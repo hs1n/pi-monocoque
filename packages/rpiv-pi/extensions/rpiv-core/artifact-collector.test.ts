@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { type BranchEntry, fs as fsHandle, opaque, type ParseContext } from "@juicesharp/rpiv-workflow/registration";
+import { type BranchEntry, fs as fsHandle, opaque, type ParseContext } from "@hs1n/rpiv-workflow/registration";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { frontmatterParser, rpivArtifactCollector, rpivBucketCollector } from "./artifact-collector.js";
 

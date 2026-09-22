@@ -22,7 +22,7 @@
  * production code (test-utils boundary rule).
  */
 
-import type { ModelSelection, WorkflowHostContext, WorkflowSessionContext } from "@juicesharp/rpiv-workflow";
+import type { ModelSelection, WorkflowHostContext, WorkflowSessionContext } from "@hs1n/rpiv-workflow";
 
 /** What the host recorded for one `spawnChild` call. */
 export interface FakeSpawnRecord {

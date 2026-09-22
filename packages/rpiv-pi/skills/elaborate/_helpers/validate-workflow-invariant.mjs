@@ -17,10 +17,10 @@
 // via buildSkillContractsFromFrontmatter(BUNDLED_SKILLS_DIR)).
 //
 // All sources are .ts (this monorepo is noEmit); loaded via jiti (a direct dep
-// of both @juicesharp/rpiv-pi and @juicesharp/rpiv-workflow). jiti is created
+// of both @hs1n/rpiv-pi and @hs1n/rpiv-workflow). jiti is created
 // from this file so its resolver walks node_modules upward from
 // _helpers/ → .../packages/rpiv-pi/skills/elaborate/_helpers and finds the
-// root-workspace @juicesharp/rpiv-workflow symlink. Module cache ON (default):
+// root-workspace @hs1n/rpiv-workflow symlink. Module cache ON (default):
 // the bare-specifier import and the transitive import built-in-workflows.ts
 // makes resolve to one shared module instance.
 
@@ -43,7 +43,7 @@ let deriveOutcomes;
 let BUNDLED_SKILLS_DIR;
 try {
 	({ builtInWorkflows } = await jiti.import(`${CORE}built-in-workflows.ts`));
-	({ validateWorkflow } = await jiti.import("@juicesharp/rpiv-workflow"));
+	({ validateWorkflow } = await jiti.import("@hs1n/rpiv-workflow"));
 	({ buildSkillContractsFromFrontmatter } = await jiti.import(`${CORE}skill-contracts-source.ts`));
 	({ deriveOutcomes } = await jiti.import(`${CORE}outcome-derivation.ts`));
 	({ BUNDLED_SKILLS_DIR } = await jiti.import(`${CORE}paths.ts`));

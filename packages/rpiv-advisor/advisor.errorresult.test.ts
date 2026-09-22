@@ -1,4 +1,4 @@
-import { createMockCtx, createMockPi } from "@juicesharp/rpiv-test-utils";
+import { createMockCtx, createMockPi } from "@hs1n/rpiv-test-utils";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@earendil-works/pi-ai", async (importOriginal) => {

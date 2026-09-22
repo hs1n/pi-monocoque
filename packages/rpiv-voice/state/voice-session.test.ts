@@ -1,5 +1,5 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
-import { makeTheme, makeTui } from "@juicesharp/rpiv-test-utils";
+import { makeTheme, makeTui } from "@hs1n/rpiv-test-utils";
 import { describe, expect, it, vi } from "vitest";
 
 import type { VoiceConfig } from "../config/voice-config.js";

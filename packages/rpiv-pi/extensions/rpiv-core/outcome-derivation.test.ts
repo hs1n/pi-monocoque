@@ -5,13 +5,9 @@
  * calls from `built-in-workflows.ts` — derivation must reproduce them exactly.
  */
 
-import {
-	__resetSkillContracts,
-	getBucketKindMappings,
-	registerBucketKindMapping,
-} from "@juicesharp/rpiv-workflow/internal";
-import type { SkillContract, SkillContractMap, Workflow } from "@juicesharp/rpiv-workflow/registration";
-import { acts, defineWorkflow, produces } from "@juicesharp/rpiv-workflow/registration";
+import { __resetSkillContracts, getBucketKindMappings, registerBucketKindMapping } from "@hs1n/rpiv-workflow/internal";
+import type { SkillContract, SkillContractMap, Workflow } from "@hs1n/rpiv-workflow/registration";
+import { acts, defineWorkflow, produces } from "@hs1n/rpiv-workflow/registration";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { builtInWorkflows } from "./built-in-workflows.js";

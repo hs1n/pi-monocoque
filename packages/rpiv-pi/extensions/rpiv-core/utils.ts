@@ -58,7 +58,7 @@ export function toErrorMessage(e: unknown, fallback?: string): string {
  *   - `ERR_MODULE_NOT_FOUND` — Node's native ESM resolver (a plain
  *     `await import(...)` under stock Node).
  *   - `MODULE_NOT_FOUND` — jiti's resolver, which is what Pi ACTUALLY uses to
- *     load `.ts` extensions. A missing nested `import("@juicesharp/rpiv-…")`
+ *     load `.ts` extensions. A missing nested `import("@hs1n/rpiv-…")`
  *     inside a jiti-loaded module rejects with this CJS-style code (verified on
  *     jiti 2.7.0, both `tryNative:false` and the native-fallback path). Matching
  *     only the ESM code let these fall through to a logged `[rpiv-core] failed

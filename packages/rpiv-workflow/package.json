@@ -1,5 +1,5 @@
 {
-	"name": "@juicesharp/rpiv-workflow",
+	"name": "@hs1n/rpiv-workflow",
 	"version": "2.11.0",
 	"description": "Pi extension. Chain skills into typed multi-stage workflows with audited JSONL state, predicate routing, and per-stage output validation. Skill-agnostic — bring your own skills.",
 	"keywords": [
@@ -14,15 +14,15 @@
 	],
 	"type": "module",
 	"license": "MIT",
-	"author": "juicesharp",
+	"author": "hs1n",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/juicesharp/rpiv-mono.git",
+		"url": "git+https://github.com/hs1n/pi-monocoque.git",
 		"directory": "packages/rpiv-workflow"
 	},
-	"homepage": "https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-workflow#readme",
+	"homepage": "https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-workflow#readme",
 	"bugs": {
-		"url": "https://github.com/juicesharp/rpiv-mono/issues"
+		"url": "https://github.com/hs1n/pi-monocoque/issues"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -106,18 +106,21 @@
 		"./internal": "./internal.ts"
 	},
 	"pi": {
-		"image": "https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-workflow/docs/cover.png",
+		"image": "https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-workflow/docs/cover.png",
 		"extensions": [
 			"./extension.ts"
 		]
 	},
 	"dependencies": {
-		"@juicesharp/rpiv-config": "^2.11.0",
+		"@hs1n/rpiv-config": "^2.11.0",
 		"jiti": "^2.7.0",
 		"typebox": "^1.1.24"
 	},
 	"peerDependencies": {
 		"@earendil-works/pi-coding-agent": "*",
 		"@standard-schema/spec": "*"
-	}
+	},
+	"contributors": [
+		"juicesharp <https://github.com/juicesharp>"
+	]
 }

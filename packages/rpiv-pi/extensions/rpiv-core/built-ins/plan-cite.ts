@@ -4,7 +4,7 @@
  * its frontmatter `files:`.
  */
 import { parseFrontmatter } from "@earendil-works/pi-coding-agent";
-import type { Output, ScriptContext } from "@juicesharp/rpiv-workflow/registration";
+import type { Output, ScriptContext } from "@hs1n/rpiv-workflow/registration";
 import { verifyCitations } from "./citations.js";
 import { forEachLineOutsideFences } from "./markdown-fence.js";
 import { PLAN_PHASE_RE, phaseFiles } from "./plan-phases.js";

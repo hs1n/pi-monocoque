@@ -109,7 +109,7 @@ function resolveOutcome(stage: StageDef, skill: string): Outcome {
 			throw new Error(
 				`dispatchStage: stage "${skill}" has kind "produces" but no \`outcome\` — ` +
 					"there is no framework default for produces stages (the `.rpiv/artifacts/` layout is " +
-					"an rpiv-pi convention). Either wire `outcome: rpivArtifactMdOutcome` (from @juicesharp/rpiv-pi) " +
+					"an rpiv-pi convention). Either wire `outcome: rpivArtifactMdOutcome` (from @hs1n/rpiv-pi) " +
 					"or supply your own `{ collector, parser? }`.",
 			);
 		default:

@@ -1,7 +1,7 @@
 # rpiv-voice
 
 ## Monorepo Context
-Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@juicesharp/rpiv-*` family. **Opt-in sibling** — installed explicitly, absent from the registry (not in `siblings.ts`, not peer-pinned by `rpiv-pi`). Only package in the monorepo that owns native bindings (sherpa-onnx-node) + mic capture.
+Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family. **Opt-in sibling** — installed explicitly, absent from the registry (not in `siblings.ts`, not peer-pinned by `rpiv-pi`). Only package in the monorepo that owns native bindings (sherpa-onnx-node) + mic capture.
 
 ## Responsibility
 Registers a single `/voice` slash command: captures mic audio via `decibri`, runs local Whisper STT via `sherpa-onnx-node`, renders a live transcript/equalizer overlay, and pastes the committed text into the editor. Local-only; no cloud.
@@ -9,8 +9,8 @@ Registers a single `/voice` slash command: captures mic audio via `decibri`, run
 ## Dependencies
 - **`@earendil-works/pi-coding-agent`** (peer): `ExtensionAPI`, `ExtensionCommandContext` (`ctx.ui.custom`, `ctx.ui.notify`, `ctx.ui.pasteToEditor`, `ctx.hasUI`)
 - **`@earendil-works/pi-tui`** (peer): `Container`, width-correct helpers, key matching
-- **`@juicesharp/rpiv-i18n`** (optional peer): dynamic-imported in `index.ts` + `state/i18n-bridge.ts`; package runs standalone if absent
-- **`@juicesharp/rpiv-config`** (runtime): `configPath`, `loadJsonConfigWithLegacyFallback`, `saveJsonConfig` — sole importer is `config/voice-config.ts`
+- **`@hs1n/rpiv-i18n`** (optional peer): dynamic-imported in `index.ts` + `state/i18n-bridge.ts`; package runs standalone if absent
+- **`@hs1n/rpiv-config`** (runtime): `configPath`, `loadJsonConfigWithLegacyFallback`, `saveJsonConfig` — sole importer is `config/voice-config.ts`
 - **`sherpa-onnx-node`** (`^1.13.0`, CJS, no upstream `.d.ts` — `audio/sherpa-onnx-node.d.ts` is an ambient mirror): Whisper int8 ONNX recognizer
 - **`decibri`** (runtime): EventEmitter-shaped mic with built-in Silero VAD
 
@@ -31,7 +31,7 @@ locales/           — JSON translation maps loaded once at module init
 // Top-level await: locale registration MUST happen before default export runs.
 // `/loader` subpath avoids pulling i18n-ui + pi-tui into the load graph.
 try {
-    const sdk = await import("@juicesharp/rpiv-i18n/loader");
+    const sdk = await import("@hs1n/rpiv-i18n/loader");
     sdk.registerLocalesFromDir(I18N_NAMESPACE, import.meta.url, { label: "rpiv-voice" });
 } catch { /* SDK absent — t(key, fallback) returns English fallback */ }
 
@@ -55,7 +55,7 @@ export default function (pi: ExtensionAPI): void {
 ## Architectural Boundaries
 - **`audio/` never reads canonical state** — pipeline-runner pushes deps in via `setPaused`/`setHallucinationFilterEnabled` setters
 - **i18n at render time, never module top-level** — `t(key, fallback)` is invoked inside `description`/render paths (`i18n-bridge.ts:38-52`)
-- **All SDK imports are soft** — every cross-package consumer wraps `await import("@juicesharp/rpiv-…")` in try/catch
+- **All SDK imports are soft** — every cross-package consumer wraps `await import("@hs1n/rpiv-…")` in try/catch
 - **PreflightStage tagging** — `PreflightError` throws carry a `PreflightStage` string-literal union; user-facing messages branch on stage, with a generic fallback for non-`PreflightError` throws
 - **No invariants.ts / replay.ts** — voice is overlay-scoped, not persisted; no post-compaction reconstruction
 - **Config JSON-only keys round-trip** — `numThreads` (and any future non-draft key) is not part of `SettingsDraft`; the reducer re-reads persisted config at save time (`readPersistedConfig`) and `DRAFT_OWNED_CONFIG_KEYS` carries the draft-owned keys across the merge (`__proto__` skipped)

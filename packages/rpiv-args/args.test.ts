@@ -9,7 +9,7 @@ import type {
 	InputEvent,
 	SlashCommandInfo,
 } from "@earendil-works/pi-coding-agent";
-import { createMockCtx, createMockPi } from "@juicesharp/rpiv-test-utils";
+import { createMockCtx, createMockPi } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	executeShellInBody,

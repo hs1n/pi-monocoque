@@ -19,8 +19,8 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ExtensionAPI, ExtensionUIContext } from "@earendil-works/pi-coding-agent";
-import { createMockCommandCtx, createMockModelRegistry } from "@juicesharp/rpiv-test-utils";
-import { registerWorkflowExecutionHost } from "@juicesharp/rpiv-workflow/startup";
+import { createMockCommandCtx, createMockModelRegistry } from "@hs1n/rpiv-test-utils";
+import { registerWorkflowExecutionHost } from "@hs1n/rpiv-workflow/startup";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { __resetRunLaneRegistry, getLane, recordRun, setFocusedRun } from "./run-lane-registry.js";
 import { __resetSessionCaptureState, registerSessionCapture } from "./session-capture.js";
@@ -33,7 +33,7 @@ import {
 
 // Capture the provider rpiv-core registers with the /startup seam without
 // pulling in the whole runner graph — the only symbol the registrar reaches for.
-vi.mock("@juicesharp/rpiv-workflow/startup", () => ({
+vi.mock("@hs1n/rpiv-workflow/startup", () => ({
 	registerWorkflowExecutionHost: vi.fn(),
 }));
 

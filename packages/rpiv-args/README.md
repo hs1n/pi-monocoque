@@ -1,11 +1,11 @@
-# @juicesharp/rpiv-args
+# @hs1n/rpiv-args
 
-[![npm version](https://img.shields.io/npm/v/@juicesharp/rpiv-args.svg)](https://www.npmjs.com/package/@juicesharp/rpiv-args)
+[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-args.svg)](https://www.npmjs.com/package/@hs1n/rpiv-args)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
-  <a href="https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-args">
-    <img src="https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-args/docs/cover.png" alt="Two panels: /skill:deploy api production filling $1 and $2 in a skill body, and a /skill:commit body whose !`git status -s` runs and pastes real git output into the prompt" width="50%">
+  <a href="https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-args">
+    <img src="https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-args/docs/cover.png" alt="Two panels: /skill:deploy api production filling $1 and $2 in a skill body, and a /skill:commit body whose !`git status -s` runs and pastes real git output into the prompt" width="50%">
   </a>
 </div>
 
@@ -19,7 +19,7 @@ parameterize them instead of keeping one hard-coded copy per case.
 ## Install
 
 ```sh
-pi install npm:@juicesharp/rpiv-args
+pi install npm:@hs1n/rpiv-args
 ```
 
 Restart your Pi session.
@@ -88,16 +88,16 @@ directory.
 
 ## Reference
 
-- [Placeholders and variables](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-args/docs/placeholders.md)
+- [Placeholders and variables](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-args/docs/placeholders.md)
   — every placeholder and runtime variable, indexing and slicing rules,
   quoting, and what substitution deliberately does not do.
-- [Authoring skills](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-args/docs/authoring-skills.md)
+- [Authoring skills](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-args/docs/authoring-skills.md)
   — choosing `$ARGUMENTS` over positionals, empty-argument behaviour,
   frontmatter, and a worked example with the exact text the model receives.
-- [Shell substitution](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-args/docs/shell-substitution.md)
+- [Shell substitution](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-args/docs/shell-substitution.md)
   — shell syntax, execution order, timeouts, error strings, output budgets,
   and Windows / PowerShell authoring.
-- [How it works](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-args/docs/how-it-works.md)
+- [How it works](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-args/docs/how-it-works.md)
   — the three event hooks, the transformation pipeline, both emit paths, the
   skill index, and the paths that are not covered.
 
@@ -109,11 +109,11 @@ directory.
   Commands run through `sh -c` on macOS and Linux and `powershell.exe -Command`
   on Windows, where POSIX-only tools such as `grep`, `sed` and `awk` are not
   aliased — see
-  [Shell substitution](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-args/docs/shell-substitution.md).
+  [Shell substitution](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-args/docs/shell-substitution.md).
 
 ## Related
 
-- [@juicesharp/rpiv-pi](https://www.npmjs.com/package/@juicesharp/rpiv-pi) —
+- [@hs1n/rpiv-pi](https://www.npmjs.com/package/@hs1n/rpiv-pi) —
   the umbrella package. Its `/rpiv-setup` command installs `rpiv-args` along
   with the rest of the family, and its lane transcript hides the
   `Skill input:` line from the displayed conversation.

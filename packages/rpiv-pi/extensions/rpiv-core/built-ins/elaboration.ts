@@ -6,7 +6,7 @@
  */
 import { readFileSync } from "node:fs";
 import { isAbsolute, join } from "node:path";
-import { defineParser, type Outcome, type ParseContext } from "@juicesharp/rpiv-workflow/registration";
+import { defineParser, type Outcome, type ParseContext } from "@hs1n/rpiv-workflow/registration";
 import { frontmatterParser, rpivBucketOutcome } from "../artifact-collector.js";
 import { countHeadingsOutsideFences, openFenceLine } from "./markdown-fence.js";
 import { PLAN_PHASE_RE } from "./plan-phases.js";

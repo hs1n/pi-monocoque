@@ -1,6 +1,6 @@
 # SDK reference
 
-The complete public surface of `@juicesharp/rpiv-i18n` — every exported function,
+The complete public surface of `@hs1n/rpiv-i18n` — every exported function,
 its behavior contract, the locale detection chain, and the `globalThis` escape
 hatch. For a task-oriented walkthrough of adding localization to your own
 extension, read [integration-guide.md](./integration-guide.md) first.
@@ -11,14 +11,14 @@ The package ships two entry points:
 
 | Specifier | Module | Use it for |
 | --- | --- | --- |
-| `@juicesharp/rpiv-i18n` | `i18n.ts` | Lookup and locale state — `scope`, `tr`, `registerStrings`, `applyLocale` |
-| `@juicesharp/rpiv-i18n/loader` | `loader.ts` | Registering a `locales/` directory — `registerLocalesFromDir` |
+| `@hs1n/rpiv-i18n` | `i18n.ts` | Lookup and locale state — `scope`, `tr`, `registerStrings`, `applyLocale` |
+| `@hs1n/rpiv-i18n/loader` | `loader.ts` | Registering a `locales/` directory — `registerLocalesFromDir` |
 
 The `/loader` subpath exists so a consumer that only needs to register strings
 does not pull `i18n-ui.ts` — and with it the `@earendil-works/pi-tui`
 dependency — into its load graph.
 
-## `@juicesharp/rpiv-i18n`
+## `@hs1n/rpiv-i18n`
 
 ### Registration and lookup
 
@@ -52,7 +52,7 @@ dependency — into its load graph.
 | `__resetState` | Test-only hook that clears the registry, active strings, and locale. |
 | Types | `TranslationMap`, `LocaleStrings`, `I18nState`, `LocaleConfig` |
 
-## `@juicesharp/rpiv-i18n/loader`
+## `@hs1n/rpiv-i18n/loader`
 
 ```ts
 registerLocalesFromDir(

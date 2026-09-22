@@ -5,7 +5,7 @@ Canonical state for the voice extension: `VoiceState` shape, pure `reduce(state,
 
 ## Dependencies
 - **`../config/voice-config.js`** (`VoiceConfig`, `isHallucinationFilterEnabled`, `isEqualizerEnabled`, `saveVoiceConfig`)
-- **`@juicesharp/rpiv-i18n`** (optional, dynamic-imported in `i18n-bridge.ts`)
+- **`@hs1n/rpiv-i18n`** (optional, dynamic-imported in `i18n-bridge.ts`)
 - **`@earendil-works/pi-tui`** (`Key`, `matchesKey`, `getKeybindings`)
 - **`@earendil-works/pi-coding-agent`** (`Theme`, `DynamicBorder`)
 - **Consumers**: `../command/voice-command.ts` instantiates `VoiceSession`; `../view/*` reads via bindings; `./selectors/projections.ts` projects state to view props

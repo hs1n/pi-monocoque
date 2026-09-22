@@ -17,7 +17,7 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createMockSessionChain } from "@juicesharp/rpiv-test-utils";
+import { createMockSessionChain } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { acts, defineWorkflow } from "../api.js";
 import { __resetWorkflowExecutionHost, registerWorkflowExecutionHost } from "../execution-host.js";

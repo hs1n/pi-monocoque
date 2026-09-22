@@ -15,7 +15,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const lifecycleDispose = vi.fn();
 const registerLifecycle = vi.fn((_listeners: unknown) => lifecycleDispose);
 const summarizeRun = vi.fn();
-vi.mock("@juicesharp/rpiv-workflow/startup", () => ({ registerLifecycle, summarizeRun }));
+vi.mock("@hs1n/rpiv-workflow/startup", () => ({ registerLifecycle, summarizeRun }));
 
 import { __resetLaneProgress, registerLaneProgressHook } from "./lane-progress.js";
 import { createLaneRelayUiContext } from "./lane-relay-ui.js";
@@ -164,7 +164,7 @@ describe("registerLaneProgressHook", () => {
 		// resolve one mocked and one REAL rpiv-workflow/startup module, so a
 		// stacked registration may land in the real Symbol.for lifecycle registry
 		// instead of the `registerLifecycle` mock. Total registrations must be 1.
-		const realRegistry = (globalThis as Record<symbol, unknown>)[Symbol.for("@juicesharp/rpiv-workflow:lifecycle")] as
+		const realRegistry = (globalThis as Record<symbol, unknown>)[Symbol.for("@hs1n/rpiv-workflow:lifecycle")] as
 			| unknown[]
 			| undefined;
 		expect(registerLifecycle.mock.calls.length + (realRegistry?.length ?? 0)).toBe(1);
@@ -836,14 +836,14 @@ describe("onWorkflowEnd — run-instance guard (resume race)", () => {
 
 describe("clean-install degradation", () => {
 	afterEach(() => {
-		vi.doUnmock("@juicesharp/rpiv-workflow/startup");
+		vi.doUnmock("@hs1n/rpiv-workflow/startup");
 		vi.resetModules();
 	});
 
 	it("no-ops without throwing when the rpiv-workflow sibling is absent", async () => {
 		vi.resetModules();
-		vi.doMock("@juicesharp/rpiv-workflow/startup", () => {
-			throw Object.assign(new Error("Cannot find package '@juicesharp/rpiv-workflow/startup'"), {
+		vi.doMock("@hs1n/rpiv-workflow/startup", () => {
+			throw Object.assign(new Error("Cannot find package '@hs1n/rpiv-workflow/startup'"), {
 				code: "ERR_MODULE_NOT_FOUND",
 			});
 		});

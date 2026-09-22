@@ -1,5 +1,5 @@
 import { type Api, getSupportedThinkingLevels, type Model } from "@earendil-works/pi-ai";
-import { createMockCtx, createMockPi } from "@juicesharp/rpiv-test-utils";
+import { createMockCtx, createMockPi } from "@hs1n/rpiv-test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("./advisor-ui.js", () => ({

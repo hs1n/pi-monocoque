@@ -1,11 +1,11 @@
-# @juicesharp/rpiv-btw
+# @hs1n/rpiv-btw
 
-[![npm version](https://img.shields.io/npm/v/@juicesharp/rpiv-btw.svg)](https://www.npmjs.com/package/@juicesharp/rpiv-btw)
+[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-btw.svg)](https://www.npmjs.com/package/@hs1n/rpiv-btw)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
-  <a href="https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-btw">
-    <img src="https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-btw/docs/cover.png" alt="rpiv-btw cover art: a Pi transcript with a /btw side question answered below it, labelled ephemeral and never written" width="50%">
+  <a href="https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-btw">
+    <img src="https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-btw/docs/cover.png" alt="rpiv-btw cover art: a Pi transcript with a /btw side question answered below it, labelled ephemeral and never written" width="50%">
   </a>
 </div>
 
@@ -18,7 +18,7 @@ transcript and never touches disk.
 ## Install
 
 ```sh
-pi install npm:@juicesharp/rpiv-btw
+pi install npm:@hs1n/rpiv-btw
 ```
 
 Restart your Pi session.
@@ -38,7 +38,7 @@ this session are listed under the banner, so follow-ups have context.
 `/btw` uses whatever model is already driving your session — there is nothing to
 pick, but Pi needs an active model with working credentials (`/login`).
 
-![The /btw panel at the bottom of a Pi Agent terminal, showing the echoed question, a multi-paragraph answer, and the key-hint footer](https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-btw/docs/overlay.jpg)
+![The /btw panel at the bottom of a Pi Agent terminal, showing the echoed question, a multi-paragraph answer, and the key-hint footer](https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-btw/docs/overlay.jpg)
 
 | Key | Action |
 | --- | --- |
@@ -65,11 +65,11 @@ pick, but Pi needs an active model with working credentials (`/login`).
 
 ## Reference
 
-- [Context model](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-btw/docs/context-model.md) — exactly what each `/btw` call
+- [Context model](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-btw/docs/context-model.md) — exactly what each `/btw` call
   sends to the model: the branch snapshot and its invalidation rules, session
   history threading, the cross-session question hint, and the no-pollution
   guarantees.
-- [Architecture](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-btw/docs/architecture.md) — modules, registered command and
+- [Architecture](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-btw/docs/architecture.md) — modules, registered command and
   hooks, overlay layout and key handling, process-scoped state, Pi host-version
   tolerance, and the full error-message list.
 
@@ -92,10 +92,10 @@ pick, but Pi needs an active model with working credentials (`/login`).
 
 ## Related
 
-- [`@juicesharp/rpiv-pi`](https://www.npmjs.com/package/@juicesharp/rpiv-pi) — the
+- [`@hs1n/rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi) — the
   umbrella package. It does not install `rpiv-btw`; install this one yourself when
   you want `/btw`.
-- [juicesharp/rpiv-mono](https://github.com/juicesharp/rpiv-mono#readme) — the rest
+- [juicesharp/rpiv-mono](https://github.com/hs1n/pi-monocoque#readme) — the rest
   of the rpiv family.
 
 ## License

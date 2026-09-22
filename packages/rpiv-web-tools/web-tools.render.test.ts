@@ -1,6 +1,6 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import type { Text } from "@earendil-works/pi-tui";
-import { createMockPi, makeTheme } from "@juicesharp/rpiv-test-utils";
+import { createMockPi, makeTheme } from "@hs1n/rpiv-test-utils";
 import { describe, expect, it } from "vitest";
 import registerWebTools from "./index.js";
 

@@ -6,7 +6,7 @@
 import { writeFileSync } from "node:fs";
 import { basename, isAbsolute, join } from "node:path";
 import { parseFrontmatter } from "@earendil-works/pi-coding-agent";
-import { handleToString, type Output, type RunView, type ScriptContext } from "@juicesharp/rpiv-workflow/registration";
+import { handleToString, type Output, type RunView, type ScriptContext } from "@hs1n/rpiv-workflow/registration";
 import { verifyCitations } from "./citations.js";
 import { latestVerdictPerDimension, type SeedOnlyVerdict, seedOnlyFindings } from "./gates.js";
 import { fencedSpans, forEachLineOutsideFences } from "./markdown-fence.js";

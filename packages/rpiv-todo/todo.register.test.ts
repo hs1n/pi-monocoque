@@ -1,6 +1,6 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
-import { createMockCtx, createMockPi, makeTheme } from "@juicesharp/rpiv-test-utils";
+import { createMockCtx, createMockPi, makeTheme } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { __resetState, registerTodoTool, setActiveRenderSession, type TaskDetails, TOOL_NAME } from "./todo.js";
 

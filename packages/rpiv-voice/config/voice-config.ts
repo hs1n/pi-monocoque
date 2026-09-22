@@ -11,7 +11,7 @@
  * the return — see `rpiv-config.saveJsonConfig` for the full contract.
  */
 
-import { configPath, loadJsonConfigWithLegacyFallback, saveJsonConfig } from "@juicesharp/rpiv-config";
+import { configPath, loadJsonConfigWithLegacyFallback, saveJsonConfig } from "@hs1n/rpiv-config";
 
 // ── Filesystem layout ────────────────────────────────────────────────────────
 const CONFIG_PATH = configPath("rpiv-voice", "voice.json");

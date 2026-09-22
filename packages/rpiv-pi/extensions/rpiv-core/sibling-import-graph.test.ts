@@ -6,7 +6,7 @@
  * missing-sibling banner that tell the user to install it (issue #66).
  *
  * Files like built-in-workflows.ts and artifact-collector.ts DO value-import
- * @juicesharp/rpiv-workflow — that is safe only while they stay off the
+ * @hs1n/rpiv-workflow — that is safe only while they stay off the
  * entry's static graph (they are reached via guarded dynamic imports). That
  * invariant was previously enforced by comments alone; this test walks the
  * static import graph from index.ts and fails on any reachable sibling value
@@ -115,6 +115,6 @@ describe("sibling import graph", () => {
 		// only via the lazy provider's dynamic import). Walking from it must
 		// produce violations — proving the detector can actually detect.
 		const { violations } = walkStaticGraph(resolve(HERE, "built-in-workflows.ts"));
-		expect(violations.some((v) => v.includes("@juicesharp/rpiv-workflow"))).toBe(true);
+		expect(violations.some((v) => v.includes("@hs1n/rpiv-workflow"))).toBe(true);
 	});
 });

@@ -1,4 +1,4 @@
-import { createMockPi, stubGitExec } from "@juicesharp/rpiv-test-utils";
+import { createMockPi, stubGitExec } from "@hs1n/rpiv-test-utils";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
 	clearGitContextCache,

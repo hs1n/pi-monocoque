@@ -8,11 +8,11 @@ The extension works standalone: install only this package and you get the full d
 English. Localization needs one more install:
 
 ```sh
-pi install npm:@juicesharp/rpiv-i18n
+pi install npm:@hs1n/rpiv-i18n
 ```
 
 Restart your Pi session. If you installed through
-[`@juicesharp/rpiv-pi`](https://www.npmjs.com/package/@juicesharp/rpiv-pi) and ran
+[`@hs1n/rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi) and ran
 `/rpiv-setup`, you already have it.
 
 The dependency is a genuinely optional peer. This package loads the SDK inside a
@@ -31,7 +31,7 @@ With the SDK installed, the locale resolves in this order, first hit wins:
 
 `/languages` opens an interactive picker and flips the strings live — the dialog reads its
 strings at render time, so an open questionnaire follows the change. Both `/languages` and
-`--locale` are registered by `@juicesharp/rpiv-i18n`, not by this package.
+`--locale` are registered by `@hs1n/rpiv-i18n`, not by this package.
 
 ## Shipped languages
 
@@ -58,7 +58,7 @@ submit-readiness prompt, incomplete-answers warning, and committed-note `Note` l
 preview pane's empty and notes-affordance lines, the notes header and the global-note
 header on the Submit tab, the
 external-editor failure notification, and the two RPC dialog prompts. Twenty-six keys in total,
-all under the namespace `@juicesharp/rpiv-ask-user-question`.
+all under the namespace `@hs1n/rpiv-ask-user-question`.
 
 Everything the *model* reads stays English by design: the tool description, the parameter
 schema descriptions, error messages, and the reserved-label list. Those are prompt inputs,
@@ -80,7 +80,7 @@ No code change is required.
 
 The loader iterates the SDK's supported-locale list over this directory at startup, so a
 new file is picked up automatically. See the
-[`@juicesharp/rpiv-i18n`](https://www.npmjs.com/package/@juicesharp/rpiv-i18n) README,
+[`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n) README,
 section "Contributing translations", for the full convention.
 
 Keys are looked up individually with an English fallback, so a partially translated file

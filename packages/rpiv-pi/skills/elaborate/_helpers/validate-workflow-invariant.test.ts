@@ -2,13 +2,13 @@
 // helper. Case (1) spawns the .mjs (mirrors skills/_shared/stitch-elaborations.
 // test.ts: execFileSync("node", [HELPER_MJS])) and asserts exit 0 on the clean
 // tree — the live proof that the helper's five jiti.import resolutions (bare
-// @juicesharp/rpiv-workflow + four absolute rpiv-core .ts paths — risk c2r3)
+// @hs1n/rpiv-workflow + four absolute rpiv-core .ts paths — risk c2r3)
 // hold at runtime. Case (2) exercises the SAME harness+gate the .mjs mirrors
 // against a deliberately-broken workflow and asserts route-reads-unvalidated-
 // data surfaces — proving the gate logic the .mjs wraps catches the defect.
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { acts, defineRoute, defineWorkflow, validateWorkflow, type Workflow } from "@juicesharp/rpiv-workflow";
+import { acts, defineRoute, defineWorkflow, validateWorkflow, type Workflow } from "@hs1n/rpiv-workflow";
 import { describe, expect, it } from "vitest";
 import { deriveOutcomes } from "../../../extensions/rpiv-core/outcome-derivation.js";
 import { BUNDLED_SKILLS_DIR } from "../../../extensions/rpiv-core/paths.js";

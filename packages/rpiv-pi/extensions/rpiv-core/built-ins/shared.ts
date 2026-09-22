@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, isAbsolute, join, relative, resolve } from "node:path";
-import { type Artifact, handleToString, type Output, type RunView } from "@juicesharp/rpiv-workflow/registration";
-import { StagePreflightError } from "@juicesharp/rpiv-workflow/runner";
+import { type Artifact, handleToString, type Output, type RunView } from "@hs1n/rpiv-workflow/registration";
+import { StagePreflightError } from "@hs1n/rpiv-workflow/runner";
 
 /**
  * A plan's structured `phases:` frontmatter array — the machine-readable phase

@@ -11,7 +11,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { SessionManager } from "@earendil-works/pi-coding-agent";
-import { makeAssistantMessage, makeUserMessage } from "@juicesharp/rpiv-test-utils";
+import { makeAssistantMessage, makeUserMessage } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { __resetLaneToolDefs, harvestToolDefs } from "./lane-tool-defs.js";
 import { loadBranchFromDisk } from "./lane-transcript-disk.js";

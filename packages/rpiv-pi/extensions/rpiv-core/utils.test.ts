@@ -80,9 +80,9 @@ describe("isModuleNotFound", () => {
 	});
 
 	it("is true for a MODULE_NOT_FOUND error (jiti resolver — what Pi actually uses)", () => {
-		// jiti 2.7.0 rejects a missing `import("@juicesharp/rpiv-…")` with this
+		// jiti 2.7.0 rejects a missing `import("@hs1n/rpiv-…")` with this
 		// CJS-style code; the absent-sibling guards must treat it as a no-op.
-		const err = Object.assign(new Error("Cannot find module '@juicesharp/rpiv-workflow/startup'"), {
+		const err = Object.assign(new Error("Cannot find module '@hs1n/rpiv-workflow/startup'"), {
 			code: "MODULE_NOT_FOUND",
 		});
 		expect(isModuleNotFound(err)).toBe(true);
@@ -180,21 +180,21 @@ describe("readPiAgentSettings", () => {
 	it("returns parsed settings + packages array when valid", () => {
 		writeSettings({
 			defaultProvider: "zai",
-			packages: ["npm:pi-perplexity", "npm:@juicesharp/rpiv-todo"],
+			packages: ["npm:pi-perplexity", "npm:@hs1n/rpiv-todo"],
 		});
 		const result = readPiAgentSettings();
 		expect(result).toBeDefined();
-		expect(result?.packages).toEqual(["npm:pi-perplexity", "npm:@juicesharp/rpiv-todo"]);
+		expect(result?.packages).toEqual(["npm:pi-perplexity", "npm:@hs1n/rpiv-todo"]);
 		expect(result?.settings).toEqual({
 			defaultProvider: "zai",
-			packages: ["npm:pi-perplexity", "npm:@juicesharp/rpiv-todo"],
+			packages: ["npm:pi-perplexity", "npm:@hs1n/rpiv-todo"],
 		});
 	});
 
 	it("reads from PI_CODING_AGENT_DIR/settings.json when configured", () => {
 		process.env.PI_CODING_AGENT_DIR = join(process.env.HOME!, ".config", "pi", "agent");
-		writeSettings({ packages: ["npm:@juicesharp/rpiv-todo"] });
-		expect(readPiAgentSettings()?.packages).toEqual(["npm:@juicesharp/rpiv-todo"]);
+		writeSettings({ packages: ["npm:@hs1n/rpiv-todo"] });
+		expect(readPiAgentSettings()?.packages).toEqual(["npm:@hs1n/rpiv-todo"]);
 	});
 
 	it("preserves non-string entries inside packages (caller responsibility to filter)", () => {

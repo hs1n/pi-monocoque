@@ -41,7 +41,7 @@ export async function loadWorkflowMap(cwd: string): Promise<Record<string, strin
 	// errors propagate to the caller, which decides how to surface them.
 	// Runner-free `/registration` entry — only the loader is needed, never the
 	// ~530ms engine.
-	const wf = await import("@juicesharp/rpiv-workflow/registration");
+	const wf = await import("@hs1n/rpiv-workflow/registration");
 	const loaded = await wf.loadWorkflows(cwd);
 	const map: Record<string, string[]> = {};
 	for (const w of loaded.workflows) {

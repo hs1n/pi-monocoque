@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createMockPi, writeGuidanceTree } from "@juicesharp/rpiv-test-utils";
+import { createMockPi, writeGuidanceTree } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it, type vi } from "vitest";
 import {
 	clearInjectionState,

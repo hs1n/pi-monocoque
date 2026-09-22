@@ -11,7 +11,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { fs as fsHandle, type Output, type RunView } from "@juicesharp/rpiv-workflow/registration";
+import { fs as fsHandle, type Output, type RunView } from "@hs1n/rpiv-workflow/registration";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { VERDICT_DIR } from "./shared.js";
 import { type VerdictSnapshot, verdictCollector } from "./verdict-collector.js";

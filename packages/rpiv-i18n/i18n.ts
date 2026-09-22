@@ -20,7 +20,7 @@
  * Config persists at ~/.config/rpiv-i18n/locale.json (chmod 0o600, best-effort writes).
  */
 
-import { configPath, loadJsonConfigWithLegacyFallback, saveJsonConfig } from "@juicesharp/rpiv-config";
+import { configPath, loadJsonConfigWithLegacyFallback, saveJsonConfig } from "@hs1n/rpiv-config";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -72,7 +72,7 @@ export const SUPPORTED_LOCALES: readonly { code: string; label: string }[] = [
 // All SDK state is anchored on globalThis under `Symbol.for("rpiv-i18n.runtime")`
 // so live locale changes via `/languages` propagate even when this module is
 // loaded as multiple instances (e.g. once via Pi's extension entry, once via
-// a consumer's `node_modules/@juicesharp/rpiv-i18n` import — Pi's TS loader
+// a consumer's `node_modules/@hs1n/rpiv-i18n` import — Pi's TS loader
 // caches them under different paths and each `import { tr }` would otherwise
 // see its own private copy of `activeStrings`).
 //

@@ -1,5 +1,5 @@
 /**
- * @juicesharp/rpiv-btw — /btw side-question slash command.
+ * @hs1n/rpiv-btw — /btw side-question slash command.
  *
  * Asks the same primary model a one-off side question using the cloned primary
  * conversation as context. Answer is rendered ephemerally in a bottom-slot

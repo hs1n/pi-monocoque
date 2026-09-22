@@ -1,5 +1,5 @@
 {
-	"name": "@juicesharp/rpiv-warp",
+	"name": "@hs1n/rpiv-warp",
 	"version": "2.11.0",
 	"private": false,
 	"description": "Pi extension. Native Warp terminal notifications, dispatched via OSC 777 on Pi lifecycle events.",
@@ -14,15 +14,15 @@
 	],
 	"type": "module",
 	"license": "MIT",
-	"author": "juicesharp",
+	"author": "hs1n",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/juicesharp/rpiv-mono.git",
+		"url": "git+https://github.com/hs1n/pi-monocoque.git",
 		"directory": "packages/rpiv-warp"
 	},
-	"homepage": "https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-warp#readme",
+	"homepage": "https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-warp#readme",
 	"bugs": {
-		"url": "https://github.com/juicesharp/rpiv-mono/issues"
+		"url": "https://github.com/hs1n/pi-monocoque/issues"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -49,7 +49,7 @@
 		"LICENSE"
 	],
 	"pi": {
-		"image": "https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-warp/docs/cover.png",
+		"image": "https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-warp/docs/cover.png",
 		"extensions": [
 			"./index.ts"
 		],
@@ -59,6 +59,9 @@
 		"@earendil-works/pi-coding-agent": "*"
 	},
 	"dependencies": {
-		"@juicesharp/rpiv-config": "^2.11.0"
-	}
+		"@hs1n/rpiv-config": "^2.11.0"
+	},
+	"contributors": [
+		"juicesharp <https://github.com/juicesharp>"
+	]
 }

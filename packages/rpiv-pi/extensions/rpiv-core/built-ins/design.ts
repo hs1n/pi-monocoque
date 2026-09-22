@@ -8,7 +8,7 @@
  * `sourcesCoverageGaps` can only ever see as a path string in `sources:`.
  */
 import { basename } from "node:path";
-import { defineParser, type Outcome, type ParseContext } from "@juicesharp/rpiv-workflow/registration";
+import { defineParser, type Outcome, type ParseContext } from "@hs1n/rpiv-workflow/registration";
 import { frontmatterParser, rpivBucketOutcome } from "../artifact-collector.js";
 import { DESIGN_SLICE_RE } from "./slices.js";
 

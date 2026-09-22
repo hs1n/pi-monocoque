@@ -1,7 +1,7 @@
 # rpiv-ask-user-question
 
 ## Monorepo Context
-Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@juicesharp/rpiv-*` family. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`. Used by `rpiv-pi` skills for developer checkpoints.
+Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`. Used by `rpiv-pi` skills for developer checkpoints.
 
 ## Responsibility
 Single-tool extension exposing `ask_user_question` — a TUI option selector with inline free-text input on every question type. The "Chat about this" escape hatch was removed; Esc is the only way to abandon without answering. Returns a structured questionnaire result.
@@ -9,8 +9,8 @@ Single-tool extension exposing `ask_user_question` — a TUI option selector wit
 ## Dependencies
 - **`@earendil-works/pi-coding-agent`** (peer): theme, markdown, dynamic border
 - **`@earendil-works/pi-tui`** (peer): containers, multiline editor, key matching, width-correct text helpers
-- **`@juicesharp/rpiv-i18n`** (optional peer): live-locale strings via `state/i18n-bridge.ts`; English-fallback shim when absent
-- **`@juicesharp/rpiv-config`**: `loadJsonConfigWithLegacyFallback` — honors `XDG_CONFIG_HOME` with a one-way legacy `~/.config` fallback; also `GuidanceFields`/`validateGuidanceFields` for the `guidance` config overrides
+- **`@hs1n/rpiv-i18n`** (optional peer): live-locale strings via `state/i18n-bridge.ts`; English-fallback shim when absent
+- **`@hs1n/rpiv-config`**: `loadJsonConfigWithLegacyFallback` — honors `XDG_CONFIG_HOME` with a one-way legacy `~/.config` fallback; also `GuidanceFields`/`validateGuidanceFields` for the `guidance` config overrides
 - **`typebox`**: schema types (regular dependency — was a peer until #79 broke installers that don't materialise peers)
 
 ## Module Structure

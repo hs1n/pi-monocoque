@@ -1,7 +1,7 @@
 # rpiv-todo
 
 ## Monorepo Context
-Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@juicesharp/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`.
+Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`.
 
 ## Responsibility
 Claude-Code-parity task management for Pi. Registers a single multiplexed `todo` tool (action-discriminated: create/update/list/get/delete/clear), the `/todos` slash command, a persistent overlay widget mounted above the editor, and a global collapse/expand shortcut for it (`pi.registerShortcut`, default `ctrl+shift+t`; `collapseKey: "off"` skips registration entirely). State is reconstructed by replaying the session branch — no disk persistence.
@@ -10,8 +10,8 @@ Claude-Code-parity task management for Pi. Registers a single multiplexed `todo`
 - **`@earendil-works/pi-coding-agent`** (peer): `ExtensionAPI`, `ExtensionUIContext`, theme/render primitives
 - **`@earendil-works/pi-ai`** (peer): `StringEnum` for action/status enums
 - **`@earendil-works/pi-tui`** (peer): width-safe text helpers, render primitives
-- **`@juicesharp/rpiv-i18n`** (peer, `"*"`, optional): locale lookups via `state/i18n-bridge.ts`
-- **`@juicesharp/rpiv-config`** (dependency): `loadJsonConfigWithLegacyFallback`/`validateGuidanceFields` — XDG-path load with one-way legacy fallback; `config.ts` owns `TodoConfig` (prompt overrides + overlay settings `maxWidgetLines`/`collapseKey`, `config.ts:4-15`) and the collapse-key grammar validator
+- **`@hs1n/rpiv-i18n`** (peer, `"*"`, optional): locale lookups via `state/i18n-bridge.ts`
+- **`@hs1n/rpiv-config`** (dependency): `loadJsonConfigWithLegacyFallback`/`validateGuidanceFields` — XDG-path load with one-way legacy fallback; `config.ts` owns `TodoConfig` (prompt overrides + overlay settings `maxWidgetLines`/`collapseKey`, `config.ts:4-15`) and the collapse-key grammar validator
 - **`typebox`** (dependency — moved from peers so installers that don't materialise peer deps still resolve it): tool parameter schema
 
 ## Consumers

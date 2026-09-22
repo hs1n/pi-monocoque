@@ -64,7 +64,7 @@ describe("validateWorkflow — happy path", () => {
 		expect(errors(w)).toEqual([]);
 	});
 
-	// "Validate the bundled workflows" tests live in @juicesharp/rpiv-pi's
+	// "Validate the bundled workflows" tests live in @hs1n/rpiv-pi's
 	// built-in-workflows.test.ts — rpiv-workflow ships no built-ins.
 });
 

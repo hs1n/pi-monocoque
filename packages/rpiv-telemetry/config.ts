@@ -4,7 +4,7 @@ import {
 	readEnvVar,
 	saveJsonConfig,
 	validateConfig,
-} from "@juicesharp/rpiv-config";
+} from "@hs1n/rpiv-config";
 import { type Static, Type } from "typebox";
 import { TELEMETRY_EVENT_KINDS, type TelemetryEventKind } from "./types/events.js";
 

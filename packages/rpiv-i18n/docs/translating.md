@@ -1,7 +1,7 @@
 # Contributing translations
 
 How to add or improve a translation for any Pi extension that uses
-`@juicesharp/rpiv-i18n`. The contract is small and uniform across packages, so
+`@hs1n/rpiv-i18n`. The contract is small and uniform across packages, so
 what you learn here applies to every one of them.
 
 ## What to translate

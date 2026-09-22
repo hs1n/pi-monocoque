@@ -1,11 +1,11 @@
-# @juicesharp/rpiv-todo
+# @hs1n/rpiv-todo
 
-[![npm version](https://img.shields.io/npm/v/@juicesharp/rpiv-todo.svg)](https://www.npmjs.com/package/@juicesharp/rpiv-todo)
+[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-todo.svg)](https://www.npmjs.com/package/@hs1n/rpiv-todo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
-  <a href="https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-todo">
-    <img src="https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-todo/docs/cover.png" alt="rpiv-todo — a persistent todo overlay for Pi Agent, showing a task panel with completed, in-progress, and pending rows" width="50%">
+  <a href="https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-todo">
+    <img src="https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-todo/docs/cover.png" alt="rpiv-todo — a persistent todo overlay for Pi Agent, showing a task panel with completed, in-progress, and pending rows" width="50%">
   </a>
 </div>
 
@@ -19,7 +19,7 @@ on long research → design → implement sessions.
 ## Install
 
 ```sh
-pi install npm:@juicesharp/rpiv-todo
+pi install npm:@hs1n/rpiv-todo
 ```
 
 Restart your Pi session.
@@ -37,7 +37,7 @@ Then ask for something with several steps — "add a repository layer with tests
 and track it as todos". The model calls `todo` and the panel appears above your
 input box, updating as work moves:
 
-![Todo overlay panel: a Todos (2/7) heading above two struck-through completed rows, one in-progress row with its activity label, and four pending rows](https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-todo/docs/overlay.jpg)
+![Todo overlay panel: a Todos (2/7) heading above two struck-through completed rows, one in-progress row with its activity label, and four pending rows](https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-todo/docs/overlay.jpg)
 
 Press `ctrl+shift+t` to collapse the panel to its heading plus a one-line hint,
 and again to expand it. Run `/todos` at any time to print the full list grouped
@@ -63,7 +63,7 @@ by status.
 - **Parallel sessions stay separate.** Task state is keyed by session, so a
   detached or child session can neither read nor overwrite the foreground list.
 - **Localized UI, no setup required.** Nine locales ship with the package and
-  activate when [`@juicesharp/rpiv-i18n`](https://www.npmjs.com/package/@juicesharp/rpiv-i18n)
+  activate when [`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n)
   is installed; without it, everything falls back to English.
 
 ## Configuration
@@ -86,17 +86,17 @@ Optional. Create `~/.config/rpiv-todo/config.json` (or
 
 A missing or malformed file falls back to these defaults. `rpiv-todo` only reads
 this file — it never writes one. Full semantics:
-[Configuration](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-todo/docs/configuration.md).
+[Configuration](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-todo/docs/configuration.md).
 
 ## Reference
 
-- [`todo` tool reference](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-todo/docs/tool-schema.md)
+- [`todo` tool reference](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-todo/docs/tool-schema.md)
   — every `todo` parameter, the status machine, the response envelope, and the
   exact error strings.
-- [Configuration](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-todo/docs/configuration.md)
+- [Configuration](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-todo/docs/configuration.md)
   — config file resolution, option validation rules, and the accepted keybinding
   grammar.
-- [Overlay and `/todos`](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-todo/docs/overlay.md)
+- [Overlay and `/todos`](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-todo/docs/overlay.md)
   — overlay lifecycle, glyphs, overflow behavior, `/todos` output, and
   localization.
 
@@ -105,18 +105,18 @@ this file — it never writes one. Full semantics:
 - A Pi Agent host. No API key, no model selection, no native dependencies.
 - An interactive session for the panel and `/todos`. Headless runs still get the
   `todo` tool; nothing is rendered.
-- [`@juicesharp/rpiv-i18n`](https://www.npmjs.com/package/@juicesharp/rpiv-i18n)
+- [`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n)
   is an optional peer — install it for a localized UI, skip it for English.
 
 ## Related
 
-- [`@juicesharp/rpiv-i18n`](https://www.npmjs.com/package/@juicesharp/rpiv-i18n)
-  ([source](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-i18n))
+- [`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n)
+  ([source](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n))
   — localizes this extension's UI chrome and adds a `/languages` picker.
-- [`@juicesharp/rpiv-pi`](https://www.npmjs.com/package/@juicesharp/rpiv-pi)
-  ([source](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-pi))
+- [`@hs1n/rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi)
+  ([source](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi))
   — the umbrella package that installs this extension alongside its siblings.
 
 ## License
 
-MIT — see [LICENSE](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-todo/LICENSE).
+MIT — see [LICENSE](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-todo/LICENSE).

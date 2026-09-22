@@ -1,4 +1,4 @@
-import { createMockCommandCtx, createMockPi } from "@juicesharp/rpiv-test-utils";
+import { createMockCommandCtx, createMockPi } from "@hs1n/rpiv-test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { acts, defineWorkflow, produces } from "./api.js";
 import { registerBuiltInsProvider } from "./built-ins.js";

@@ -22,7 +22,7 @@
  * badge keyed by their own session_id (r1: state machine correct by construction;
  * multi-run display unverified without a live Warp).
  *
- * Clean-install contract: the bridge dynamically `import("@juicesharp/rpiv-warp")`
+ * Clean-install contract: the bridge dynamically `import("@hs1n/rpiv-warp")`
  * (guarded by `isModuleNotFound`) so a clean install — where the opt-in rpiv-warp
  * sibling is absent — registers, subscribes, and is a silent no-op. Lifecycle
  * listeners still fire; only the OSC emission is absent.
@@ -49,7 +49,7 @@ import { isModuleNotFound } from "./utils.js";
  * registration stack onto question-lifecycle's process-global listener Set. One slot → at
  * most one subscription, ever.
  */
-const GUARD_SLOT = Symbol.for("@juicesharp/rpiv-pi:workflowQuestionWarpBridgeGuard");
+const GUARD_SLOT = Symbol.for("@hs1n/rpiv-pi:workflowQuestionWarpBridgeGuard");
 
 interface BridgeGuard {
 	dispose: (() => void) | undefined;
@@ -104,7 +104,7 @@ export async function registerWorkflowQuestionWarpBridge(cwd: string): Promise<v
 	g.dispose = () => {};
 	let transport: { asked(runId: string): void; resolved(runId: string): void };
 	try {
-		const mod = await import("@juicesharp/rpiv-warp");
+		const mod = await import("@hs1n/rpiv-warp");
 		transport = mod.createWorkflowQuestionTransport(cwd);
 	} catch (err) {
 		g.dispose = undefined; // release the claim — the next session_start may retry

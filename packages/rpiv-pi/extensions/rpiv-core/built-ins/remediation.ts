@@ -42,7 +42,7 @@ import {
 	type Outcome,
 	opaque,
 	type SnapshotContext,
-} from "@juicesharp/rpiv-workflow/registration";
+} from "@hs1n/rpiv-workflow/registration";
 
 /** Wall-clock ceiling per git subprocess — the digest runs synchronously at
  *  the stage seam, so a wedged git (contended index.lock) must be killed here;

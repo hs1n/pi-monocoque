@@ -5,7 +5,7 @@ Pure state layer for the `todo` tool — owns the canonical shape, the reducer, 
 
 ## Dependencies
 - **`../tool/types.ts`** — `Task`, `TaskAction`, `TaskMutationParams`, `TaskStatus`, `TaskDetails` (the canonical schema travels with the tool surface, not the state layer)
-- **`@juicesharp/rpiv-i18n`** — only via `i18n-bridge.ts`; the rest of `state/` is locale-agnostic
+- **`@hs1n/rpiv-i18n`** — only via `i18n-bridge.ts`; the rest of `state/` is locale-agnostic
 - **NO `@earendil-works/pi-*`** below the bridge — reducers and selectors are testable without Pi
 
 ## Consumers

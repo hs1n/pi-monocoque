@@ -9,8 +9,8 @@ import {
 	type Theme,
 } from "@earendil-works/pi-coding-agent";
 import { type Component, getKeybindings, type TUI } from "@earendil-works/pi-tui";
-import askUserQuestionExtension from "@juicesharp/rpiv-ask-user-question";
-import { createMockPi, makeAssistantMessage, makeUserMessage } from "@juicesharp/rpiv-test-utils";
+import askUserQuestionExtension from "@hs1n/rpiv-ask-user-question";
+import { createMockPi, makeAssistantMessage, makeUserMessage } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { cappedTui, LaneConsole, showLaneConsole } from "./lane-console.js";
 import { renderLaneList } from "./lane-list.js";

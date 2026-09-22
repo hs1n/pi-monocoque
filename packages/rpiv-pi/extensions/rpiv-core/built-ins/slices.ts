@@ -5,7 +5,7 @@
  */
 import { basename } from "node:path";
 import { parseFrontmatter } from "@earendil-works/pi-coding-agent";
-import { fanout, handleToString, type RunView } from "@juicesharp/rpiv-workflow/registration";
+import { fanout, handleToString, type RunView } from "@hs1n/rpiv-workflow/registration";
 import { countHeadingsOutsideFences } from "./markdown-fence.js";
 import { haltPreflight, latestFsArtifact, MAX_PHASES, type PhaseRecord, readArtifactFile } from "./shared.js";
 

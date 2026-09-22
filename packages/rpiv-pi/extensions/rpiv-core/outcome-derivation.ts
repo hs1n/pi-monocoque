@@ -6,12 +6,12 @@
  * onto `produces` stages that lack an explicit `outcome`. Eliminates the 19
  * manual `rpivBucketOutcome(...)` restatements in `built-in-workflows.ts`.
  *
- * Registered via `registerOutcomeDeriver` (from `@juicesharp/rpiv-workflow/startup`)
+ * Registered via `registerOutcomeDeriver` (from `@hs1n/rpiv-workflow/startup`)
  * so the loader invokes it after `buildEffectiveContracts` and before the
  * validation loop — see `load/index.ts`.
  */
 
-import type { OutcomeDeriverFn } from "@juicesharp/rpiv-workflow/registration";
+import type { OutcomeDeriverFn } from "@hs1n/rpiv-workflow/registration";
 import { rpivBucketOutcome } from "./artifact-collector.js";
 import { isModuleNotFound } from "./utils.js";
 
@@ -135,7 +135,7 @@ export const deriveOutcomes: OutcomeDeriverFn = (workflows, skillContracts, onIs
  */
 export async function registerOutcomeDerivation(): Promise<void> {
 	try {
-		const { registerOutcomeDeriver } = await import("@juicesharp/rpiv-workflow/startup");
+		const { registerOutcomeDeriver } = await import("@hs1n/rpiv-workflow/startup");
 		registerOutcomeDeriver(deriveOutcomes);
 	} catch (err) {
 		if (isModuleNotFound(err)) return; // sibling absent — /rpiv-setup prompts the user

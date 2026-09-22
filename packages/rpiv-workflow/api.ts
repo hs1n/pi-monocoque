@@ -3,7 +3,7 @@
  * Users import everything they need (`defineWorkflow`, `produces`, `acts`,
  * `defineRoute`, `gate`, `STOP`, `marksReadsData`, schema adapters, plus the
  * type vocabulary `Workflow` / `StageDef` / `EdgeFn` / `EdgeTarget` /
- * `EdgeContext`) from `@juicesharp/rpiv-workflow`.
+ * `EdgeContext`) from `@hs1n/rpiv-workflow`.
  *
  * A `Workflow` is a typed graph: a named entry point, a stage table, and an
  * edge table that maps each stage to either another stage name, the sentinel

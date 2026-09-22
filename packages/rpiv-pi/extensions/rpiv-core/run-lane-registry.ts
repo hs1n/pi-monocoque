@@ -16,7 +16,7 @@
 
 import type { ExtensionUIContext } from "@earendil-works/pi-coding-agent";
 
-import type { RunRecap } from "@juicesharp/rpiv-workflow";
+import type { RunRecap } from "@hs1n/rpiv-workflow";
 
 import { addLaneUsage, type LaneUsage, toLaneUsage } from "./lane-usage.js";
 import { emitQuestionAsked, emitQuestionResolved } from "./question-lifecycle.js";
@@ -266,7 +266,7 @@ interface RegistryState {
 	focusedRunId: string | undefined;
 }
 
-const REGISTRY_SLOT = Symbol.for("@juicesharp/rpiv-pi:runLaneRegistry");
+const REGISTRY_SLOT = Symbol.for("@hs1n/rpiv-pi:runLaneRegistry");
 
 /** Read the single process-global registry state, lazily creating it on first access. */
 function state(): RegistryState {

@@ -1,4 +1,4 @@
-import { buildSessionEntries, createMockCtx, createMockPi, makeTodoToolResult } from "@juicesharp/rpiv-test-utils";
+import { buildSessionEntries, createMockCtx, createMockPi, makeTodoToolResult } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 const overlayMock = vi.hoisted(() => ({

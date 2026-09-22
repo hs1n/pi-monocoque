@@ -946,7 +946,7 @@ describe("agent enablement injection (install-gated, config-driven)", () => {
 	// --- E2E through the sync engine (real settings + models.json reads) ---
 
 	it("e2e gate on: sync injects, re-sync reports unchanged, manifest records hash-after-transform", () => {
-		writeSettings(["npm:@juicesharp/rpiv-web-tools"]);
+		writeSettings(["npm:@hs1n/rpiv-web-tools"]);
 		writeModels(ENABLE_CFG);
 
 		const r1 = syncBundledAgents(true);
@@ -965,7 +965,7 @@ describe("agent enablement injection (install-gated, config-driven)", () => {
 	});
 
 	it("e2e gate flip: un-edited dests auto-update back to the raw source form", () => {
-		writeSettings(["npm:@juicesharp/rpiv-web-tools"]);
+		writeSettings(["npm:@hs1n/rpiv-web-tools"]);
 		writeModels(ENABLE_CFG);
 		syncBundledAgents(true);
 		expect(dest(SCANNER)).toContain("ext:rpiv-web-tools/");
@@ -994,7 +994,7 @@ describe("agent enablement injection (install-gated, config-driven)", () => {
 		};
 
 		// Gate on: files hold exactly the expected transformed form → cleaned.
-		writeSettings(["npm:@juicesharp/rpiv-web-tools"]);
+		writeSettings(["npm:@hs1n/rpiv-web-tools"]);
 		writeModels(ENABLE_CFG);
 		buildLegacyInstall(syncContext());
 		const cleaned = cleanupPerCwdAgents(cwd);

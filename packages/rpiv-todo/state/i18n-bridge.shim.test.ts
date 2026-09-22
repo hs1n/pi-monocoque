@@ -2,13 +2,13 @@
  * Regression tests for the i18n soft-peer dynamic-load shim.
  *
  * The shim has two halves:
- *   - bridge module (this directory) — `await import("@juicesharp/rpiv-i18n")`
+ *   - bridge module (this directory) — `await import("@hs1n/rpiv-i18n")`
  *     inside try/catch; on failure, `t` becomes an identity passthrough.
  *   - extension entry point (../index.ts) — `await import(...)` wraps the
  *     `registerStrings(...)` call; on failure, no-op.
  *
  * Both must use a DYNAMIC import. A static
- *     import { ... } from "@juicesharp/rpiv-i18n";
+ *     import { ... } from "@hs1n/rpiv-i18n";
  * is hoisted to module-load and throws `Cannot find module` if the SDK isn't
  * installed (standalone install of just this package), taking the entire
  * extension offline. These tests guard against that regression by reading
@@ -28,11 +28,11 @@ import { describe, expect, it } from "vitest";
 const PACKAGE_DIR = dirname(dirname(fileURLToPath(import.meta.url)));
 const BRIDGE = resolve(PACKAGE_DIR, "state/i18n-bridge.ts");
 const ENTRY = resolve(PACKAGE_DIR, "index.ts");
-const SDK_SPECIFIER = "@juicesharp/rpiv-i18n";
+const SDK_SPECIFIER = "@hs1n/rpiv-i18n";
 
 // The specifier may carry an optional subpath (e.g. `/loader`) — the entry
-// point uses `@juicesharp/rpiv-i18n/loader` to avoid pulling the UI module
-// into the load graph; the bridge uses the bare `@juicesharp/rpiv-i18n`
+// point uses `@hs1n/rpiv-i18n/loader` to avoid pulling the UI module
+// into the load graph; the bridge uses the bare `@hs1n/rpiv-i18n`
 // specifier for runtime lookup. Both forms must be dynamic-imported.
 const SDK_SPECIFIER_PATTERN = String.raw`${SDK_SPECIFIER}(?:/[\w-]+)?`;
 const STATIC_IMPORT = new RegExp(
@@ -77,7 +77,7 @@ describe("i18n soft-peer shim — source shape", () => {
 // Held in a variable so TypeScript treats the specifier as dynamic — a literal
 // string here would trip TS2307 ("cannot find module") at compile time even
 // though the test deliberately wants the resolution to fail at runtime.
-const MISSING_SDK_SPECIFIER = "@juicesharp/__definitely-not-installed__";
+const MISSING_SDK_SPECIFIER = "@hs1n/__definitely-not-installed__";
 
 describe("i18n soft-peer shim — runtime fallback contract", () => {
 	it("await import() of a non-existent specifier rejects (catchable)", async () => {

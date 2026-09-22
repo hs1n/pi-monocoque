@@ -1,5 +1,5 @@
 import type { ExtensionAPI, ExtensionUIContext } from "@earendil-works/pi-coding-agent";
-import { createMockPi, createMockUI } from "@juicesharp/rpiv-test-utils";
+import { createMockPi, createMockUI } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { showLaneConsole } from "./lane-console.js";
 import { createLaneRelayUiContext } from "./lane-relay-ui.js";

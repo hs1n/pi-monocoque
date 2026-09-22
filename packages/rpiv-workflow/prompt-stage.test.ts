@@ -13,7 +13,7 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createMockPi, createMockSessionChain, mockAssistantMessage } from "@juicesharp/rpiv-test-utils";
+import { createMockPi, createMockSessionChain, mockAssistantMessage } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { acts, defineWorkflow, produces } from "./api.js";
 import { fs as fsHandle, handleToString } from "./handle.js";

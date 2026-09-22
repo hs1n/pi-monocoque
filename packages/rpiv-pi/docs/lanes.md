@@ -58,7 +58,7 @@ While a question has focus, `esc` hands the keys back to the lane spine and leav
 question deferred — it stays parked until you come back to it. The footer in that state
 reads `esc → lanes · answer in the question above`.
 
-Install [`@juicesharp/rpiv-warp`](https://www.npmjs.com/package/@juicesharp/rpiv-warp)
+Install [`@hs1n/rpiv-warp`](https://www.npmjs.com/package/@hs1n/rpiv-warp)
 if you want parked questions to also raise a "Blocked" badge in Warp. It is entirely
 opt-in; without it nothing changes.
 

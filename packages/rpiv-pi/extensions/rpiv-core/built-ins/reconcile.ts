@@ -10,7 +10,7 @@
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, isAbsolute, join } from "node:path";
-import { handleToString, type Output, type ScriptContext } from "@juicesharp/rpiv-workflow/registration";
+import { handleToString, type Output, type ScriptContext } from "@hs1n/rpiv-workflow/registration";
 import { phaseFiles, planPhaseRecords, withTestTwins } from "./plan-phases.js";
 import { classifyApplication, type ReconciliationDirective, reconciliationRecords } from "./reconcile-directives.mjs";
 import {

@@ -5,7 +5,7 @@
  */
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { modelKey, parseModelKey } from "@juicesharp/rpiv-config";
+import { modelKey, parseModelKey } from "@hs1n/rpiv-config";
 import { loadAdvisorConfig, validateDisabledForModels } from "./config.js";
 import { reconcileAdvisorTool } from "./handlers.js";
 import {

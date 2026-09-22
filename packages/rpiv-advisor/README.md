@@ -1,12 +1,12 @@
-# @juicesharp/rpiv-advisor
+# @hs1n/rpiv-advisor
 
-[![npm version](https://img.shields.io/npm/v/@juicesharp/rpiv-advisor.svg)](https://www.npmjs.com/package/@juicesharp/rpiv-advisor)
+[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-advisor.svg)](https://www.npmjs.com/package/@hs1n/rpiv-advisor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
-  <a href="https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-advisor">
+  <a href="https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-advisor">
     <picture>
-      <img src="https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-advisor/docs/cover.png" alt="rpiv-advisor cover: an executor model calling advisor() and a stronger reviewer answering with a plan, a correction, or a stop signal" width="50%">
+      <img src="https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-advisor/docs/cover.png" alt="rpiv-advisor cover: an executor model calling advisor() and a stronger reviewer answering with a plan, a correction, or a stop signal" width="50%">
     </picture>
   </a>
 </div>
@@ -16,7 +16,7 @@ Let the model you're working with hand its whole conversation to a second, stron
 ## Install
 
 ```sh
-pi install npm:@juicesharp/rpiv-advisor
+pi install npm:@hs1n/rpiv-advisor
 ```
 
 Restart your Pi session.
@@ -38,7 +38,7 @@ tool goes live for this and every future session.
 If the model you want isn't in the list, its provider isn't authenticated yet —
 run Pi's `/login` for that provider, then re-run `/advisor`.
 
-![The /advisor picker: a bordered panel titled "Advisor Tool" above a scrollable list of the models Pi has credentials for, with the current selection highlighted](https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-advisor/docs/advisor.jpg)
+![The /advisor picker: a bordered panel titled "Advisor Tool" above a scrollable list of the models Pi has credentials for, with the current selection highlighted](https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-advisor/docs/advisor.jpg)
 
 From there the executor model calls `advisor()` on its own when it needs stronger
 judgment. To turn it back off, run `/advisor` and choose **No advisor**.
@@ -97,8 +97,8 @@ write leaves your previous selection untouched and tells you so.
 
 ## Reference
 
-- [Configuration](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-advisor/docs/configuration.md) — config file resolution, every key, blocklist matching rules, guidance overrides, and the full notification catalogue.
-- [`advisor` tool reference](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-advisor/docs/tool-reference.md) — schema, result envelope, failure paths, what gets sent to the reviewer, lifecycle hooks, and picker keys.
+- [Configuration](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-advisor/docs/configuration.md) — config file resolution, every key, blocklist matching rules, guidance overrides, and the full notification catalogue.
+- [`advisor` tool reference](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-advisor/docs/tool-reference.md) — schema, result envelope, failure paths, what gets sent to the reviewer, lifecycle hooks, and picker keys.
 
 ## Requirements
 
@@ -118,10 +118,10 @@ write leaves your previous selection untouched and tells you so.
 
 ## Related
 
-- [`@juicesharp/rpiv-pi`](https://www.npmjs.com/package/@juicesharp/rpiv-pi) —
+- [`@hs1n/rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi) —
   the umbrella package; its `code-review` skill calls `advisor()` when this
   package is installed.
 
 ## License
 
-MIT — see [LICENSE](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-advisor/LICENSE).
+MIT — see [LICENSE](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-advisor/LICENSE).

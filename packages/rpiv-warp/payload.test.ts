@@ -1,4 +1,4 @@
-import { buildSessionEntries, createMockCtx, makeAssistantMessage, makeUserMessage } from "@juicesharp/rpiv-test-utils";
+import { buildSessionEntries, createMockCtx, makeAssistantMessage, makeUserMessage } from "@hs1n/rpiv-test-utils";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
 	AGENT_ID,

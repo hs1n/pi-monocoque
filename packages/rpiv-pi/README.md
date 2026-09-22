@@ -1,11 +1,11 @@
-# @juicesharp/rpiv-pi
+# @hs1n/rpiv-pi
 
-[![npm version](https://img.shields.io/npm/v/@juicesharp/rpiv-pi.svg)](https://www.npmjs.com/package/@juicesharp/rpiv-pi)
+[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-pi.svg)](https://www.npmjs.com/package/@hs1n/rpiv-pi)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
-  <a href="https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-pi">
-    <img src="https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-pi/docs/cover.png" alt="rpiv-pi cover art showing the six-stage skill pipeline: discover, research, design, plan, implement, validate" width="70%">
+  <a href="https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi">
+    <img src="https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-pi/docs/cover.png" alt="rpiv-pi cover art showing the six-stage skill pipeline: discover, research, design, plan, implement, validate" width="70%">
   </a>
 </div>
 
@@ -20,7 +20,7 @@ structured, reviewable multi-stage work instead of one very long chat turn.
 ## Install
 
 ```sh
-pi install npm:@juicesharp/rpiv-pi
+pi install npm:@hs1n/rpiv-pi
 ```
 
 Restart your Pi session.
@@ -120,7 +120,7 @@ no overrides.
 | [Pi Agent](https://github.com/badlogic/pi-mono) | The host. Install it globally so `pi` is on your PATH |
 | A model provider | Pi's own `/login` or `~/.pi/agent/models.json` — see [docs/models-config.md](./docs/models-config.md) |
 | [`@tintinweb/pi-subagents`](https://www.npmjs.com/package/@tintinweb/pi-subagents) | Supplies the `Agent` tool. Without it the parallel-analysis skills cannot dispatch. Installed by `/rpiv-setup` |
-| [`@juicesharp/rpiv-workflow`](https://www.npmjs.com/package/@juicesharp/rpiv-workflow) | Supplies `/wf`. Without it the four built-in workflows do not register. Installed by `/rpiv-setup` |
+| [`@hs1n/rpiv-workflow`](https://www.npmjs.com/package/@hs1n/rpiv-workflow) | Supplies `/wf`. Without it the four built-in workflows do not register. Installed by `/rpiv-setup` |
 | `git` *(optional)* | Branch, commit, and user context. If it fails, injection is skipped and nothing else changes |
 | Node.js 22+ | Runtime for Pi and rpiv-pi's bundled scripts |
 
@@ -142,18 +142,18 @@ You need no build step and no native dependency.
 ## Related
 
 `/rpiv-setup` installs the ones marked auto; the rest are standalone
-`pi install npm:@juicesharp/rpiv-<name>`.
+`pi install npm:@hs1n/rpiv-<name>`.
 
 | Package | Role | Auto |
 | --- | --- | :---: |
-| [`@juicesharp/rpiv-workflow`](https://www.npmjs.com/package/@juicesharp/rpiv-workflow) | `/wf` runner — chains skills into typed multi-stage pipelines | ✓ |
-| [`@juicesharp/rpiv-args`](https://www.npmjs.com/package/@juicesharp/rpiv-args) | `$1` / `$ARGUMENTS` placeholders in skill bodies | ✓ |
-| [`@juicesharp/rpiv-ask-user-question`](https://www.npmjs.com/package/@juicesharp/rpiv-ask-user-question) | Structured questionnaires back to you | ✓ |
-| [`@juicesharp/rpiv-todo`](https://www.npmjs.com/package/@juicesharp/rpiv-todo) | Live task overlay surviving `/reload` | ✓ |
-| [`@juicesharp/rpiv-advisor`](https://www.npmjs.com/package/@juicesharp/rpiv-advisor) | Escalate to a stronger reviewer model | ✓ |
-| [`@juicesharp/rpiv-web-tools`](https://www.npmjs.com/package/@juicesharp/rpiv-web-tools) | Web search + fetch with pluggable providers | ✓ |
-| [`@juicesharp/rpiv-i18n`](https://www.npmjs.com/package/@juicesharp/rpiv-i18n) | Localization SDK for the rpiv TUI strings | ✓ |
-| [`@juicesharp/rpiv-warp`](https://www.npmjs.com/package/@juicesharp/rpiv-warp) | Warp Blocked badge on parked lane questions | — |
+| [`@hs1n/rpiv-workflow`](https://www.npmjs.com/package/@hs1n/rpiv-workflow) | `/wf` runner — chains skills into typed multi-stage pipelines | ✓ |
+| [`@hs1n/rpiv-args`](https://www.npmjs.com/package/@hs1n/rpiv-args) | `$1` / `$ARGUMENTS` placeholders in skill bodies | ✓ |
+| [`@hs1n/rpiv-ask-user-question`](https://www.npmjs.com/package/@hs1n/rpiv-ask-user-question) | Structured questionnaires back to you | ✓ |
+| [`@hs1n/rpiv-todo`](https://www.npmjs.com/package/@hs1n/rpiv-todo) | Live task overlay surviving `/reload` | ✓ |
+| [`@hs1n/rpiv-advisor`](https://www.npmjs.com/package/@hs1n/rpiv-advisor) | Escalate to a stronger reviewer model | ✓ |
+| [`@hs1n/rpiv-web-tools`](https://www.npmjs.com/package/@hs1n/rpiv-web-tools) | Web search + fetch with pluggable providers | ✓ |
+| [`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n) | Localization SDK for the rpiv TUI strings | ✓ |
+| [`@hs1n/rpiv-warp`](https://www.npmjs.com/package/@hs1n/rpiv-warp) | Warp Blocked badge on parked lane questions | — |
 
 ## License
 

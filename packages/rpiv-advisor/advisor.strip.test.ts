@@ -1,5 +1,5 @@
 import type { Message } from "@earendil-works/pi-ai";
-import { makeAssistantMessage, makeToolResult, makeUserMessage } from "@juicesharp/rpiv-test-utils";
+import { makeAssistantMessage, makeToolResult, makeUserMessage } from "@hs1n/rpiv-test-utils";
 import { describe, expect, it } from "vitest";
 import { ensureUserTailForAdvisor, stripInflightAdvisorCall } from "./advisor/index.js";
 

@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { fs as fsHandle, type ParseContext } from "@juicesharp/rpiv-workflow/registration";
+import { fs as fsHandle, type ParseContext } from "@hs1n/rpiv-workflow/registration";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { elaborationOutcome, elaborationParser, elaborationStructure } from "./elaboration.js";
 import { openFenceLine } from "./markdown-fence.js";

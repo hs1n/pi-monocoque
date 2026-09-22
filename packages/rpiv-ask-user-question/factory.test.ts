@@ -1,5 +1,5 @@
 import { CURSOR_MARKER, getKeybindings } from "@earendil-works/pi-tui";
-import { createMockPi } from "@juicesharp/rpiv-test-utils";
+import { createMockPi } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerAskUserQuestionTool } from "./ask-user-question.js";
 import type { QuestionAnswer, QuestionnaireResult } from "./tool/types.js";

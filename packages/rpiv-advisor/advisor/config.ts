@@ -2,11 +2,11 @@
  * config — persisted advisor config (~/.config/rpiv-advisor/advisor.json) and
  * the provider:id key codec. Owns the AdvisorConfig shape and load/validate/save.
  * The modelKey (join) / parseModelKey (split) inverse pair the codec relies on
- * lives in @juicesharp/rpiv-config.
+ * lives in @hs1n/rpiv-config.
  */
 
-import type { GuidanceFields } from "@juicesharp/rpiv-config";
-import { configPath, loadJsonConfigWithLegacyFallback, saveJsonConfig } from "@juicesharp/rpiv-config";
+import type { GuidanceFields } from "@hs1n/rpiv-config";
+import { configPath, loadJsonConfigWithLegacyFallback, saveJsonConfig } from "@hs1n/rpiv-config";
 import { EFFORT_ORDINAL, type GradedEffort } from "./messages.js";
 
 const ADVISOR_CONFIG_PATH = configPath("rpiv-advisor", "advisor.json");

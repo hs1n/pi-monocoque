@@ -1,7 +1,7 @@
 import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
-import { createMockCtx, createMockPi, stubGitExec, writeGuidanceTree } from "@juicesharp/rpiv-test-utils";
+import { createMockCtx, createMockPi, stubGitExec, writeGuidanceTree } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("./package-checks.js", () => ({
@@ -106,8 +106,8 @@ describe("session_start hook — notifications", () => {
 	it("warns about missing siblings with npm: prefix stripped", async () => {
 		vi.mocked(syncBundledAgents).mockReturnValueOnce(emptySync);
 		vi.mocked(findMissingSiblings).mockReturnValueOnce([
-			{ pkg: "npm:@juicesharp/rpiv-advisor", matches: /./, provides: "x" },
-			{ pkg: "npm:@juicesharp/rpiv-args", matches: /./, provides: "y" },
+			{ pkg: "npm:@hs1n/rpiv-advisor", matches: /./, provides: "x" },
+			{ pkg: "npm:@hs1n/rpiv-args", matches: /./, provides: "y" },
 		] as never);
 		const { pi, captured } = createMockPi({ exec: stubGitExec({}) as never });
 		registerSessionHooks(pi);
@@ -117,8 +117,8 @@ describe("session_start hook — notifications", () => {
 		expect(warnCall).toBeDefined();
 		expect((warnCall![0] as string).startsWith("\n")).toBe(true);
 		expect(warnCall?.[0]).toContain("rpiv-pi: 2 sibling extensions missing");
-		expect(warnCall?.[0]).toContain("@juicesharp/rpiv-advisor");
-		expect(warnCall?.[0]).toContain("@juicesharp/rpiv-args");
+		expect(warnCall?.[0]).toContain("@hs1n/rpiv-advisor");
+		expect(warnCall?.[0]).toContain("@hs1n/rpiv-args");
 		expect(warnCall?.[0]).toContain("Run /rpiv-setup to install them.");
 		expect(warnCall?.[0]).toContain("╭");
 		expect(warnCall?.[0]).toContain("╯");
@@ -128,7 +128,7 @@ describe("session_start hook — notifications", () => {
 	it("skips notifications when !hasUI", async () => {
 		vi.mocked(syncBundledAgents).mockReturnValueOnce({ ...emptySync, added: ["a.md"] });
 		vi.mocked(findMissingSiblings).mockReturnValueOnce([
-			{ pkg: "npm:@juicesharp/rpiv-todo", matches: /./, provides: "t" },
+			{ pkg: "npm:@hs1n/rpiv-todo", matches: /./, provides: "t" },
 		] as never);
 		const { pi, captured } = createMockPi({ exec: stubGitExec({}) as never });
 		registerSessionHooks(pi);

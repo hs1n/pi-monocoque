@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Syncs ALL @juicesharp/rpiv-* intra-monorepo package dependency versions
+ * Syncs ALL @hs1n/rpiv-* intra-monorepo package dependency versions
  * to match their current versions. Enforces lockstep versioning.
  *
  * Runs `dependencies` and `devDependencies` only — `peerDependencies:"*"`

@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { createMockPi } from "@juicesharp/rpiv-test-utils";
+import { createMockPi } from "@hs1n/rpiv-test-utils";
 import { describe, expect, it } from "vitest";
 import {
 	ADVISOR_TOOL_NAME,

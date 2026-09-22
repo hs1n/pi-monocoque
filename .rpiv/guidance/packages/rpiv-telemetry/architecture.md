@@ -1,7 +1,7 @@
 # rpiv-telemetry
 
 ## Monorepo Context
-**Private** Pi extension in `rpiv-mono` (`"private": true` — bumped lockstep with the `@juicesharp/rpiv-*` family but **skipped at publish**). Not a sibling: absent from `siblings.ts`, not peer-pinned in `rpiv-pi`, never suggested by `/rpiv-setup`. Rides shared check/test/release infrastructure purely through filesystem auto-discovery (`packages/*` glob). MLflow observability for Pi Agent — auto-instruments lifecycle events and sub-agent activity.
+**Private** Pi extension in `rpiv-mono` (`"private": true` — bumped lockstep with the `@hs1n/rpiv-*` family but **skipped at publish**). Not a sibling: absent from `siblings.ts`, not peer-pinned in `rpiv-pi`, never suggested by `/rpiv-setup`. Rides shared check/test/release infrastructure purely through filesystem auto-discovery (`packages/*` glob). MLflow observability for Pi Agent — auto-instruments lifecycle events and sub-agent activity.
 
 ## Responsibility
 A telemetry pipeline: it subscribes to Pi lifecycle + pi-subagents EventBus events, normalizes them into a provider-agnostic `TelemetryEvent` stream, and fans that stream out to configured sinks (console for debug, MLflow for real tracing). The central, non-obvious design constraint is **lazy-load cold-start discipline** — the Pi extension path must never eagerly evaluate `@mlflow/core` (~325ms).
@@ -9,7 +9,7 @@ A telemetry pipeline: it subscribes to Pi lifecycle + pi-subagents EventBus even
 ## Dependencies
 - **`@earendil-works/pi-coding-agent`** (peer): `ExtensionAPI`, lifecycle events + EventBus
 - **`typebox`** (runtime dep): config schema + EventBus payload validation
-- **`@juicesharp/rpiv-config`** (runtime dep): `loadJsonConfigWithLegacyFallback` reads config XDG-first (`XDG_CONFIG_HOME`) with a one-way fallback to the legacy `~/.config` path when the XDG file is absent; `configPath` remains only for the save path (`saveJsonConfig`)
+- **`@hs1n/rpiv-config`** (runtime dep): `loadJsonConfigWithLegacyFallback` reads config XDG-first (`XDG_CONFIG_HOME`) with a one-way fallback to the legacy `~/.config` path when the XDG file is absent; `configPath` remains only for the save path (`saveJsonConfig`)
 - **`@mlflow/core`** (runtime dep): trace/span primitives — loaded lazily, never at extension start
 
 ## Module Structure

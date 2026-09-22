@@ -1,5 +1,5 @@
 /**
- * Inject rpiv-pi's bundled skill contracts into the @juicesharp/rpiv-workflow
+ * Inject rpiv-pi's bundled skill contracts into the @hs1n/rpiv-workflow
  * registry. Mirrors register-built-in-workflows.ts: rpiv-workflow is a SIBLING
  * (peerDependency a clean install does not pull), so we NEVER statically import
  * it at runtime — a lazy provider behind a dynamic import, no-op when absent.
@@ -14,12 +14,7 @@
 import { readFileSync, realpathSync } from "node:fs";
 import { isAbsolute, relative, sep } from "node:path";
 import { getAgentDir, loadSkills, loadSkillsFromDir, parseFrontmatter } from "@earendil-works/pi-coding-agent";
-import type {
-	ConsumesSpec,
-	ProducesSpec,
-	SchemaCompatResult,
-	SkillContract,
-} from "@juicesharp/rpiv-workflow/registration";
+import type { ConsumesSpec, ProducesSpec, SchemaCompatResult, SkillContract } from "@hs1n/rpiv-workflow/registration";
 import { BUNDLED_SKILLS_DIR } from "./paths.js";
 import { isModuleNotFound } from "./utils.js";
 
@@ -212,9 +207,7 @@ export function buildUserSkillContracts(cwd: string = process.cwd()): Array<[str
  */
 export async function registerUserSkillContractsSource(): Promise<void> {
 	try {
-		const { registerSkillContracts, registerSkillContractsProvider } = await import(
-			"@juicesharp/rpiv-workflow/startup"
-		);
+		const { registerSkillContracts, registerSkillContractsProvider } = await import("@hs1n/rpiv-workflow/startup");
 		registerSkillContractsProvider(() => {
 			registerSkillContracts(buildUserSkillContracts(), "user-skills");
 		});
@@ -233,7 +226,7 @@ export async function registerUserSkillContractsSource(): Promise<void> {
 export async function registerSkillContractsSource(): Promise<void> {
 	try {
 		const { registerCompositionComparator, registerSkillContracts, registerSkillContractsProvider } = await import(
-			"@juicesharp/rpiv-workflow/startup"
+			"@hs1n/rpiv-workflow/startup"
 		);
 		registerCompositionComparator("plans", artifactKindComparator);
 		registerSkillContractsProvider(() => {
@@ -246,7 +239,7 @@ export async function registerSkillContractsSource(): Promise<void> {
 		// Register the contract-derived outcome resolver so `produces` stages
 		// auto-wire `rpivBucketOutcome(bucket)` from `artifactKind` at load time.
 		// Dynamic import (not static): `outcome-derivation.js` pulls in
-		// `artifact-collector.js`, which value-imports `@juicesharp/rpiv-workflow/registration`
+		// `artifact-collector.js`, which value-imports `@hs1n/rpiv-workflow/registration`
 		// at module-eval. A static edge would make THAT a load-time requirement of the
 		// whole extension — so when the sibling is absent or not co-located, rpiv-core
 		// fails to load entirely (the bug in #66). Deferring it here keeps the sibling

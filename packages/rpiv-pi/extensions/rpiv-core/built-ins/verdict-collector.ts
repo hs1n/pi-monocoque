@@ -40,7 +40,7 @@ import {
 	type RunView,
 	toolCallCollector,
 	transcriptPathCollector,
-} from "@juicesharp/rpiv-workflow/registration";
+} from "@hs1n/rpiv-workflow/registration";
 import { latestFsArtifact } from "./shared.js";
 
 /** The verdict dir listing at unit start — filename → mtimeMs. `undefined`

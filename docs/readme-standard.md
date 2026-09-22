@@ -56,7 +56,7 @@ that would be empty or padding.
 
 ### `# <npm package name>`
 
-The published name, `@juicesharp/rpiv-x` — that is what a reader searched for.
+The published name, `@hs1n/rpiv-x` — that is what a reader searched for.
 Badges go directly under the H1 (npm version, license), then the cover image.
 Badges at the bottom of a page are decoration; at the top they are metadata.
 
@@ -77,7 +77,7 @@ The one command, plus the restart note. Nothing else.
 
 ````md
 ```sh
-pi install npm:@juicesharp/rpiv-x
+pi install npm:@hs1n/rpiv-x
 ```
 
 Restart your Pi session.
@@ -129,7 +129,7 @@ Troubleshooting section is worse than none: it implies the package is fragile.
    metadata the registry already renders.
 4. **Tables for anything enumerable.** Config keys, providers, commands, flags.
    Prose for anything with a "because" in it.
-5. **Absolute image URLs.** `https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/<pkg>/docs/<file>` — relative paths break on npm. Every image gets meaningful alt text.
+5. **Absolute image URLs.** `https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/<pkg>/docs/<file>` — relative paths break on npm. Every image gets meaningful alt text.
 6. **Second person, present tense.** "You pick a model with `/advisor`", not "the
    user may configure an advisor model".
 7. **Facts only.** No aspirational features, no roadmap, no rationale essays. If a

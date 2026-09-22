@@ -1,6 +1,6 @@
 # Architecture and internals
 
-What `@juicesharp/rpiv-pi` registers into a Pi session, how it finds its siblings, and
+What `@hs1n/rpiv-pi` registers into a Pi session, how it finds its siblings, and
 how it injects context. Read this if you are debugging behavior you did not ask for, or
 extending the package.
 
@@ -106,21 +106,21 @@ enforces that.
 | Package | Provides |
 | --- | --- |
 | `@tintinweb/pi-subagents` | `Agent`, `get_subagent_result`, `steer_subagent` tools |
-| `@juicesharp/rpiv-ask-user-question` | `ask_user_question` tool |
-| `@juicesharp/rpiv-todo` | `todo` tool, `/todos`, overlay widget |
-| `@juicesharp/rpiv-advisor` | `advisor` tool and `/advisor` |
-| `@juicesharp/rpiv-i18n` | `/languages`, `--locale`, the i18n SDK |
-| `@juicesharp/rpiv-web-tools` | `web_search`, `web_fetch`, `/web-tools` |
-| `@juicesharp/rpiv-args` | `$N` / `$ARGUMENTS` substitution in skill bodies |
-| `@juicesharp/rpiv-workflow` | `/wf` and the workflow runner |
+| `@hs1n/rpiv-ask-user-question` | `ask_user_question` tool |
+| `@hs1n/rpiv-todo` | `todo` tool, `/todos`, overlay widget |
+| `@hs1n/rpiv-advisor` | `advisor` tool and `/advisor` |
+| `@hs1n/rpiv-i18n` | `/languages`, `--locale`, the i18n SDK |
+| `@hs1n/rpiv-web-tools` | `web_search`, `web_fetch`, `/web-tools` |
+| `@hs1n/rpiv-args` | `$N` / `$ARGUMENTS` substitution in skill bodies |
+| `@hs1n/rpiv-workflow` | `/wf` and the workflow runner |
 
 It installs them serially with a 120-second timeout each, previews every change in a
 confirmation dialog, and applies nothing until you confirm. It also prunes the
 superseded `pi-subagents` entry from `settings.json` when it finds one.
 
 Only two siblings are ever imported at runtime, both behind guarded dynamic imports that
-no-op silently when the module is absent: `@juicesharp/rpiv-workflow` (built-in
-workflows, execution host, skill contracts, lane progress) and `@juicesharp/rpiv-warp`
+no-op silently when the module is absent: `@hs1n/rpiv-workflow` (built-in
+workflows, execution host, skill contracts, lane progress) and `@hs1n/rpiv-warp`
 (the Blocked badge on parked questions, entirely opt-in).
 
 Registration order is load-bearing. The session hooks, `/rpiv-update-agents`, and
@@ -132,7 +132,7 @@ half-initialized barrel under jiti.
 ## Uninstall
 
 ```sh
-pi uninstall npm:@juicesharp/rpiv-pi
+pi uninstall npm:@hs1n/rpiv-pi
 ```
 
 Optionally `pi uninstall npm:@tintinweb/pi-subagents` if no other plugin needs it, then
@@ -141,5 +141,5 @@ restart Pi. Your `.rpiv/artifacts/` tree, `~/.config/rpiv-pi/models.json`, and
 
 ## Releasing
 
-Every `@juicesharp/rpiv-*` package ships in lockstep from the monorepo root via
+Every `@hs1n/rpiv-*` package ships in lockstep from the monorepo root via
 `node scripts/release.mjs`. Never run `npm version` inside this package.

@@ -7,7 +7,7 @@ describe("SIBLINGS registry", () => {
 	});
 
 	it("includes rpiv-workflow (the /wf runtime sibling)", () => {
-		expect(SIBLINGS.find((s) => s.pkg === "npm:@juicesharp/rpiv-workflow")).toBeDefined();
+		expect(SIBLINGS.find((s) => s.pkg === "npm:@hs1n/rpiv-workflow")).toBeDefined();
 	});
 
 	it("lists @tintinweb/pi-subagents at SIBLINGS[0]", () => {
@@ -19,7 +19,7 @@ describe("SIBLINGS registry", () => {
 	});
 
 	it("does NOT list rpiv-btw (standalone-only — rpiv-pi has no runtime dependency on it)", () => {
-		expect(SIBLINGS.find((s) => s.pkg === "npm:@juicesharp/rpiv-btw")).toBeUndefined();
+		expect(SIBLINGS.find((s) => s.pkg === "npm:@hs1n/rpiv-btw")).toBeUndefined();
 	});
 
 	for (const s of SIBLINGS) {
@@ -34,14 +34,14 @@ describe("SIBLINGS registry", () => {
 	it("rpiv-args does NOT match rpiv-args-extended (word boundary)", () => {
 		const argsEntry = SIBLINGS.find((s) => s.pkg.endsWith("/rpiv-args"));
 		expect(argsEntry).toBeDefined();
-		expect(argsEntry?.matches.test("@juicesharp/rpiv-args-extended")).toBe(false);
+		expect(argsEntry?.matches.test("@hs1n/rpiv-args-extended")).toBe(false);
 	});
 
 	it("rpiv-i18n does NOT match rpiv-i18n-utils (word boundary)", () => {
 		const i18nEntry = SIBLINGS.find((s) => s.pkg.endsWith("/rpiv-i18n"));
 		expect(i18nEntry).toBeDefined();
-		expect(i18nEntry?.matches.test("@juicesharp/rpiv-i18n-utils")).toBe(false);
-		expect(i18nEntry?.matches.test("@juicesharp/rpiv-i18n")).toBe(true);
+		expect(i18nEntry?.matches.test("@hs1n/rpiv-i18n-utils")).toBe(false);
+		expect(i18nEntry?.matches.test("@hs1n/rpiv-i18n")).toBe(true);
 	});
 
 	it("pi-subagents SIBLINGS[0] matches BOTH the @tintinweb/pi-subagents fork and the @gotgenes/pi-subagents fork", () => {
@@ -62,7 +62,7 @@ describe("SIBLINGS registry", () => {
 	it("pi-subagents SIBLINGS[0] regex does NOT match unrelated @-scoped pi-subagents-* variants", () => {
 		const subagentsEntry = SIBLINGS[0];
 		// Word-boundary guard: must not over-match a hypothetical future sibling
-		// such as `@juicesharp/pi-subagents-utils` (a dash right after the
+		// such as `@hs1n/pi-subagents-utils` (a dash right after the
 		// `pi-subagents` token is excluded via `(?![-\w])`).
 		expect(subagentsEntry?.matches.test("@tintinweb/pi-subagents-utils")).toBe(false);
 		expect(subagentsEntry?.matches.test("@gotgenes/pi-subagents-utils")).toBe(false);

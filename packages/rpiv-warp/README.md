@@ -1,11 +1,11 @@
-# @juicesharp/rpiv-warp
+# @hs1n/rpiv-warp
 
-[![npm version](https://img.shields.io/npm/v/@juicesharp/rpiv-warp.svg)](https://www.npmjs.com/package/@juicesharp/rpiv-warp)
+[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-warp.svg)](https://www.npmjs.com/package/@hs1n/rpiv-warp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
-  <a href="https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-warp">
-    <img src="https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-warp/docs/cover.png" alt="rpiv-warp cover: a Pi lifecycle event traced from the agent_end hook, through the OSC 777 escape sequence, into a delivered macOS toast reading 'Pi needs attention — Waiting for your answer'" width="60%">
+  <a href="https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-warp">
+    <img src="https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-warp/docs/cover.png" alt="rpiv-warp cover: a Pi lifecycle event traced from the agent_end hook, through the OSC 777 escape sequence, into a delivered macOS toast reading 'Pi needs attention — Waiting for your answer'" width="60%">
   </a>
 </div>
 
@@ -20,7 +20,7 @@ and nothing else installs it for you.
 ## Install
 
 ```sh
-pi install npm:@juicesharp/rpiv-warp
+pi install npm:@hs1n/rpiv-warp
 ```
 
 Restart your Pi session.
@@ -81,10 +81,10 @@ extension registers, so restart Pi after editing it.
 
 ## Reference
 
-- [Event reference](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-warp/docs/events.md)
+- [Event reference](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-warp/docs/events.md)
   — every lifecycle handler and what it emits, the timer-driven events, the exact
   escape sequences, the full payload field list, and the workflow-question API.
-- [Detection and edge cases](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-warp/docs/detection.md)
+- [Detection and edge cases](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-warp/docs/detection.md)
   — the environment variables Warp sets, protocol negotiation, broken-build
   gating, Windows behavior, and what happens in every environment where nothing
   can be emitted.
@@ -114,7 +114,7 @@ itself.
 
 ## Related
 
-- [`@juicesharp/rpiv-pi`](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-pi)
+- [`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi)
   — drives the per-run workflow-question badges when both are installed, and
   keeps `rpiv-warp` out of detached workflow child sessions.
 

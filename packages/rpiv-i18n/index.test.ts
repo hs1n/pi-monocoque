@@ -10,7 +10,7 @@
 
 import { mkdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { createMockCtx, createMockPi } from "@juicesharp/rpiv-test-utils";
+import { createMockCtx, createMockPi } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("./i18n-ui.js", () => ({

@@ -39,7 +39,7 @@ const extractShell = (notice: string): string => {
 // Reused fixture body — a minimal valid pack-file workflow. Uses an absolute
 // path to the package's `api.ts` (mirroring load.test.ts:87-90) because jiti
 // resolves imports from the loaded file's location, and the loaded file lives
-// in os.tmpdir() where bare specifiers like "@juicesharp/rpiv-workflow" have
+// in os.tmpdir() where bare specifiers like "@hs1n/rpiv-workflow" have
 // no node_modules chain back to the workspace.
 const importApi = `import { defineWorkflow, acts } from "${join(__dirname, "api.ts")}";`;
 const legacyConfigBody =

@@ -5,7 +5,7 @@
 
 import type { Api, Model } from "@earendil-works/pi-ai";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { modelKey, parseModelKey } from "@juicesharp/rpiv-config";
+import { modelKey, parseModelKey } from "@hs1n/rpiv-config";
 import type { DisabledForModelsEntry } from "./config.js";
 import { EFFORT_ORDINAL, type GradedEffort } from "./messages.js";
 

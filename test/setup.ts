@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { configPath } from "@juicesharp/rpiv-config";
+import { configPath } from "@hs1n/rpiv-config";
 import { beforeEach, vi } from "vitest";
 
 const TEST_HOME = mkdtempSync(join(tmpdir(), "rpiv-test-home-"));
@@ -74,7 +74,7 @@ beforeEach(async () => {
 	const args = await import("../packages/rpiv-args/args.js");
 	args.invalidateSkillIndex();
 
-	const workflowInternal = await import("@juicesharp/rpiv-workflow/internal");
+	const workflowInternal = await import("@hs1n/rpiv-workflow/internal");
 	workflowInternal.__resetBuiltIns();
 	workflowInternal.__resetLoadCache();
 	workflowInternal.__resetLifecycleRegistry();

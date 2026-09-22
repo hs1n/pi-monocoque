@@ -2,7 +2,7 @@
  * The grade panels: the shared tiered panel factory, its build-lane instances,
  * and ship's bespoke tier-independent panel and verdict channel.
  */
-import { fanout, handleToString, type RunView } from "@juicesharp/rpiv-workflow/registration";
+import { fanout, handleToString, type RunView } from "@hs1n/rpiv-workflow/registration";
 import {
 	dimensionsToRegrade,
 	freshVerdicts,

@@ -10,7 +10,7 @@ User-invocable AI workflow definitions. Each `SKILL.md` is a structured prompt i
 - **Pi framework**: reads `"skills": ["./skills"]` from `package.json`; injects SKILL.md body as system context on invocation
 - **Sibling plugins**: provide the tools skills call (`ask_user_question`, `todo`, `advisor`, `web_search`/`web_fetch`, the `Agent` dispatcher)
 - **`extensions/rpiv-core/`**: session-time guidance/git-context injection, bundled-agent sync; registers each skill's `contract:` frontmatter into the rpiv-workflow registry (`skill-contracts-source.ts`) and injects the session-start pipeline index (`pipeline-pointer.ts`)
-- **`@juicesharp/rpiv-args`**: substitutes `$N`/`$ARGUMENTS`/`$@`/`${@:N[:L]}` placeholders in skill bodies before they reach the agent loop; on the token path it also emits the raw argument string in a `Skill input:`-labeled trailer after the skill block so supplied input is never misread as empty (issue #89)
+- **`@hs1n/rpiv-args`**: substitutes `$N`/`$ARGUMENTS`/`$@`/`${@:N[:L]}` placeholders in skill bodies before they reach the agent loop; on the token path it also emits the raw argument string in a `Skill input:`-labeled trailer after the skill block so supplied input is never misread as empty (issue #89)
 
 ## Consumers
 - **Users**: `/skill:<name>` invokes the matching skill. Most pipeline-stage/fanout skills declare `disable-model-invocation: true` — hidden from the model's skill list, they run only on explicit invocation or workflow dispatch; the model-visible set is the utility/annotation skills (annotate-guidance, annotate-inline, changelog, code-review, commit, create-handoff, migrate-to-guidance, pr-triage, resume-handoff). A compact stage-command index injected at session start keeps hidden stages discoverable

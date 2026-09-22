@@ -6,7 +6,7 @@ Pure state machine for the questionnaire dialog. Owns the canonical shape, the k
 ## Dependencies
 - **`../tool/types.ts`** — `QuestionAnswer`, `QuestionData`, `QuestionParams`, `QuestionnaireResult` (canonical I/O)
 - **`../view/components/wrapping-select.ts`** — `WrappingSelectItem` (the row-kind union; `RowKind = WrappingSelectItem["kind"]`)
-- **`@juicesharp/rpiv-i18n`** — only via `i18n-bridge.ts`
+- **`@hs1n/rpiv-i18n`** — only via `i18n-bridge.ts`
 - **`@earendil-works/pi-tui`** — `Key`/`matchesKey` (`key-router.ts`), `Editor`/`OverlayHandle` (session + builder); **`@earendil-works/pi-coding-agent`** — `Theme`, `getMarkdownTheme` (builder). The core files above stay pi-free
 
 ## Consumers

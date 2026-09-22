@@ -1,12 +1,12 @@
-# @juicesharp/rpiv-voice
+# @hs1n/rpiv-voice
 
-[![npm version](https://img.shields.io/npm/v/@juicesharp/rpiv-voice.svg)](https://www.npmjs.com/package/@juicesharp/rpiv-voice)
+[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-voice.svg)](https://www.npmjs.com/package/@hs1n/rpiv-voice)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
-  <a href="https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-voice">
+  <a href="https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-voice">
     <picture>
-      <img src="https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-voice/docs/cover.png" alt="rpiv-voice cover: a mocked /voice overlay showing a live transcript, an equalizer strip, and the status row" width="50%">
+      <img src="https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-voice/docs/cover.png" alt="rpiv-voice cover: a mocked /voice overlay showing a live transcript, an equalizer strip, and the status row" width="50%">
     </picture>
   </a>
 </div>
@@ -19,7 +19,7 @@ through sherpa-onnx Whisper (base multilingual int8) — no cloud, no API key, n
 ## Install
 
 ```sh
-pi install npm:@juicesharp/rpiv-voice
+pi install npm:@hs1n/rpiv-voice
 ```
 
 Restart your Pi session.
@@ -32,7 +32,7 @@ Type `/voice`. The first run downloads the Whisper model (~198 MB, ~157 MB on di
 Then talk. Committed text appears as you finish phrases, with a dim trailing partial for
 the sentence you are still speaking.
 
-![The /voice overlay above the Pi prompt: a committed transcript line, a teal divider, and the status row reading 0:14 with the Enter, Space, Tab and Esc hints](https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-voice/docs/overlay.jpg)
+![The /voice overlay above the Pi prompt: a committed transcript line, a teal divider, and the status row reading 0:14 with the Enter, Space, Tab and Esc hints](https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-voice/docs/overlay.jpg)
 
 | Key | Action |
 | --- | --- |
@@ -60,7 +60,7 @@ If you have remapped Pi's confirm/cancel keys, the overlay follows your remap.
   repetition-loop detector, and an input-side energy floor. Toggle it off when you are
   dictating single words.
 - **Localized UI in nine languages** — `de`, `en`, `es`, `fr`, `pt`, `pt-BR`, `ru`, `uk`,
-  `zh`. With [`@juicesharp/rpiv-i18n`](https://www.npmjs.com/package/@juicesharp/rpiv-i18n)
+  `zh`. With [`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n)
   installed, `/languages` flips the overlay strings without a restart; without it the
   extension still loads, English-only.
 
@@ -83,9 +83,9 @@ The microphone is the OS default input and the model is fixed — neither is sel
 
 ## Reference
 
-- [Configuration](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-voice/docs/configuration.md) — every key, the XDG path rules, file permissions, the diagnostic log, and how the recognition language is chosen.
-- [Keys and screens](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-voice/docs/keybindings.md) — the full key table for both screens, the remappable bindings, and exactly what `Enter` pastes and `Space` pauses.
-- [Model install and platform support](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-voice/docs/model.md) — the first-run pipeline, the files on disk, failure recovery, and the prebuilt-binary matrix.
+- [Configuration](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-voice/docs/configuration.md) — every key, the XDG path rules, file permissions, the diagnostic log, and how the recognition language is chosen.
+- [Keys and screens](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-voice/docs/keybindings.md) — the full key table for both screens, the remappable bindings, and exactly what `Enter` pastes and `Space` pauses.
+- [Model install and platform support](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-voice/docs/model.md) — the first-run pipeline, the files on disk, failure recovery, and the prebuilt-binary matrix.
 
 ## Requirements
 
@@ -117,13 +117,13 @@ The microphone is the OS default input and the model is fixed — neither is sel
 
 ## Related
 
-- [`@juicesharp/rpiv-i18n`](https://www.npmjs.com/package/@juicesharp/rpiv-i18n) —
-  optional. Install it with `pi install npm:@juicesharp/rpiv-i18n` to localize the
+- [`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n) —
+  optional. Install it with `pi install npm:@hs1n/rpiv-i18n` to localize the
   overlay and enable `/languages`.
-- [`@juicesharp/rpiv-pi`](https://www.npmjs.com/package/@juicesharp/rpiv-pi) — the
+- [`@hs1n/rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi) — the
   umbrella package and `/rpiv-setup`. It does not install `rpiv-voice`; this package is
   opt-in and installed explicitly.
 
 ## License
 
-MIT — see [LICENSE](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-voice/LICENSE).
+MIT — see [LICENSE](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-voice/LICENSE).

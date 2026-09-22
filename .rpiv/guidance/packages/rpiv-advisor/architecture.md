@@ -1,7 +1,7 @@
 # rpiv-advisor
 
 ## Monorepo Context
-Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@juicesharp/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`.
+Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`.
 
 ## Responsibility
 Single-tool extension implementing the advisor-strategy pattern: registers an `advisor` tool (zero parameters) and the matching slash command. When the executor calls `advisor()`, the tool serializes the current conversation branch and forwards it to a separately-configured reviewer model (typically a stronger reviewer). The tool is registered at load but kept inactive until a model is selected; selection persists at the XDG-resolved `configPath("rpiv-advisor", "advisor.json")` (chmod 0600); reads fall back one-way to the legacy `~/.config` file via `loadJsonConfigWithLegacyFallback` only when no file exists at the XDG path.
@@ -10,7 +10,7 @@ Single-tool extension implementing the advisor-strategy pattern: registers an `a
 - **`@earendil-works/pi-coding-agent`** (peer): `ExtensionAPI`, branch-to-LLM converter, dynamic border
 - **`@earendil-works/pi-ai`** (peer): `Model`/`Api`/`ThinkingLevel` types plus a static value import of `getSupportedThinkingLevels` (`advisor/command.ts` effort picker); only `completeSimple` is resolved at runtime by `advisor/pi-compat.ts`
 - **`@earendil-works/pi-tui`** (peer): containers, select list, layout primitives
-- **`@juicesharp/rpiv-config`** (dependency): `validateGuidanceFields` (persisted prompt overrides), `modelKey`/`parseModelKey` (config codec + blocklist canonicalization)
+- **`@hs1n/rpiv-config`** (dependency): `validateGuidanceFields` (persisted prompt overrides), `modelKey`/`parseModelKey` (config codec + blocklist canonicalization)
 - **`typebox`** (dependency, `^1.1.24`): empty parameter schema — a runtime dep, not a peer, so tools still register under installers that don't materialize peers
 
 ## Consumers

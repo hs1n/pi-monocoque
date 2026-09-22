@@ -1,4 +1,4 @@
-import { createMockPi } from "@juicesharp/rpiv-test-utils";
+import { createMockPi } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import registerTodo from "./index.js";
 import { getState, replaceState } from "./state/store.js";

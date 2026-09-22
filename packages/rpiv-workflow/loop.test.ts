@@ -18,7 +18,7 @@ import {
 	createMockPi,
 	createMockSessionChain,
 	mockAssistantMessage,
-} from "@juicesharp/rpiv-test-utils";
+} from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	acts,

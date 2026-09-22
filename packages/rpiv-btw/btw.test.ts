@@ -4,7 +4,7 @@ import {
 	createMockPi,
 	makeAssistantMessage,
 	makeUserMessage,
-} from "@juicesharp/rpiv-test-utils";
+} from "@hs1n/rpiv-test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@earendil-works/pi-ai", async (importOriginal) => {

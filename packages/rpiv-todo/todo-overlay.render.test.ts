@@ -1,7 +1,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import type { ExtensionUIContext } from "@earendil-works/pi-coding-agent";
-import { createMockCtx, createMockPi, createMockUI } from "@juicesharp/rpiv-test-utils";
+import { createMockCtx, createMockPi, createMockUI } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { __resetState, registerTodoTool, setActiveRenderSession, type TaskAction } from "./todo.js";
 import { TodoOverlay } from "./todo-overlay.js";

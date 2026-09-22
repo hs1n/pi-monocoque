@@ -12,7 +12,7 @@
  */
 
 import { join } from "node:path";
-import { configPath } from "@juicesharp/rpiv-config";
+import { configPath } from "@hs1n/rpiv-config";
 
 export interface OverlayPaths {
 	/** Config file — the only place `default` may live. */

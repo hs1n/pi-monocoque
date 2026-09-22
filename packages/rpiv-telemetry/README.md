@@ -1,4 +1,4 @@
-# @juicesharp/rpiv-telemetry
+# @hs1n/rpiv-telemetry
 
 Records what a [Pi Agent](https://github.com/badlogic/pi-mono) session did — every
 turn, tool call, LLM request, and sub-agent run — as MLflow traces you can inspect
@@ -49,7 +49,7 @@ Env vars override the file's MLflow credentials ([`docs/configuration.md`](docs/
 
 ## Used by
 
-Its one sibling dependency is [`rpiv-config`](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-config), for config load, save, and validation.
+Its one sibling dependency is [`rpiv-config`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-config), for config load, save, and validation.
 The root Vitest harness calls `teardownTelemetry()` before every test for isolation — a harness coupling, not a runtime one.
 
 ## Conventions

@@ -18,7 +18,7 @@
  */
 
 import type { ExtensionAPI, ExtensionUIContext, ModelRegistry } from "@earendil-works/pi-coding-agent";
-import { parseModelKey } from "@juicesharp/rpiv-config";
+import { parseModelKey } from "@hs1n/rpiv-config";
 import { isLaneRelayUiContext } from "./lane-relay-ui.js";
 import type { ModelThinkingLevelValue } from "./models-config.js";
 import { isStaleCtxError } from "./utils.js";

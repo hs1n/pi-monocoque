@@ -1,10 +1,10 @@
 # API reference
 
-Every export of `@juicesharp/rpiv-test-utils`, grouped by module. `index.ts` re-exports all ten
+Every export of `@hs1n/rpiv-test-utils`, grouped by module. `index.ts` re-exports all ten
 modules, so everything below is reachable from a single bare-name import:
 
 ```ts
-import { createMockPi, makeTheme, stubFetch } from "@juicesharp/rpiv-test-utils";
+import { createMockPi, makeTheme, stubFetch } from "@hs1n/rpiv-test-utils";
 ```
 
 `verifyShipManifest` has its own page: [ship-manifest.md](./ship-manifest.md).

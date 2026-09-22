@@ -1,11 +1,11 @@
-# @juicesharp/rpiv-workflow
+# @hs1n/rpiv-workflow
 
-[![npm version](https://img.shields.io/npm/v/@juicesharp/rpiv-workflow.svg)](https://www.npmjs.com/package/@juicesharp/rpiv-workflow)
+[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-workflow.svg)](https://www.npmjs.com/package/@hs1n/rpiv-workflow)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
-  <a href="https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-workflow">
-    <img src="https://raw.githubusercontent.com/juicesharp/rpiv-mono/main/packages/rpiv-workflow/docs/cover.png" alt="rpiv-workflow cover art — a five-node stage diagram running research to plan to review to a blockers gate to commit, with a dashed revise edge looping back to plan" width="50%">
+  <a href="https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-workflow">
+    <img src="https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-workflow/docs/cover.png" alt="rpiv-workflow cover art — a five-node stage diagram running research to plan to review to a blockers gate to commit, with a dashed revise edge looping back to plan" width="50%">
   </a>
 </div>
 
@@ -15,12 +15,12 @@ each stage in its own detached session, validates its output against a schema,
 routes between stages on predicates over the previous stage's data, and appends
 each step to a resumable JSONL trail. It ships **zero** workflows — write your own
 in `.rpiv/workflows/config.ts`, or install
-[`@juicesharp/rpiv-pi`](https://www.npmjs.com/package/@juicesharp/rpiv-pi) for five.
+[`@hs1n/rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi) for five.
 
 ## Install
 
 ```sh
-pi install npm:@juicesharp/rpiv-workflow
+pi install npm:@hs1n/rpiv-workflow
 ```
 
 Restart your Pi session.
@@ -32,7 +32,7 @@ own. The fastest way to see a real run is the sibling that bundles both skills
 and workflows:
 
 ```sh
-pi install npm:@juicesharp/rpiv-pi
+pi install npm:@hs1n/rpiv-pi
 ```
 
 ```
@@ -46,7 +46,7 @@ To write your own instead, put a workflow at `.rpiv/workflows/config.ts` naming
 skills already on your machine (check `~/.pi/agent/skills/`):
 
 ```ts
-import { defineWorkflow, acts, terminal } from "@juicesharp/rpiv-workflow";
+import { defineWorkflow, acts, terminal } from "@hs1n/rpiv-workflow";
 
 export default defineWorkflow({
   name: "review-and-ship",
@@ -59,7 +59,7 @@ export default defineWorkflow({
 Each stage key is the skill name; `acts()` runs a skill for its side effects,
 `terminal()` does the same for a stage that carries nothing forward. Schemas,
 artifact outcomes, and predicate routing are in the
-[authoring reference](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-workflow/docs/workflow-authoring.md).
+[authoring reference](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-workflow/docs/workflow-authoring.md).
 
 | Command | What it does |
 | --- | --- |
@@ -116,9 +116,9 @@ The stage knobs most people touch:
 
 ## Reference
 
-- [Workflow basics](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-workflow/docs/workflow-basics.md) — `/wf` invocation forms, `--name` and `@resume`, where every file resolves, layer merging, config vs pack files, skill aliases, run state, and the glossary.
-- [Authoring reference](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-workflow/docs/workflow-authoring.md) — the full DSL: stage factories, loops, `verify` / `panel`, script and prompt stages, edge targets, routing, outcomes with the collector and parser catalogs, multi-input stages, validators, and the load-time validation rules.
-- [Embedding](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-workflow/docs/embedding.md) — host ports, the entry-point map, `registerBuiltIns` / `registerLifecycle`, the programmatic runner and resume API, cancellation, triggers, and past-run inspection.
+- [Workflow basics](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-workflow/docs/workflow-basics.md) — `/wf` invocation forms, `--name` and `@resume`, where every file resolves, layer merging, config vs pack files, skill aliases, run state, and the glossary.
+- [Authoring reference](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-workflow/docs/workflow-authoring.md) — the full DSL: stage factories, loops, `verify` / `panel`, script and prompt stages, edge targets, routing, outcomes with the collector and parser catalogs, multi-input stages, validators, and the load-time validation rules.
+- [Embedding](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-workflow/docs/embedding.md) — host ports, the entry-point map, `registerBuiltIns` / `registerLifecycle`, the programmatic runner and resume API, cancellation, triggers, and past-run inspection.
 
 ## Requirements
 
@@ -127,10 +127,10 @@ stages dispatch through your host's session.
 
 ## Related
 
-- [`@juicesharp/rpiv-pi`](https://www.npmjs.com/package/@juicesharp/rpiv-pi) —
+- [`@hs1n/rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi) —
   supplies the detached SDK executor, the terminal-keystroke abort, and five
   bundled workflows (`ship`, `arch`, `vet`, `polish`, `build`).
 
 ## License
 
-MIT — see [LICENSE](https://github.com/juicesharp/rpiv-mono/blob/main/packages/rpiv-workflow/LICENSE).
+MIT — see [LICENSE](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-workflow/LICENSE).

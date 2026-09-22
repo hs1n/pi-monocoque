@@ -31,7 +31,7 @@ import {
 import { tmpdir } from "node:os";
 import { basename, dirname, isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createMockSessionChain, mockAssistantMessage } from "@juicesharp/rpiv-test-utils";
+import { createMockSessionChain, mockAssistantMessage } from "@hs1n/rpiv-test-utils";
 import {
 	acts,
 	defineRoute,
@@ -45,9 +45,9 @@ import {
 	runWorkflow,
 	validateWorkflow,
 	type Workflow,
-} from "@juicesharp/rpiv-workflow";
-import { type RunState, runsDir, stateFilePath, takeRouteNote } from "@juicesharp/rpiv-workflow/internal";
-import { fanin, fs as fsHandle, loopSpecOf, type ProgressValue } from "@juicesharp/rpiv-workflow/registration";
+} from "@hs1n/rpiv-workflow";
+import { type RunState, runsDir, stateFilePath, takeRouteNote } from "@hs1n/rpiv-workflow/internal";
+import { fanin, fs as fsHandle, loopSpecOf, type ProgressValue } from "@hs1n/rpiv-workflow/registration";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { rpivArtifactMdOutcome } from "./artifact-collector.js";
 import {
@@ -101,7 +101,7 @@ const DECLARED_CONTRACTS = new Map(buildSkillContractsFromFrontmatter(BUNDLED_SK
  */
 const deriveAndValidate = (
 	wf: Workflow,
-	opts?: { skillContracts?: Map<string, import("@juicesharp/rpiv-workflow/registration").SkillContract> },
+	opts?: { skillContracts?: Map<string, import("@hs1n/rpiv-workflow/registration").SkillContract> },
 ) => {
 	return validateWorkflow(withDerivedOutcomes(wf, opts?.skillContracts), opts);
 };
@@ -112,7 +112,7 @@ const deriveAndValidate = (
  */
 const withDerivedOutcomes = (
 	wf: Workflow,
-	skillContracts?: Map<string, import("@juicesharp/rpiv-workflow/registration").SkillContract>,
+	skillContracts?: Map<string, import("@hs1n/rpiv-workflow/registration").SkillContract>,
 ): Workflow => {
 	const mutable: Workflow = { ...wf, stages: { ...wf.stages } };
 	for (const [name, stage] of Object.entries(wf.stages)) {
@@ -522,7 +522,7 @@ describe("readers must not silently drop the first row when no header is on disk
 	});
 
 	it("readLastStage returns the row even when the header line is missing", async () => {
-		const { readLastStage } = await import("@juicesharp/rpiv-workflow");
+		const { readLastStage } = await import("@hs1n/rpiv-workflow");
 		const runId = "2026-05-23_13-05-38-abcd";
 		mkdirSync(runsDir(tmpDir), { recursive: true });
 		const filePath = stateFilePath(tmpDir, runId);
@@ -673,7 +673,7 @@ describe("recordStage signals success and advances stageNumber monotonically", (
 	});
 
 	it("returns the assigned stageNumber on a successful write", async () => {
-		const { recordStage } = await import("@juicesharp/rpiv-workflow/internal");
+		const { recordStage } = await import("@hs1n/rpiv-workflow/internal");
 		const state = freshState();
 		const assigned = recordStage(
 			tmpDir,
@@ -686,7 +686,7 @@ describe("recordStage signals success and advances stageNumber monotonically", (
 	});
 
 	it("returns undefined on a write failure but still advances lastAllocatedStageNumber (no number reuse)", async () => {
-		const { recordStage } = await import("@juicesharp/rpiv-workflow/internal");
+		const { recordStage } = await import("@hs1n/rpiv-workflow/internal");
 		const state = freshState();
 		const failedAssignment = recordStage(
 			"/dev/null/impossible",

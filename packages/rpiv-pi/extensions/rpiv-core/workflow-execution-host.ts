@@ -19,7 +19,7 @@
 
 import type { ExtensionAPI, ExtensionUIContext } from "@earendil-works/pi-coding-agent";
 import { SessionManager } from "@earendil-works/pi-coding-agent";
-import type { BranchEntry, ModelSelection, WorkflowHostContext } from "@juicesharp/rpiv-workflow";
+import type { BranchEntry, ModelSelection, WorkflowHostContext } from "@hs1n/rpiv-workflow";
 import { isLaneRelayUiContext } from "./lane-relay-ui.js";
 import { loadModelsConfig, resolveMaxConcurrency, resolveStageModel } from "./models-config.js";
 import { getFocusedRun, getLane, recordRun, retireRun, setLaneAbort } from "./run-lane-registry.js";
@@ -174,7 +174,7 @@ export function registerWorkflowExecutionHostProviderHook(pi: ExtensionAPI): voi
 export async function registerWorkflowExecutionHostProvider(): Promise<void> {
 	try {
 		// Thin `/startup` entry — keeps the loader/DSL/runner graph off startup.
-		const { registerWorkflowExecutionHost } = await import("@juicesharp/rpiv-workflow/startup");
+		const { registerWorkflowExecutionHost } = await import("@hs1n/rpiv-workflow/startup");
 		registerWorkflowExecutionHost({
 			createHost: createWorkflowExecution,
 			resolveModel: ({ workflow, stage, skill }) =>

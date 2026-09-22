@@ -8,7 +8,7 @@
  *
  * Before running:
  *   Draft [Unreleased] entries for every affected package's CHANGELOG.md.
- *   If you are inside a Pi session with @juicesharp/rpiv-pi loaded, run
+ *   If you are inside a Pi session with @hs1n/rpiv-pi loaded, run
  *   `/skill:changelog` — it regenerates [Unreleased] from git history
  *   (committed + uncommitted) in Keep a Changelog style. Otherwise hand-edit
  *   each packages/<pkg>/CHANGELOG.md before invoking this script. The release
@@ -167,7 +167,7 @@ function hasUnreleasedEntries() {
 console.log("\n=== rpiv-mono Release ===\n");
 
 console.log("Reminder: draft [Unreleased] entries before releasing.");
-console.log("  In a Pi session with @juicesharp/rpiv-pi loaded: run /skill:changelog");
+console.log("  In a Pi session with @hs1n/rpiv-pi loaded: run /skill:changelog");
 console.log("  Otherwise: hand-edit each packages/<pkg>/CHANGELOG.md\n");
 
 console.log("Checking for uncommitted changes...");

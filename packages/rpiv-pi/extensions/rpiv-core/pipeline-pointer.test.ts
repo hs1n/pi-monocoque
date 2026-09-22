@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { createMockPi } from "@juicesharp/rpiv-test-utils";
+import { createMockPi } from "@hs1n/rpiv-test-utils";
 import { describe, expect, it, vi } from "vitest";
 import { FLAG_DEBUG, MSG_TYPE_PIPELINE_INDEX } from "./constants.js";
 import { BUNDLED_SKILLS_DIR } from "./paths.js";

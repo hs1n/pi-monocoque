@@ -1,9 +1,9 @@
 /**
  * i18n bridge for rpiv-voice — single thin import surface so every translation
- * call site routes through one place. Backed by `@juicesharp/rpiv-i18n`'s SDK
+ * call site routes through one place. Backed by `@hs1n/rpiv-i18n`'s SDK
  * when available; degrades to canonical-English fallbacks when not.
  *
- * - `t(key, fallback)` is `scope("@juicesharp/rpiv-voice")` if the SDK is
+ * - `t(key, fallback)` is `scope("@hs1n/rpiv-voice")` if the SDK is
  *   installed (live `/languages` updates propagate). If the SDK is missing
  *   (standalone install without rpiv-i18n), `t` is an identity passthrough
  *   that returns the inline English fallback at every call site, so the
@@ -18,7 +18,7 @@
  * `const X = t(...)`.
  */
 
-export const I18N_NAMESPACE = "@juicesharp/rpiv-voice";
+export const I18N_NAMESPACE = "@hs1n/rpiv-voice";
 
 type ScopeFn = (key: string, fallback: string) => string;
 type LocaleFn = () => string | undefined;
@@ -39,7 +39,7 @@ type I18nSDK = {
 let scopeImpl: ScopeFn;
 let activeLocaleImpl: LocaleFn;
 try {
-	const sdk = (await import("@juicesharp/rpiv-i18n")) as I18nSDK;
+	const sdk = (await import("@hs1n/rpiv-i18n")) as I18nSDK;
 	scopeImpl = sdk.scope(I18N_NAMESPACE);
 	activeLocaleImpl = sdk.getActiveLocale;
 } catch {

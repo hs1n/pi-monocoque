@@ -11,7 +11,7 @@
  * the aggregate 0→≥1 / ≥1→0 transitions into OSC badge events.
  *
  * Instance-independent channel: the listener Set is anchored on a process-global
- * `Symbol.for("@juicesharp/rpiv-pi:questionLifecycle")` slot — NOT module-level
+ * `Symbol.for("@hs1n/rpiv-pi:questionLifecycle")` slot — NOT module-level
  * state. A detached workflow child re-loads rpiv-core and may get a SEPARATE
  * module instance; a module-local Set would split producers and consumers across
  * instances. The global slot guarantees every instance shares ONE stream,
@@ -83,7 +83,7 @@ interface LifecycleState {
 	readonly listeners: Set<QuestionLifecycleListener>;
 }
 
-const LIFECYCLE_SLOT = Symbol.for("@juicesharp/rpiv-pi:questionLifecycle");
+const LIFECYCLE_SLOT = Symbol.for("@hs1n/rpiv-pi:questionLifecycle");
 
 /** Read the single process-global lifecycle state, lazily creating it on first access. */
 function state(): LifecycleState {

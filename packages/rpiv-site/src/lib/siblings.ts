@@ -48,11 +48,14 @@ function readPkg(name: SiblingName): PkgJson {
 }
 
 /** Strip scopes from peer-dep names; drop internal sibling co-deps so the
- * catalog peer signature reads as "external runtime weight" only. */
+ * catalog peer signature reads as "external runtime weight" only.
+ * Scope-agnostic on purpose: this fork renamed the workspace scope, and a
+ * hardcoded one would leave `@<scope>/rpiv-*` names unstripped — they would then
+ * survive the `rpiv-` filter below and surface as external peers. */
 function shortPeers(peers: Record<string, string> | undefined): string[] {
 	if (!peers) return [];
 	return Object.keys(peers)
-		.map((p) => p.replace(/^@earendil-works\//, "").replace(/^@juicesharp\//, ""))
+		.map((p) => p.replace(/^@earendil-works\//, "").replace(/^@[^/]+\//, ""))
 		.filter((p) => !p.startsWith("rpiv-"));
 }
 

@@ -9,9 +9,9 @@ import type { Workflow } from "../api.js";
 import { globalSlot } from "../internal-utils.js";
 import type { CompositionComparator, SkillContractMap } from "../skill-contract.js";
 
-const COMPARATORS_KEY = Symbol.for("@juicesharp/rpiv-workflow:composition-comparators");
-const DERIVERS_KEY = Symbol.for("@juicesharp/rpiv-workflow:outcome-derivers");
-const BUCKETS_KEY = Symbol.for("@juicesharp/rpiv-workflow:bucket-kind-mappings");
+const COMPARATORS_KEY = Symbol.for("@hs1n/rpiv-workflow:composition-comparators");
+const DERIVERS_KEY = Symbol.for("@hs1n/rpiv-workflow:outcome-derivers");
+const BUCKETS_KEY = Symbol.for("@hs1n/rpiv-workflow:bucket-kind-mappings");
 
 /**
  * A callback that derives `Outcome` outcomes for `produces` stages from the
