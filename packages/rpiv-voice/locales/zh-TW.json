@@ -1,0 +1,50 @@
+{
+  "_meta.notes": "繁體中文（台灣）翻譯。按鍵名（Enter、Space、Tab、Esc、Ctrl-S）與專有名稱（STT、Whisper、voice.json）保留原文：前者是通用 CLI 慣例，後者是檔案／模型名稱。語音辨識的「逐字稿」用台灣慣用語 transcript。",
+
+  "command.description": "用語音輸入文字 — 本機 STT，不經雲端",
+
+  "error.requires_interactive": "/voice 需要互動模式",
+  "error.model_download_failed": "無法下載 STT 模型。請檢查網路連線。",
+  "error.model_extract_failed": "下載的 STT 模型壓縮檔已損毀，請重試。",
+  "error.model_verify_failed": "下載後 STT 模型檔案不完整，請重試。",
+  "error.model_stale_install": "STT 模型檔案已被移除或損毀，下次啟動時會重新下載。",
+  "error.engine_load_failed": "無法載入 STT 模型。",
+  "error.mic_unavailable": "麥克風無法使用。請確認已連接輸入裝置，且 Pi 已取得麥克風權限。",
+
+  "splash.preparing": "正在準備模型…",
+  "splash.downloading": "正在下載 Whisper…",
+  "splash.extracting": "正在解壓縮模型檔案…",
+  "splash.verifying": "正在驗證模型檔案…",
+  "splash.loading_engine": "正在載入語音模型…",
+  "splash.initializing_mic": "正在初始化麥克風…",
+
+  "footer.enter_paste": "Enter 貼上",
+  "footer.space_pause": "Space 暫停",
+  "footer.space_resume": "Space 繼續",
+  "footer.tab_settings": "Tab 開啟設定",
+  "footer.esc_cancel": "Esc 取消",
+  "footer.esc_back": "Esc 返回",
+  "footer.ctrl_s_save": "Ctrl-S 儲存",
+  "footer.enter_toggle": "Enter 切換",
+
+  "transcript.placeholder": "聆聽中…",
+
+  "notify.settings_saved": "語音設定已儲存",
+
+  "status.recording": "錄音中",
+  "status.paused": "已暫停",
+
+  "settings.microphone_label": "麥克風",
+  "settings.microphone_value_default": "系統預設輸入裝置",
+  "settings.language_label": "語言",
+  "settings.language_value_auto": "自動偵測",
+  "settings.language_hint": "執行 /languages 可變更。",
+  "settings.hallucination_filter_label": "過濾 Whisper 雜訊",
+  "settings.hallucination_filter_hint": "濾掉靜音片段的雜訊。逐字聽寫單字時可關閉。",
+
+  "settings.equalizer_label": "等化器",
+  "settings.equalizer_hint": "在逐字稿下方顯示即時音訊波形。預設關閉。",
+
+  "settings.threads_label": "執行緒",
+  "settings.threads_hint": "在 voice.json 設定 numThreads；重新執行 /voice 以套用。"
+}

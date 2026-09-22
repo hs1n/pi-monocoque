@@ -63,7 +63,8 @@ export const SUPPORTED_LOCALES: readonly { code: string; label: string }[] = [
 	{ code: "pt-BR", label: "Português (Brasil)" },
 	{ code: "ru", label: "Русский" },
 	{ code: "uk", label: "Українська" },
-	{ code: "zh", label: "中文" },
+	{ code: "zh", label: "简体中文" },
+	{ code: "zh-TW", label: "繁體中文" },
 ];
 
 // ---------------------------------------------------------------------------

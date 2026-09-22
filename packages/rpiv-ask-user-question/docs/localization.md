@@ -47,7 +47,8 @@ Nine locale files ship in `locales/`:
 | `pt-BR` | Português (Brasil) |
 | `ru` | Русский |
 | `uk` | Українська |
-| `zh` | 中文 |
+| `zh` | 简体中文 |
+| `zh-TW` | 繁體中文 |
 
 ## What is translated, and what is not
 

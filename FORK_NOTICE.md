@@ -36,6 +36,22 @@ than behavioral changes:
   site that looks like the upstream one.
 - Codecov upload removed from `.github/workflows/ci.yml` (it required upstream's OIDC
   identity and failed the build in a fork).
+- **The workspace scope is `@hs1n`, not `@juicesharp`.** Every reference that describes
+  *this* repo's packages — package names, dependencies, peers, source imports, per-package
+  READMEs and docs, per-package agent guidance — was retargeted by
+  `scripts/fork-rename-scope.mjs`, which is parameterized because the authoritative scope is
+  whatever npm account owns it (`npm whoami`). **Nothing has been published under it yet.**
+  Each `package.json` also carries `author: hs1n` plus a `contributors` entry for
+  juicesharp, so upstream authorship survives into published metadata and not just LICENSE.
+  Files that describe *upstream* — this notice, `README.md`, `.rpiv/guidance/architecture.md`,
+  `packages/rpiv-site/**`, and the per-package `CHANGELOG.md` bodies — were deliberately left
+  naming `@juicesharp` and upstream's repo URLs, because they are records of or statements
+  about upstream rather than about this fork's artifacts.
+- **`zh-TW` (繁體中文) joined the locale picker**, with `locales/zh-TW.json` in
+  `rpiv-todo`, `rpiv-ask-user-question`, and `rpiv-voice`; the ambiguous `zh` label now reads
+  `简体中文`. Upstream's own `zh.json` maps are untouched — note that they are three keys
+  behind `en.json` in `rpiv-ask-user-question` (`review.global_hint`, `review.note_label`,
+  `notes.global_header`), which fall back to English.
 
 Anything added later on top of this list is documented in the commit history.
 
@@ -44,8 +60,8 @@ Anything added later on top of this list is documented in the commit history.
 `rpiv`, `rpiv-pi`, `juicesharp`, `rpiv-pi.com`, and the npm scope **`@juicesharp`** identify
 the upstream project and its author. This fork:
 
-- does **not** publish anything to npm under `@juicesharp` (that scope is not ours and
-  `npm publish` would be rejected),
+- uses its own scope **`@hs1n`** for the packages it builds, and does **not** publish anything
+  to npm under `@juicesharp` (that scope is not ours and `npm publish` would be rejected),
 - does **not** operate `rpiv-pi.com`, and
 - will not present itself as the upstream project.
 
@@ -53,8 +69,12 @@ The GitHub repository name `pi-monocoque` is deliberately distinct from upstream
 
 ## Upstream prose in this repository
 
-`README.md`, `roadmap.md`, `docs/`, and the per-package READMEs are upstream's original text
-and are preserved verbatim so attribution stays intact. Sections such as *Roadmap*,
+`README.md`, `roadmap.md`, and the root `docs/` are upstream's original text and are
+preserved verbatim so attribution stays intact — except that the upstream repo's own package
+tables in `README.md` still name `@juicesharp`, which is correct: that is what exists on npm
+today. The per-package READMEs and `docs/` files under `packages/` keep upstream's prose but
+have their package-name and repo-URL references retargeted to this fork's `@hs1n` scope by
+`scripts/fork-rename-scope.mjs`. Sections such as *Roadmap*,
 *Who built this*, *Contributions*, and *Status and expectations* — including the statements
 about Codemasters International and the author's professional role — express the **upstream
 author's** views, not those of this fork's maintainer. They are kept as-is for provenance,

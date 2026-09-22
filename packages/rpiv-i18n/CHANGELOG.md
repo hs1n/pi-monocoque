@@ -7,6 +7,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **`zh-TW` (繁體中文) becomes a supported locale.** The picker previously offered a single `zh` entry whose label was just `中文`, which left a Traditional-Chinese reader no way to tell which script they would get — the shipped maps are Simplified. `SUPPORTED_LOCALES` now carries `{ code: "zh-TW", label: "繁體中文" }`, so `--locale zh-TW` and `/languages` both reach it. The SDK needs no registration of its own (the picker reads `SUPPORTED_LOCALES` directly); the consuming packages ship `locales/zh-TW.json`.
+
+### Changed
+
+- **The `zh` label reads `简体中文` instead of `中文`.** Same list, same code, same maps — only the ambiguous label changed, so the two Chinese entries are now distinguishable by script rather than by trial. Alphabetical order by code is preserved (`zh`, then `zh-TW`).
+
 ## [2.11.0] - 2026-09-21
 
 ## [2.10.1] - 2026-09-13

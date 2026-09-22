@@ -51,7 +51,8 @@ pi --locale uk
 | `pt-BR` | Português (Brasil) |
 | `ru` | Русский |
 | `uk` | Українська |
-| `zh` | 中文 |
+| `zh` | 简体中文 |
+| `zh-TW` | 繁體中文 |
 
 To localize your own extension, add `@hs1n/rpiv-i18n` to your
 `peerDependencies` (marked optional), then at extension load:

@@ -1,0 +1,19 @@
+{
+  "_meta.notes": "繁體中文（台灣）翻譯。用語採台灣慣例（待辦事項、備註、互動模式）。{key} 是執行期插入的按鍵提示，必須保留。",
+
+  "status.pending": "待處理",
+  "status.in_progress": "進行中",
+  "status.completed": "已完成",
+  "status.deleted": "已刪除",
+
+  "overlay.heading": "待辦事項",
+  "overlay.more": "更多",
+  "overlay.expandHint": "按 {key} 展開",
+  "overlay.collapsed": "已收合",
+
+  "command.no_todos": "尚無待辦事項。可以請 agent 新增一些！",
+  "command.requires_interactive": "/todos 需要互動模式",
+  "command.section.pending": "── 待處理 ──",
+  "command.section.in_progress": "── 進行中 ──",
+  "command.section.completed": "── 已完成 ──"
+}

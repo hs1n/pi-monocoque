@@ -7,6 +7,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **`locales/zh-TW.json`.** Traditional Chinese for the overlay and `/todos` chrome, covering the full current key set (13) — `registerLocalesFromDir` picks the file up with no code change, since it iterates the SDK's `SUPPORTED_LOCALES`. Terminology follows Taiwan usage (`待辦事項`, `待處理`, `已收合`, `互動模式`) rather than a character-by-character conversion of the Simplified map, and the `{key}` placeholder in `overlay.expandHint` is preserved so the runtime substitution still fires.
+
 ## [2.11.0] - 2026-09-21
 
 ## [2.10.1] - 2026-09-13

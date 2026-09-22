@@ -7,6 +7,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **`locales/zh-TW.json`.** Traditional Chinese for the `/voice` overlay, the settings screen, the splash stages and the model-download errors — all 37 current keys. Key names, `STT`/`Whisper`, and the `voice.json` field name stay untranslated (they are printed as keycaps or name real artifacts), while the surrounding copy follows Taiwan usage (`逐字稿`, `麥克風`, `執行緒`, `儲存`). The file is picked up by `registerLocalesFromDir` with no `index.ts` edit.
+
 ## [2.11.0] - 2026-09-21
 
 ## [2.10.1] - 2026-09-13
