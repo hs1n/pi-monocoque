@@ -55,12 +55,9 @@ Eleven exports, all stateless — no singletons, no caches, no import-time side 
 | [`rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi) | Path resolution, model-key codec, schema validation for model config |
 | [`rpiv-advisor`](https://www.npmjs.com/package/@hs1n/rpiv-advisor) | Model-key codec, guidance fields, config load/save |
 | [`rpiv-web-tools`](https://www.npmjs.com/package/@hs1n/rpiv-web-tools) | Provider config load/save, guidance schema and validation |
-| [`rpiv-telemetry`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-telemetry) (internal, never published) | Config load/save, schema validation, env-var reads |
-| [`rpiv-voice`](https://www.npmjs.com/package/@hs1n/rpiv-voice) | Config load/save |
 | [`rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n) | Config load/save |
 | [`rpiv-todo`](https://www.npmjs.com/package/@hs1n/rpiv-todo) | Config load, guidance fields |
 | [`rpiv-ask-user-question`](https://www.npmjs.com/package/@hs1n/rpiv-ask-user-question) | Config load, guidance fields |
-| [`rpiv-warp`](https://www.npmjs.com/package/@hs1n/rpiv-warp) | Config load |
 | [`rpiv-workflow`](https://www.npmjs.com/package/@hs1n/rpiv-workflow) | Path resolution |
 
 These are versioned in lockstep with this package.

@@ -42,8 +42,8 @@ single module root. Upstream deliberately ships them as separate packages
 ([`docs/packages.md`](https://github.com/juicesharp/rpiv-mono/blob/main/docs/packages.md):
 *"Pi loads packages with separate module roots, so separate installs do not collide"*),
 and `rpiv-pi`'s detached-child loader reads each sibling's own manifest flag
-(`pi.ambientObserver`, set by `rpiv-warp`) from the owning package's `package.json`.
-Flattening them changes that behavior. Not worth it.
+(`pi.ambientObserver`) from the owning package's `package.json`. Flattening them
+changes that behavior. Not worth it.
 
 ## Install
 
@@ -59,7 +59,7 @@ cd ~/src/pi-monocoque && npm install
 # 3. Install the pipeline into Pi.
 scripts/fork-pi-install.sh                 # global
 scripts/fork-pi-install.sh -l              # project-local (./.pi/settings.json)
-scripts/fork-pi-install.sh --with btw,voice,warp,telemetry
+scripts/fork-pi-install.sh --with btw
 scripts/fork-pi-install.sh --dry-run
 ```
 

@@ -27,8 +27,6 @@
 		"includes": [
 			"packages/*/**/*.ts",
 			"packages/*/**/*.js",
-			"packages/rpiv-site/**/*.css",
-			"packages/rpiv-site/**/*.html",
 			"scripts/**/*.js",
 			"scripts/**/*.mjs",
 			"test/**/*.ts",

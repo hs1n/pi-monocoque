@@ -39,11 +39,11 @@ The layout tree, per-package responsibilities, and the private/opt-in roster are
 where something lives.
 
 ## Layout and build model
-- **Build model**: `noEmit: true` everywhere. Packages publish raw `.ts` (Pi loads `.ts` directly via the `pi` manifest). No `dist/`, no per-package tsconfig.json — one shared `tsconfig.base.json` (rpiv-site has its own, excluded from it).
-- **Plugin discovery**: each extension package's `package.json` carries a `pi` field — `pi.extensions: ["./index.ts"]` (`["./extension.ts"]` for rpiv-workflow/rpiv-telemetry; `["./extensions"]` for rpiv-pi) and optionally `pi.skills: ["./skills"]`; non-extension packages (rpiv-config, rpiv-site, test-utils) have no `pi` field. Pi loads the default-exported function with an `ExtensionAPI` instance.
+- **Build model**: `noEmit: true` everywhere. Packages publish raw `.ts` (Pi loads `.ts` directly via the `pi` manifest). No `dist/`, no per-package tsconfig.json — one shared `tsconfig.base.json`.
+- **Plugin discovery**: each extension package's `package.json` carries a `pi` field — `pi.extensions: ["./index.ts"]` (`["./extension.ts"]` for rpiv-workflow; `["./extensions"]` for rpiv-pi) and optionally `pi.skills: ["./skills"]`; non-extension packages (rpiv-config, test-utils) have no `pi` field. Pi loads the default-exported function with an `ExtensionAPI` instance.
 - **Sibling registry**: `packages/rpiv-pi/extensions/rpiv-core/siblings.ts` is the single source of truth. Adding an entry here propagates to `/rpiv-setup`, missing-plugin warnings, and presence detection (regex over `~/.pi/agent/settings.json`). A parallel `LEGACY_SIBLINGS` registry drives prune-on-upgrade for superseded packages. **No runtime imports of siblings** — Phase 1 zero-cross-imports contract.
-- **Opt-in extensions**: a published sibling becomes opt-in by being **absent from `siblings.ts`** (and from `rpiv-pi/package.json` `peerDependencies`). It still rides lockstep + shared CI infrastructure via the `packages/*` glob, but `/rpiv-setup` won't suggest it — users install it explicitly with `pi install`.
-- **Test runner**: Vitest at repo root; one runner with `include: ['packages/*/**/*.test.ts']` discovers every test file; `test/setup.ts` runs once per worker before any test file imports. Coverage excludes `**/index.ts`, `packages/test-utils/**`, `packages/rpiv-site/**`, and `packages/rpiv-telemetry/**`. No per-package vitest configs.
+- **Opt-in extensions**: a published sibling becomes opt-in by being **absent from `siblings.ts`** (and from `rpiv-pi/package.json` `peerDependencies`). It still rides lockstep + shared CI infrastructure via the `packages/*` glob, but `/rpiv-setup` won't suggest it — users install it explicitly with `pi install`. `rpiv-btw` is the one remaining opt-in sibling. **This fork deleted `rpiv-voice`, `rpiv-warp`, `rpiv-telemetry`, and `rpiv-site`** — see `FORK_NOTICE.md`; anything still naming them (a stray `--with` flag, a doc table) is stale.
+- **Test runner**: Vitest at repo root; one runner with `include: ['packages/*/**/*.test.ts']` discovers every test file; `test/setup.ts` runs once per worker before any test file imports. Coverage excludes `**/index.ts` and `packages/test-utils/**`. No per-package vitest configs.
 
 ## Commands
 
@@ -54,10 +54,9 @@ where something lives.
 | `npx tsc --noEmit -p tsconfig.base.json` | **Read-only whole-tree typecheck** (no formatter side effects) — use when a write-scoped probe must not rewrite files outside its own set |
 | `npm run check:files -- <paths...>` | Path-scoped Biome (`--write --error-on-warnings`) — rewrites ONLY the paths it is given; **the path-scoped auto-fix lint form** a phase's `#### Automated Verification:` uses to stay write-scoped to its own `files:` set |
 | `npm test` / `npm run coverage` | Vitest at root (single runner) / with V8 coverage |
-| `npm run build:site` | Build the Astro marketing site (`packages/rpiv-site`) — separate from publish |
 | `node scripts/release.mjs <patch\|minor\|major\|x.y.z>` | Cut a lockstep release — see `.rpiv/guidance/scripts/architecture.md` |
 | `node scripts/sync-versions.js` | Verify lockstep + rewrite intra-monorepo deps to `^<version>` |
-| `bash scripts/fork-pi-install.sh [-l] [--with btw,voice,warp,telemetry]` | **Fork-only.** Install this fork's packages into Pi by local path — the only supported install path here. See `INSTALL-FORK.md` |
+| `bash scripts/fork-pi-install.sh [-l] [--with btw]` | **Fork-only.** Install this fork's packages into Pi by local path — the only supported install path here. See `INSTALL-FORK.md` |
 | `node scripts/fork-license-audit.mjs .` | **Fork-only.** Dependency license inventory + copyleft/unknown flagging (Node built-ins only, no npx) |
 | `node scripts/fork-rename-scope.mjs <@scope>` | **Fork-only.** Rewrite the npm scope across the repo (idempotent, `--report` / `--dry-run`) |
 | `node scripts/fork-own-skill.mjs <skill> [--list] [--check] [--remove <skill>]` | **Fork-only.** Copy a bundled skill into `~/.agents/skills` so it shadows the package one, carrying its `_shared/` deps |

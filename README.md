@@ -24,6 +24,10 @@ Fifteen packages in one npm workspace: the **rpiv-pi** pipeline, the [Pi Agent](
 
 ## Packages
 
+> **This fork deleted four of the packages described below — `rpiv-site`, `rpiv-telemetry`,
+> `rpiv-voice`, `rpiv-warp`. See `FORK_NOTICE.md`.** The prose below is upstream's and is left
+> intact as a record of upstream; the corresponding rows are struck from the tables.
+
 The pipeline needs most of them. **rpiv-args** expands shell-style `$1` and `$ARGUMENTS` placeholders inside skills, **rpiv-ask-user-question** lets the model put a structured questionnaire to the user instead of guessing, **rpiv-todo** keeps a live task overlay that survives `/reload` and compaction, **rpiv-advisor** escalates to a stronger reviewer model before the agent acts, **rpiv-web-tools** gives the model web search and fetch with pluggable providers, and **rpiv-workflow** chains skills into typed multi-stage pipelines (audited JSONL state, predicate routing, per-stage output validation) and ships the `/wf` command Pi calls to run them. A few exist because I wanted them inside Pi: **rpiv-btw** is a side-conversation pattern I got used to in Claude Code, **rpiv-voice** is on-device dictation for when I'd rather talk than type, and **rpiv-warp** integrates Pi with Warp terminal's notification system, because that's where I actually run Pi. **rpiv-i18n** is the one that came from users: it started as localization for ask-user-question and grew into a small SDK. And two are plumbing rather than products: **rpiv-config** is the shared config I/O every sibling depends on, published only so those dependencies resolve, and **rpiv-telemetry** wires Pi into MLflow — auto-instruments lifecycle events and sub-agent activity so runs are inspectable after the fact — but it stays `private: true` and is loaded from a checkout, never the registry.
 
 > [!TIP]
@@ -44,18 +48,14 @@ Each one installs on its own with `pi install npm:@juicesharp/rpiv-<name>`, then
 | `rpiv-i18n` | Localization SDK for sibling extensions | ✓ | [`@juicesharp/rpiv-i18n`](https://www.npmjs.com/package/@juicesharp/rpiv-i18n) |
 | `rpiv-workflow` | `/wf` runner — chain skills into typed multi-stage pipelines | ✓ | [`@juicesharp/rpiv-workflow`](https://www.npmjs.com/package/@juicesharp/rpiv-workflow) |
 | `rpiv-btw` | `/btw` side-conversation slash command | — | [`@juicesharp/rpiv-btw`](https://www.npmjs.com/package/@juicesharp/rpiv-btw) |
-| `rpiv-voice` | Local voice dictation (`/voice` overlay, on-device Whisper) | — | [`@juicesharp/rpiv-voice`](https://www.npmjs.com/package/@juicesharp/rpiv-voice) |
-| `rpiv-warp` | Warp terminal notification integration | — | [`@juicesharp/rpiv-warp`](https://www.npmjs.com/package/@juicesharp/rpiv-warp) |
 
 ### Everything else in the workspace
 
-Four packages you do not `pi install`. One is on npm as a library; three are `private: true` and resolve only inside a checkout.
+Two packages you do not `pi install`. One is on npm as a library; one is `private: true` and resolves only inside a checkout.
 
 | Package | Role | How you get it |
 | --- | --- | --- |
 | [`rpiv-config`](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-config) | Shared XDG-aware JSON config I/O for the siblings | Published as a library: `npm install @juicesharp/rpiv-config`. Not a Pi extension — it registers nothing, and ten siblings already pull it in as a dependency. [npm](https://www.npmjs.com/package/@juicesharp/rpiv-config) |
-| [`rpiv-telemetry`](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-telemetry) | MLflow observability — auto-instruments lifecycle + sub-agent activity | **Not published.** Inside this repo Pi loads it through the workspace symlink; elsewhere, point Pi at a checkout: `pi install ./packages/rpiv-telemetry` |
-| [`rpiv-site`](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-site) | The [rpiv-pi.com](https://rpiv-pi.com) site (static Astro build) | **Not published.** Built from this repo with `npm run build:site`, deployed to GitHub Pages by CI |
 | [`test-utils`](https://github.com/juicesharp/rpiv-mono/tree/main/packages/test-utils) | Shared test fixtures (`@juicesharp/rpiv-test-utils`) | **Not published.** Symlinked by npm workspaces; imported by the test suite only |
 
 ## Roadmap

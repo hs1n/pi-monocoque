@@ -34,6 +34,16 @@ than behavioral changes:
   `rpiv-pi.com`.
 - `.github/workflows/deploy-site.yml` is manual-only, so this fork can never auto-publish a
   site that looks like the upstream one.
+- **Four packages are deleted outright: `rpiv-site`, `rpiv-telemetry`, `rpiv-voice`,
+  `rpiv-warp`.** None of them was loaded by Pi here (all four were opt-in or private), so
+  removing them changes no runtime behavior — it removes the Astro site and its dependency
+  tree, the MLflow instrumentation, the local-dictation extension, and the Warp terminal
+  bridge, along with the guidance files, tests, and CI/config wiring that pointed at them.
+  `rpiv-warp`'s only in-tree consumer was the guarded `workflow-question-warp-bridge.ts` in
+  `rpiv-core`, which is deleted with it. `scripts/fork-pi-install.sh` now takes only
+  `--with btw`. **This widens the divergence from upstream**: upstream merges touching those
+  paths will conflict, and re-adding one is a `git revert` of this deletion plus a
+  `pi install`.
 - Codecov upload removed from `.github/workflows/ci.yml` (it required upstream's OIDC
   identity and failed the build in a fork).
 - **The workspace scope is `@hs1n`, not `@juicesharp`.** Every reference that describes

@@ -12,14 +12,11 @@ Shared JSON config I/O utilities for rpiv-mono sibling packages: load/save with 
 ## Consumers
 - **`@hs1n/rpiv-todo`**: `loadJsonConfigWithLegacyFallback`, `validateGuidanceFields`, `GuidanceFields` (type)
 - **`@hs1n/rpiv-ask-user-question`**: `loadJsonConfigWithLegacyFallback`, `validateGuidanceFields`, `GuidanceFields` (type)
-- **`@hs1n/rpiv-warp`**: `loadJsonConfigWithLegacyFallback`, `configPath`
 - **`@hs1n/rpiv-advisor`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`, `validateGuidanceFields`, `modelKey`, `parseModelKey`, `GuidanceFields` (type)
 - **`@hs1n/rpiv-web-tools`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`, `validateGuidanceFields`, `GuidanceFieldsSchema`
-- **`@hs1n/rpiv-voice`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`
 - **`@hs1n/rpiv-i18n`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`
 - **`@hs1n/rpiv-pi`** (rpiv-core): `configPath`, `loadJsonConfigWithLegacyFallback`, `validateConfig`, `parseModelKey`, `modelKey`, `saveJsonConfig`
 - **`@hs1n/rpiv-workflow`**: `configPath`
-- **`@hs1n/rpiv-telemetry`**: `configPath`, `loadJsonConfigWithLegacyFallback`, `readEnvVar`, `saveJsonConfig`, `validateConfig`
 
 No consumer imports plain `loadJsonConfig` anymore — all config-reading siblings migrated to `loadJsonConfigWithLegacyFallback`.
 

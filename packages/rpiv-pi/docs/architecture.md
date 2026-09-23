@@ -118,10 +118,9 @@ It installs them serially with a 120-second timeout each, previews every change 
 confirmation dialog, and applies nothing until you confirm. It also prunes the
 superseded `pi-subagents` entry from `settings.json` when it finds one.
 
-Only two siblings are ever imported at runtime, both behind guarded dynamic imports that
-no-op silently when the module is absent: `@hs1n/rpiv-workflow` (built-in
-workflows, execution host, skill contracts, lane progress) and `@hs1n/rpiv-warp`
-(the Blocked badge on parked questions, entirely opt-in).
+Only one sibling is ever imported at runtime, behind a guarded dynamic import that
+no-ops silently when the module is absent: `@hs1n/rpiv-workflow` (built-in
+workflows, execution host, skill contracts, lane progress).
 
 Registration order is load-bearing. The session hooks, `/rpiv-update-agents`, and
 `/rpiv-setup` register unconditionally and first, so a clean install with no siblings

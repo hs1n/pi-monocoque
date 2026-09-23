@@ -769,11 +769,7 @@ describe("ambient-observer manifest marker", () => {
 		).toBe(false);
 	});
 
-	it("the real rpiv-warp package.json declares the ambientObserver marker", () => {
-		const warpPkg = fileURLToPath(new URL("../../../rpiv-warp/package.json", import.meta.url));
-		const pkg = JSON.parse(readFileSync(warpPkg, "utf8")) as { pi?: { ambientObserver?: boolean } };
-		expect(pkg.pi?.ambientObserver).toBe(true);
-		// And rpiv-pi's own package (the launcher) is NOT marked.
+	it("rpiv-pi's own package.json is NOT marked as an ambient observer", () => {
 		const selfPkg = fileURLToPath(new URL("../../package.json", import.meta.url));
 		const self = JSON.parse(readFileSync(selfPkg, "utf8")) as { pi?: { ambientObserver?: boolean } };
 		expect(self.pi?.ambientObserver ?? false).toBe(false);

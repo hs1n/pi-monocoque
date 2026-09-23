@@ -26,7 +26,7 @@ Each capability is a source module + co-located `<feature>.test.ts`.
 | `session-capture.ts` | `session_start` capture of modelRegistry/uiContext/model, borrowed for per-child model resolution (replaced model-override's global `pi.setModel` flip) |
 | `subagent-usage.ts` | Process-global subagent token accumulator on a Symbol slot; fed by per-child EventBus subscriptions; rolled into lane rows |
 | `lane-*.ts` (family) | Lane UI: `belowEditor` dock (+dock-editor), `/lanes` switcher, self-windowing console, transcript replay live + disk-jsonl (`lane-transcript*`, `lane-tool-defs` renderer cache), progress/usage/streaming/failure, shared lane-list renderer, deferring relay-ui |
-| `question-lifecycle.ts` | `workflow-question` lifecycle events from the registry via a `Symbol.for` global slot; `workflow-question-warp-bridge.ts` consumes them |
+| `question-lifecycle.ts` | `workflow-question` lifecycle events from the registry via a `Symbol.for` global slot; the lane dock/console render them |
 | `*-command.ts` / `models-*` / `skill-*` | Registrars: setup, update-agents, models-config(+validate,+sources), models-picker, skill-bracket, skill-contracts-source (+outcome-derivation, artifact-collector), register-built-in-workflows (+built-in-workflows) |
 | `agent-enablement.ts` | Pure sibling-tool enablement map driving conditional frontmatter injection in `agents.ts` (currently empty) |
 | `rpiv-models/` | Nested subdir for the `/rpiv-models` cascade picker: `command.ts`, `index.ts`, `items.ts`, `overrides.ts` (+ unit tests) |
@@ -39,13 +39,13 @@ Each capability is a source module + co-located `<feature>.test.ts`.
 - **`@hs1n/rpiv-config`** (dependency): static value imports — `configPath` + `loadJsonConfigWithLegacyFallback` + `validateConfig` in `models-config.ts`; `parseModelKey` in `session-capture.ts` + `sdk-workflow-host.ts`; `loadJsonConfigWithLegacyFallback` + `modelKey` + `saveJsonConfig` in `rpiv-models/`.
 - **`typebox`** (dependency `^1.1.24`): `Type`/`Static` schema for `models.json` in `models-config.ts`.
 - **`@hs1n/rpiv-workflow`** (peer): guarded dynamic `import(...)` of `/startup` in `register-built-in-workflows.ts`, `workflow-execution-host.ts`, `lane-progress.ts`, `outcome-derivation.ts` (itself reached dynamically from `skill-contracts-source.ts`, keeping artifact-collector's static edge off the entry graph), `skill-contracts-source.ts`; of `/registration` in `models-config-sources.ts`; of `/runner` in `lane-switcher.ts` (rerun-failed-run callback). Degrades silently when absent (`isModuleNotFound` guard). Off-entry-graph modules statically value-import the peer — `built-in-workflows.ts`, `artifact-collector.ts`, and the whole `built-ins/` cluster (`/registration` + `/runner`; see the `built-ins/` architecture.md) — safe only because they are reached solely via those guarded dynamic imports; `skill-contracts-source.ts` sits on the entry graph and imports `/registration` types only.
-- **`@hs1n/rpiv-warp`** (opt-in — in neither `SIBLINGS` nor `peerDependencies`): guarded dynamic import in `workflow-question-warp-bridge.ts` for the per-run Blocked badge.
+- **`@hs1n/rpiv-warp`** — DELETED by this fork along with `workflow-question-warp-bridge.ts`.
 - Node built-ins: `node:fs`, `node:path`, `node:url`, `node:os`, `node:child_process`.
 - External processes: `git` (via `pi.exec`), `pi` CLI (via `spawn` for the installer), `node` (the build workflow's code-splice stage shells out to `skills/_shared/stitch-elaborations.mjs` via `execFileSync`).
 
-Sibling *presence detection* stays filesystem-based (regex over settings); two
-siblings load at runtime — `rpiv-workflow` and the opt-in `rpiv-warp` — always
-through guarded optional dynamic import.
+Sibling *presence detection* stays filesystem-based (regex over settings); the only
+sibling loaded at runtime is `rpiv-workflow`, always through a guarded optional
+dynamic import.
 
 ## Consumers
 

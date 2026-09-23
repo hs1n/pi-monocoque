@@ -11,15 +11,15 @@ rpiv-mono/
 ├── packages/
 │   ├── rpiv-pi/                  — Umbrella: extension runtime + skills + agents (zero tools)
 │   ├── rpiv-<feature>/           — One Pi extension per directory; npm name @juicesharp/rpiv-<feature>
-│   ├── rpiv-site/                — Astro 5 marketing site (private). Excluded from root tsconfig + coverage scope
-│   ├── rpiv-telemetry/           — Private Pi extension: MLflow observability (private opt-in; not in siblings.ts)
+│   ├── rpiv-site/                — DELETED by this fork (was: Astro 5 marketing site)
+│   ├── rpiv-telemetry/           — DELETED by this fork (was: private MLflow observability extension)
 │   └── test-utils/               — Private workspace package: shared test fixtures (not published)
 ├── test/                         — Repo-wide Vitest setup (homedir stub + env hygiene + pi-ai//compat mocks + beforeEach singleton resets)
 ├── scripts/                      — Lockstep release pipeline (release.mjs + sync-versions.js) + repo guards (check-no-decision-codes.mjs, check-slice-overlap.mjs)
 │                                 — fork additions: fork-pi-install.sh (local-path Pi install), fork-license-audit.mjs (dependency license inventory), fork-rename-scope.mjs (npm-scope rename), fork-own-skill.mjs (take over a bundled skill into ~/.agents/skills)
 ├── thoughts/shared/              — Pipeline artifacts: questions/, research/, solutions/, designs/, plans/, reviews/ (gitignored)
 ├── vitest.config.ts              — Single Vitest runner; `include: ['packages/*/**/*.test.ts']`, setupFiles `['./test/setup.ts']`
-├── tsconfig.base.json            — Single shared TS config; no per-package tsconfig.json (rpiv-site has its own — excluded here)
+├── tsconfig.base.json            — Single shared TS config; no per-package tsconfig.json
 ├── package.json                  — npm workspaces root
 └── biome.json                    — Single shared lint/format config
 ```
@@ -34,8 +34,7 @@ on upgrade).
 
 ## Opt-in and private roster (today)
 
-- **Opt-in** (absent from `siblings.ts` + `rpiv-pi/package.json` `peerDependencies`): `rpiv-voice`, `rpiv-btw`, `rpiv-warp`.
-- **Private** (`"private": true` — skip publish, otherwise follow the same lockstep rules): `rpiv-site`, `rpiv-telemetry`, `test-utils`. `rpiv-telemetry` is a private Pi extension — it ships `pi.extensions` but is absent from `siblings.ts`.
+This fork deleted four packages — `rpiv-site`, `rpiv-telemetry`, `rpiv-voice`, `rpiv-warp`. See `FORK_NOTICE.md`. The surviving opt-in sibling is `rpiv-btw` (absent from `siblings.ts` + `rpiv-pi/package.json` `peerDependencies`). The surviving private package is `test-utils` (`"private": true` — skips publish, otherwise follows the same lockstep rules).
 
 ## Command rationale
 

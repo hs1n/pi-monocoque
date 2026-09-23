@@ -34,7 +34,6 @@ vi.mock("@earendil-works/pi-ai/compat", async (importOriginal) => {
 const ADVISOR_SYMBOL = Symbol.for("rpiv-advisor");
 const BTW_SYMBOL = Symbol.for("rpiv-btw");
 const I18N_SYMBOL = Symbol.for("rpiv-i18n");
-const VOICE_SYMBOL = Symbol.for("rpiv-voice");
 
 // Package modules are imported dynamically inside beforeEach (NOT statically at
 // the top of this file) by deliberate design — DO NOT "optimize" by hoisting.
@@ -103,10 +102,6 @@ beforeEach(async () => {
 	laneSwitcher.__resetLaneSwitcher();
 	const laneProgress = await import("../packages/rpiv-pi/extensions/rpiv-core/lane-progress.js");
 	laneProgress.__resetLaneProgress();
-	const workflowQuestionWarpBridge = await import(
-		"../packages/rpiv-pi/extensions/rpiv-core/workflow-question-warp-bridge.js"
-	);
-	workflowQuestionWarpBridge.__resetWorkflowQuestionWarpBridge();
 	const skillBracket = await import("../packages/rpiv-pi/extensions/rpiv-core/skill-bracket.js");
 	skillBracket.__resetSkillBracketState();
 	const modelsConfigModule = await import("../packages/rpiv-pi/extensions/rpiv-core/models-config.js");
@@ -114,20 +109,8 @@ beforeEach(async () => {
 	const modelsConfigValidate = await import("../packages/rpiv-pi/extensions/rpiv-core/models-config-validate.js");
 	modelsConfigValidate.__resetModelsConfigValidation();
 
-	const titleSpinner = await import("../packages/rpiv-warp/title-spinner.js");
-	titleSpinner.__resetState();
-
-	const warpIndex = await import("../packages/rpiv-warp/index.js");
-	warpIndex.__resetState();
-
-	const telemetry = await import("../packages/rpiv-telemetry/instrumentation/index.js");
-	telemetry.teardownTelemetry();
-
 	const i18n = await import("../packages/rpiv-i18n/i18n.js");
 	i18n.__resetState();
-
-	const voice = await import("../packages/rpiv-voice/config/voice-config.js");
-	voice.__resetState();
 
 	const webToolsInterceptors = await import("../packages/rpiv-web-tools/providers/interceptors/index.js");
 	webToolsInterceptors.__resetWebToolsInterceptors();
@@ -135,14 +118,11 @@ beforeEach(async () => {
 	delete (globalThis as Record<symbol, unknown>)[ADVISOR_SYMBOL];
 	delete (globalThis as Record<symbol, unknown>)[BTW_SYMBOL];
 	delete (globalThis as Record<symbol, unknown>)[I18N_SYMBOL];
-	delete (globalThis as Record<symbol, unknown>)[VOICE_SYMBOL];
 
 	const piAgentSettings = join(process.env.HOME!, ".pi", "agent", "settings.json");
 	const xdgPiAgentDir = join(process.env.HOME!, ".config", "pi", "agent");
 	const advisorConfig = join(process.env.HOME!, ".config", "rpiv-advisor", "advisor.json");
 	const i18nConfig = join(process.env.HOME!, ".config", "rpiv-i18n", "locale.json");
-	const voiceConfig = join(process.env.HOME!, ".config", "rpiv-voice", "voice.json");
-	const voiceErrorsLog = join(process.env.HOME!, ".config", "rpiv-voice", "errors.log");
 	const todoConfig = join(process.env.HOME!, ".config", "rpiv-todo", "config.json");
 	const askUserQuestionConfig = join(process.env.HOME!, ".config", "rpiv-ask-user-question", "config.json");
 	const webToolsConfig = configPath("rpiv-web-tools");
@@ -151,15 +131,10 @@ beforeEach(async () => {
 	rmSync(xdgPiAgentDir, { recursive: true, force: true });
 	rmSync(advisorConfig, { force: true });
 	rmSync(i18nConfig, { force: true });
-	rmSync(voiceConfig, { force: true });
-	rmSync(voiceErrorsLog, { force: true });
 	rmSync(todoConfig, { force: true });
 	rmSync(askUserQuestionConfig, { force: true });
 	rmSync(webToolsConfig, { force: true });
 	rmSync(modelsConfig, { force: true, recursive: true });
-
-	const telemetryConfig = join(process.env.HOME!, ".config", "rpiv-telemetry", "config.json");
-	rmSync(telemetryConfig, { force: true });
 
 	// User overlay for `/wf` workflows: canonical file at
 	// `~/.config/rpiv-workflow/workflows.config.ts` plus a drop-in directory

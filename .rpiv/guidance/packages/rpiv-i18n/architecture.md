@@ -1,7 +1,7 @@
 # rpiv-i18n
 
 ## Monorepo Context
-Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`. Other rpiv-* packages declare it as an **optional** peer (`peerDependenciesMeta.optional: true`); `rpiv-todo`, `rpiv-ask-user-question`, and `rpiv-voice` already do. Carries an `exports` map (`{ ".": "./i18n.ts", "./loader": "./loader.ts" }`) — bare-name imports hit the public SDK; the `./loader` subpath exposes the locale-file loader without pulling `i18n-ui.ts`/pi-tui.
+Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`. Other rpiv-* packages declare it as an **optional** peer (`peerDependenciesMeta.optional: true`); `rpiv-todo` and `rpiv-ask-user-question` already do. Carries an `exports` map (`{ ".": "./i18n.ts", "./loader": "./loader.ts" }`) — bare-name imports hit the public SDK; the `./loader` subpath exposes the locale-file loader without pulling `i18n-ui.ts`/pi-tui.
 
 ## Responsibility
 Localization SDK + extension. Two concerns:
@@ -18,7 +18,7 @@ A frozen read-only snapshot is also published on a well-known `globalThis` Symbo
 
 ## Consumers
 - **Pi extension host**: loads via `pi.extensions: ["./index.ts"]`
-- **Sibling extensions**: call `registerLocalesFromDir(namespace, import.meta.url, { label })` from `@hs1n/rpiv-i18n/loader` (dynamic import, soft-peer try/catch) at extension load — bulk dir-based registration that replaces hand-rolled `registerStrings`. Then use `tr` / `scope` from `@hs1n/rpiv-i18n` at render sites. Today: `rpiv-todo`, `rpiv-ask-user-question`, `rpiv-voice` (all `optional: true` peers — UI works without it but English-only)
+- **Sibling extensions**: call `registerLocalesFromDir(namespace, import.meta.url, { label })` from `@hs1n/rpiv-i18n/loader` (dynamic import, soft-peer try/catch) at extension load — bulk dir-based registration that replaces hand-rolled `registerStrings`. Then use `tr` / `scope` from `@hs1n/rpiv-i18n` at render sites. Today: `rpiv-todo` and `rpiv-ask-user-question` (both `optional: true` peers — UI works without it but English-only)
 
 ## Module Structure
 ```
@@ -52,7 +52,7 @@ Lookups are **overlay-then-base**: the active locale's map is merged on top of t
 2. Author `locales/<code>.json` JSON maps (mirror `rpiv-todo/locales/`); ship them in `package.json` `files`
 3. At module top level (top-level `await`, before the default export — mirror `rpiv-todo/index.ts`), dynamic-`import("@hs1n/rpiv-i18n/loader")` inside a try/catch (soft peer) and call `registerLocalesFromDir(<pkg-name>, import.meta.url, { label })` ONCE — it iterates `SUPPORTED_LOCALES` and calls `registerStrings` for you. (Low-level `registerStrings(<pkg-name>, byLocale)` remains for callers that build maps in-memory.)
 4. Use `const t = scope("<pkg-name>")` then `t("key", "English fallback")` at every render-time string site — never inline literals where translations exist
-5. If your extension owns module-level singleton i18n state (e.g. an `i18n-bridge.ts` cache), export a `__resetState` and wire it into `test/setup.ts` `beforeEach` — no existing bridge does this: rpiv-todo / rpiv-ask-user-question / rpiv-voice resolve `scope` once at load and expose nothing resettable
+5. If your extension owns module-level singleton i18n state (e.g. an `i18n-bridge.ts` cache), export a `__resetState` and wire it into `test/setup.ts` `beforeEach` — no existing bridge does this: rpiv-todo / rpiv-ask-user-question resolve `scope` once at load and expose nothing resettable
 </important>
 
 <important if="you are adding a new supported locale to the picker">

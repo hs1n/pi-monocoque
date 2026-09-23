@@ -44,13 +44,7 @@ const REPO_ROOT = resolve(import.meta.dirname, "..");
 /** Directories whose contents are rewritten. */
 const RENAME_ROOTS = ["packages", "test", "scripts", "docs", ".rpiv/guidance/packages"];
 /** Path prefixes (repo-relative, POSIX) never rewritten. */
-const SKIP_PREFIXES = [
-	"packages/rpiv-site/",
-	"packages/rpiv-site",
-	".rpiv/guidance/packages/rpiv-site/",
-	".rpiv/guidance/packages/rpiv-site",
-	"node_modules/",
-];
+const SKIP_PREFIXES = ["node_modules/"];
 /** Basenames never rewritten, anywhere. */
 const SKIP_BASENAMES = new Set(["CHANGELOG.md"]);
 /** Path segments that mark a subtree as a record rather than a source of truth. */
@@ -69,7 +63,7 @@ const repoArg = repoFlagIndex >= 0 ? args[repoFlagIndex + 1] : undefined;
 const PKG_DIRS = readdirSync(join(REPO_ROOT, "packages")).filter((d) =>
 	statSync(join(REPO_ROOT, "packages", d)).isDirectory(),
 );
-const PKG_GLOBS = PKG_DIRS.filter((d) => d !== "rpiv-site");
+const PKG_GLOBS = PKG_DIRS;
 
 /** Current scope, detected from the workspace package names. */
 function detectScope() {
@@ -127,7 +121,7 @@ const newRepo = repoArg ?? oldRepo;
 if (reportOnly || !newScope) {
 	console.log(`current scope:    ${oldScope}`);
 	console.log(`current repo:     ${oldRepo}`);
-	console.log(`workspace pkgs:   ${PKG_GLOBS.length} (rpiv-site excluded)`);
+	console.log(`workspace pkgs:   ${PKG_GLOBS.length}`);
 	if (reportOnly) {
 		const files = RENAME_ROOTS.flatMap((r) => walk(join(REPO_ROOT, r)));
 		let hits = 0;

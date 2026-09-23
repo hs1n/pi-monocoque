@@ -43,8 +43,6 @@ export default defineConfig({
 				"**/*.d.ts",
 				"**/index.ts",
 				"packages/test-utils/**",
-				"packages/rpiv-site/**",
-				"packages/rpiv-telemetry/**",
 			],
 		},
 	},
