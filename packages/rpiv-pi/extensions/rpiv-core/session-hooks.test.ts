@@ -399,6 +399,58 @@ describe("pipeline-pointer injection", () => {
 	});
 });
 
+describe("session_start hook — repeat-fire idempotence", () => {
+	const sendsOf = (pi: { sendMessage: unknown }, customType: string) =>
+		(pi.sendMessage as ReturnType<typeof vi.fn>).mock.calls.filter(
+			([msg]) => (msg as { customType?: string }).customType === customType,
+		).length;
+
+	it("a repeat session_start on the SAME session re-injects neither root guidance nor the pointer", async () => {
+		writeGuidanceTree(projectDir, { ".rpiv/guidance/architecture.md": "root-architecture" });
+		const { pi, captured } = createMockPi({ exec: stubGitExec({}) as never });
+		registerSessionHooks(pi);
+		// Pi holds ONE sessionManager per session (runner.js stores it at
+		// construction; the ctx getter returns it), so a repeat fire for the same
+		// session passes the same object.
+		const ctx = createMockCtx({ cwd: projectDir, hasUI: false });
+		const start = captured.events.get("session_start")?.[0];
+
+		await start?.({ reason: "startup" } as never, ctx as never);
+		expect(sendsOf(pi, "rpiv-guidance")).toBe(1);
+		expect(sendsOf(pi, "rpiv-pipeline-index")).toBe(1);
+
+		await start?.({ reason: "startup" } as never, ctx as never);
+		expect(sendsOf(pi, "rpiv-guidance")).toBe(1);
+		expect(sendsOf(pi, "rpiv-pipeline-index")).toBe(1);
+	});
+
+	it("a session_start on a DIFFERENT session still injects (new session, detached child)", async () => {
+		writeGuidanceTree(projectDir, { ".rpiv/guidance/architecture.md": "root-architecture" });
+		const { pi, captured } = createMockPi({ exec: stubGitExec({}) as never });
+		registerSessionHooks(pi);
+		const start = captured.events.get("session_start")?.[0];
+
+		await start?.({ reason: "startup" } as never, createMockCtx({ cwd: projectDir }) as never);
+		await start?.({ reason: "startup" } as never, createMockCtx({ cwd: projectDir, sessionId: "child" }) as never);
+		expect(sendsOf(pi, "rpiv-guidance")).toBe(2);
+		expect(sendsOf(pi, "rpiv-pipeline-index")).toBe(2);
+	});
+
+	it("a session_start after compaction on the same session still injects (context was lost)", async () => {
+		writeGuidanceTree(projectDir, { ".rpiv/guidance/architecture.md": "root-architecture" });
+		const { pi, captured } = createMockPi({ exec: stubGitExec({}) as never });
+		registerSessionHooks(pi);
+		const ctx = createMockCtx({ cwd: projectDir });
+		await captured.events.get("session_start")?.[0]({ reason: "startup" } as never, ctx as never);
+		await captured.events.get("session_compact")?.[0](
+			{ reason: "threshold", willRetry: false } as never,
+			ctx as never,
+		);
+		await captured.events.get("session_start")?.[0]({ reason: "startup" } as never, ctx as never);
+		expect(sendsOf(pi, "rpiv-guidance")).toBe(2);
+	});
+});
+
 describe("session_compact hook", () => {
 	it("defers root guidance + pointer + git as one next-turn message", async () => {
 		writeGuidanceTree(projectDir, { ".rpiv/guidance/architecture.md": "root-architecture" });

@@ -123,16 +123,34 @@ describe("resolveAndFormatNewGuidance", () => {
 		expect(resolveAndFormatNewGuidance(filePath, projectDir, "read")).toBeNull();
 	});
 
-	it("returns joined formatted blocks for multiple new files including the trigger string", () => {
+	it("injects only the most specific hit — the root file is delivered at session start", () => {
 		writeGuidanceTree(projectDir, {
 			".rpiv/guidance/architecture.md": "root",
 			"src/AGENTS.md": "src",
 		});
 		const content = resolveAndFormatNewGuidance(join(projectDir, "src", "x.ts"), projectDir, "write");
-		expect(content).toContain("root");
 		expect(content).toContain("src");
+		expect(content).not.toContain("root");
 		expect(content).toContain("auto-loaded because write touched src/x.ts");
-		expect(content?.split("\n\n---\n\n")).toHaveLength(2);
+		expect(content?.split("\n\n---\n\n")).toHaveLength(1);
+	});
+
+	it("never injects the intermediate levels on the tool path", () => {
+		writeGuidanceTree(projectDir, {
+			".rpiv/guidance/architecture.md": "root",
+			".rpiv/guidance/packages/architecture.md": "mid",
+			".rpiv/guidance/packages/app/architecture.md": "leaf",
+		});
+		const content = resolveAndFormatNewGuidance(join(projectDir, "packages", "app", "x.ts"), projectDir, "read");
+		expect(content).toContain("leaf");
+		expect(content).not.toContain("mid");
+		expect(content).not.toContain("root");
+	});
+
+	it("uses the deepest existing level when the leaf directory has no guidance of its own", () => {
+		writeGuidanceTree(projectDir, { ".rpiv/guidance/src/architecture.md": "src-level" });
+		const content = resolveAndFormatNewGuidance(join(projectDir, "src", "deep", "x.ts"), projectDir, "read");
+		expect(content).toContain("src-level");
 	});
 
 	it("marks injected files before returning — a second call returns null", () => {
@@ -172,7 +190,7 @@ describe("handleToolCallGuidance", () => {
 		expect(pi.sendMessage).toHaveBeenCalledTimes(1);
 	});
 
-	it("emits one sendMessage combining multiple newly-resolved files", () => {
+	it("emits one sendMessage for the most specific newly-resolved file", () => {
 		writeGuidanceTree(projectDir, {
 			".rpiv/guidance/architecture.md": "root",
 			"src/AGENTS.md": "src",
@@ -185,8 +203,8 @@ describe("handleToolCallGuidance", () => {
 		);
 		expect(pi.sendMessage).toHaveBeenCalledTimes(1);
 		const content = (pi.sendMessage as ReturnType<typeof vi.fn>).mock.calls[0][0].content;
-		expect(content).toContain("root");
-		expect(content).toContain("src");
+		expect(content).toContain("src (AGENTS.md)");
+		expect(content).not.toContain("root (architecture.md)");
 		expect(content).toContain("auto-loaded because write touched src/x.ts");
 	});
 });

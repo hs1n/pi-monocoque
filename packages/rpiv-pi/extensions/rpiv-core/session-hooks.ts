@@ -54,10 +54,23 @@ let startupMaintenanceDone = false;
  */
 let postCompactSessions = new WeakSet<object>();
 
+/**
+ * Sessions that already received their session-start injections (root guidance
+ * + pipeline index). Pi fires `session_start` more than once for one live
+ * session, and the injections it triggers are per-CONTEXT while the dedup Set
+ * they reset is per-PROCESS — so a repeat fire re-sent the root file verbatim
+ * (measured: 15.8 KB duplicated in one session, with no compaction between the
+ * two deliveries). Keying by SessionManager identity keeps the genuinely fresh
+ * contexts (a new session, a detached child, an in-place replacement after
+ * compaction) injecting exactly as before and drops only the repeat.
+ */
+let sessionStartInjected = new WeakSet<object>();
+
 /** Test reset — wired into test/setup.ts `beforeEach`. */
 export function __resetSessionHooksAnnounced(): void {
 	startupMaintenanceDone = false;
 	postCompactSessions = new WeakSet<object>();
+	sessionStartInjected = new WeakSet<object>();
 }
 
 const msgAgentsAdded = (n: number) => `Copied ${n} rpiv-pi agent(s) to ~/.pi/agent/agents/`;
@@ -125,14 +138,22 @@ async function onSessionStart(
 	ctx: { cwd: string; hasUI: boolean; ui: UI; sessionManager: object },
 	pi: ExtensionAPI,
 ): Promise<void> {
+	// Root guidance + pipeline index are per-CONTEXT; the dedup Set they reset is
+	// per-PROCESS. Re-injecting for a session that already holds this context
+	// duplicates the root file verbatim, so skip the repeat — but still inject
+	// when the session was compacted (its context is gone) or is a fresh
+	// identity (new session, detached child, in-place replacement).
+	const pendingPostCompact = postCompactSessions.has(ctx.sessionManager);
 	postCompactSessions.delete(ctx.sessionManager);
-	resetInjectionState();
-	injectRootGuidance(ctx.cwd, pi);
-	injectPipelinePointer(pi);
+	if (pendingPostCompact || !sessionStartInjected.has(ctx.sessionManager)) {
+		sessionStartInjected.add(ctx.sessionManager);
+		resetInjectionState();
+		injectRootGuidance(ctx.cwd, pi);
+		injectPipelinePointer(pi);
+	}
 	await injectGitContext(pi, (msg) => sendGitContextMessage(pi, msg));
 
-	// Injections above run every fire (each stage needs its own guidance + git
-	// context); startup maintenance below runs once per process load — see the
+	// Startup maintenance below runs once per process load — see the
 	// `startupMaintenanceDone` doc-block.
 	if (startupMaintenanceDone) return;
 	startupMaintenanceDone = true;

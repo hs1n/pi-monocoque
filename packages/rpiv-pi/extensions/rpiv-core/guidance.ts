@@ -5,6 +5,9 @@
  * directory, picks the first existing of:
  *   AGENTS.md > CLAUDE.md > .rpiv/guidance/<sub>/architecture.md
  *
+ * `resolveGuidance` returns that whole ladder; the TOOL path injects only its
+ * deepest hit — see `TOOL_PATH_GUIDANCE_LIMIT`.
+ *
  * Depth 0 (project root) skips AGENTS.md/CLAUDE.md because Pi's own
  * resource-loader (loadContextFileFromDir at resource-loader.js:30-46)
  * already loads <cwd>/AGENTS.md or <cwd>/CLAUDE.md into the system
@@ -37,6 +40,22 @@ const ARCHITECTURE_MD = "architecture.md";
 /** Forward-slash dedup key for root guidance — must NOT use join() for cross-platform compat. */
 const ROOT_GUIDANCE_KEY = `${RPIV_DIR}/${GUIDANCE_SUBDIR}/${ARCHITECTURE_MD}`;
 const FILE_WRITE_TOOLS = ["read", "edit", "write"] as const;
+
+/**
+ * How many of `resolveGuidance`'s hits the TOOL path may inject per touch,
+ * counted from the most specific end.
+ *
+ * The ladder's depth-0 entry (the root `.rpiv/guidance/architecture.md`) is
+ * already delivered at `session_start` and re-delivered by the post-compaction
+ * block, so on the tool path it is always already in the dedup Set; what the
+ * ladder actually adds per touch is the intermediate levels, which the leaf
+ * largely restates. Measured on one working session: 7.3 KB of the 21.9 KB
+ * pulled in by a single `rpiv-core` touch was the `packages/rpiv-pi` summary.
+ *
+ * `Number.POSITIVE_INFINITY` restores the pre-throttle behaviour (every
+ * not-yet-injected ancestor).
+ */
+const TOOL_PATH_GUIDANCE_LIMIT = 1;
 
 // ---------------------------------------------------------------------------
 // Guidance Resolution
@@ -177,12 +196,17 @@ export function injectRootGuidance(cwd: string, pi: ExtensionAPI): void {
  * in one function: marking before returning content lets the caller send with
  * idempotence > reliability.
  *
+ * Throttled to `TOOL_PATH_GUIDANCE_LIMIT` files, taken from the specific end of
+ * the ladder BEFORE the dedup filter — filtering first would let an ancestor
+ * through on every later touch of the same directory, which is exactly what the
+ * throttle exists to avoid.
+ *
  * Returns the `"\n\n---\n\n"`-joined formatted blocks, or `null` when nothing
  * resolves along the ladder OR every resolved file is already injected (marks
  * nothing in the null cases).
  */
 export function resolveAndFormatNewGuidance(filePath: string, cwd: string, toolName: string): string | null {
-	const resolved = resolveGuidance(filePath, cwd);
+	const resolved = resolveGuidance(filePath, cwd).slice(-TOOL_PATH_GUIDANCE_LIMIT);
 	const newFiles = resolved.filter((g) => !injectedGuidance.has(g.relativePath));
 	if (newFiles.length === 0) return null;
 
