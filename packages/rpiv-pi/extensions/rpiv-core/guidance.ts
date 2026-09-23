@@ -53,9 +53,22 @@ const FILE_WRITE_TOOLS = ["read", "edit", "write"] as const;
  * pulled in by a single `rpiv-core` touch was the `packages/rpiv-pi` summary.
  *
  * `Number.POSITIVE_INFINITY` restores the pre-throttle behaviour (every
- * not-yet-injected ancestor).
+ * not-yet-injected ancestor); `0` (or negative) disables the tool path outright.
+ * The three points are distinct on purpose — see `takeDeepest`.
  */
 const TOOL_PATH_GUIDANCE_LIMIT = 1;
+
+/**
+ * The specific-end slice, with the knob's whole scale honoured.
+ *
+ * Extracted because `slice(-0)` is `slice(0)` — the WHOLE array — so a limit of
+ * 0 would inject the entire ladder while reading as "inject nothing". Anything
+ * at or below zero is therefore an explicit empty selection, not a slice.
+ */
+export function takeDeepest<T>(resolved: readonly T[], limit: number): T[] {
+	if (limit <= 0) return [];
+	return resolved.slice(-limit);
+}
 
 // ---------------------------------------------------------------------------
 // Guidance Resolution
@@ -206,7 +219,7 @@ export function injectRootGuidance(cwd: string, pi: ExtensionAPI): void {
  * nothing in the null cases).
  */
 export function resolveAndFormatNewGuidance(filePath: string, cwd: string, toolName: string): string | null {
-	const resolved = resolveGuidance(filePath, cwd).slice(-TOOL_PATH_GUIDANCE_LIMIT);
+	const resolved = takeDeepest(resolveGuidance(filePath, cwd), TOOL_PATH_GUIDANCE_LIMIT);
 	const newFiles = resolved.filter((g) => !injectedGuidance.has(g.relativePath));
 	if (newFiles.length === 0) return null;
 

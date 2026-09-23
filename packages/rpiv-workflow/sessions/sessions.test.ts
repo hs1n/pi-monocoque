@@ -33,6 +33,7 @@ import { DEFAULT_TRIGGER } from "../triggers.js";
 import type { RunState, StageSessionContext, WorkflowHostContext, WorkflowSessionContext } from "../types.js";
 import { bashStrikesRemaining } from "./bash-strikes.js";
 import { classifyAndHandleAbort } from "./sessions.js";
+import { resendIntoChild } from "./spawn.js";
 
 // ---------------------------------------------------------------------------
 // Fixtures — the minimal slice of sessions.test.ts's wiring the classifier needs
@@ -306,5 +307,30 @@ describe("sessions — abort classifier (direct)", () => {
 		expect(state.termination.error).toContain("per-command timeout");
 		expect(chain.sentMessages.some((m) => m.includes("HUNG, not merely slow"))).toBe(false);
 		expect(onSuccess).not.toHaveBeenCalled();
+	});
+});
+
+// ---------------------------------------------------------------------------
+// resendIntoChild — the mid-stream delivery mode
+// ---------------------------------------------------------------------------
+
+describe("resendIntoChild", () => {
+	it("delivers as followUp so a mid-stream re-prompt queues instead of throwing", async () => {
+		// The IDLE-BEFORE-REPROMPT invariant claims `sendUserMessage` "QUEUES, safe
+		// mid-stream". That is only true if the delivery mode reaches Pi's sender:
+		// it forwards `deliverAs` to `prompt()` as `streamingBehavior`, and `prompt()`
+		// THROWS "Agent is already processing" when it is absent. A host that drops
+		// the option turns this call into exactly the throw the invariant avoids.
+		const calls: Array<[string, unknown]> = [];
+		const child = {
+			sendUserMessage: async (content: string, options?: unknown) => {
+				calls.push([content, options]);
+			},
+			waitForIdle: async () => {},
+		} as unknown as WorkflowSessionContext;
+
+		await resendIntoChild(child, "fix it");
+
+		expect(calls).toEqual([["fix it", { deliverAs: "followUp" }]]);
 	});
 });

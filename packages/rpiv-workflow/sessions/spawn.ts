@@ -145,8 +145,15 @@ export function forkChildSession(
  * `spawnChildAndRun` calls `waitForIdle()` before `body`, and the host's
  * `prompt()` is only the single initial send. Callers must never call a child's
  * `prompt()` again after the first; re-prompts go through `sendUserMessage` here.
+ *
+ * That queueing is NOT automatic: Pi's sender forwards `deliverAs` to
+ * `prompt()` as `streamingBehavior`, and throws when it is absent. So the mode
+ * is passed explicitly — `followUp` ("deliver when the agent stops"), never
+ * `steer`, because a re-prompt must not interleave into a turn that is still
+ * deciding what to do. A host that drops the option turns this call into the
+ * very throw the invariant exists to avoid.
  */
 export async function resendIntoChild(child: WorkflowSessionContext, msg: string): Promise<void> {
-	await child.sendUserMessage(msg);
+	await child.sendUserMessage(msg, { deliverAs: "followUp" });
 	await child.waitForIdle();
 }

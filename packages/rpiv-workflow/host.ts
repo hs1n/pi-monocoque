@@ -168,14 +168,29 @@ export interface WorkflowHostContext {
 }
 
 /**
+ * How a message delivered into a RUNNING child is handled. Mirrors Pi's
+ * `streamingBehavior`: `"steer"` lands after the current turn's tool calls,
+ * before the next LLM call; `"followUp"` waits until the agent stops.
+ *
+ * This is NOT optional in practice — Pi's sender forwards it straight to
+ * `prompt()`, which THROWS when the agent is already streaming and no mode was
+ * given. A host that drops it turns every mid-stream delivery into a stage
+ * failure.
+ */
+export type DeliverAs = "steer" | "followUp";
+
+/**
  * The child ctx delivered to `spawnChild`'s `withSession` callback. The parent
  * `WorkflowHostContext` declares NO sender; this session subtype ADDS
  * `sendUserMessage` as the guaranteed in-session sender — the host always wires
  * one into a freshly-spawned child session. So any caller operating inside a
  * session can send without a presence check, a compile-time fact of the subtype.
+ *
+ * `options.deliverAs` MUST reach the host's sender for a mid-stream delivery to
+ * queue instead of throw; see `DeliverAs`.
  */
 export interface WorkflowSessionContext extends WorkflowHostContext {
-	sendUserMessage(content: string): Promise<void>;
+	sendUserMessage(content: string, options?: { deliverAs?: DeliverAs }): Promise<void>;
 
 	/**
 	 * Set by a watchdog-equipped host (rpiv-pi) when it aborted THIS child because a

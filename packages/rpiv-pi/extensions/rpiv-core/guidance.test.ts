@@ -9,6 +9,7 @@ import {
 	injectRootGuidance,
 	resolveAndFormatNewGuidance,
 	resolveGuidance,
+	takeDeepest,
 	takeRootGuidance,
 } from "./guidance.js";
 
@@ -105,6 +106,23 @@ describe("injectRootGuidance", () => {
 		const { pi } = createMockPi();
 		injectRootGuidance(projectDir, pi);
 		expect(pi.sendMessage).not.toHaveBeenCalled();
+	});
+});
+
+describe("takeDeepest — the throttle knob's scale", () => {
+	it("0 or negative selects nothing, rather than the whole ladder", () => {
+		// `slice(-0)` is `slice(0)`: the whole array. The guard is what makes 0 mean off.
+		expect(takeDeepest(["a", "b", "c"], 0)).toEqual([]);
+		expect(takeDeepest(["a", "b", "c"], -1)).toEqual([]);
+	});
+
+	it("1 selects only the most specific hit (the default)", () => {
+		expect(takeDeepest(["a", "b", "c"], 1)).toEqual(["c"]);
+	});
+
+	it("n selects the n most specific, and Infinity the whole ladder", () => {
+		expect(takeDeepest(["a", "b", "c"], 2)).toEqual(["b", "c"]);
+		expect(takeDeepest(["a", "b", "c"], Number.POSITIVE_INFINITY)).toEqual(["a", "b", "c"]);
 	});
 });
 

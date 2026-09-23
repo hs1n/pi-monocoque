@@ -124,7 +124,7 @@ function sendGitContextMessage(pi: ExtensionAPI, content: string) {
 export function registerSessionHooks(pi: ExtensionAPI): void {
 	pi.on("session_start", async (_event, ctx) => onSessionStart(_event, ctx, pi));
 	pi.on("session_compact", async (_event, ctx) => onSessionCompact(_event, ctx));
-	pi.on("session_shutdown", async () => onSessionShutdown());
+	pi.on("session_shutdown", async (_event, ctx) => onSessionShutdown(ctx));
 	pi.on("tool_call", async (event, ctx) => onToolCall(event, ctx, pi));
 	pi.on("before_agent_start", async (event, ctx) => onBeforeAgentStart(event, ctx, pi));
 }
@@ -191,10 +191,16 @@ async function onSessionCompact(_event: unknown, ctx: { sessionManager: object }
 	}
 }
 
-async function onSessionShutdown(): Promise<void> {
+async function onSessionShutdown(ctx: { sessionManager?: object }): Promise<void> {
 	resetInjectionState();
 	clearGitContextCache();
 	resetInjectedMarker();
+	// The latch must not outlive the dedup Set it guards. `resetInjectionState()`
+	// empties that Set, so leaving this session's identity marked would make a
+	// later `session_start` for the SAME session skip root guidance + the pipeline
+	// pointer while the Set they are deduped against is already empty — silently
+	// losing both. Delete just this identity: a concurrent session's latch stands.
+	if (ctx?.sessionManager) sessionStartInjected.delete(ctx.sessionManager);
 }
 
 // Runs unconditionally — per-tool-call guidance injection and git-context

@@ -449,6 +449,24 @@ describe("session_start hook — repeat-fire idempotence", () => {
 		await captured.events.get("session_start")?.[0]({ reason: "startup" } as never, ctx as never);
 		expect(sendsOf(pi, "rpiv-guidance")).toBe(2);
 	});
+
+	it("a session_start after session_shutdown re-injects on the SAME identity", async () => {
+		// The latch is deleted at shutdown precisely so it cannot outlive the dedup Set
+		// that shutdown empties — otherwise root guidance + the pointer would be skipped
+		// against an already-empty Set, and never re-sent.
+		writeGuidanceTree(projectDir, { ".rpiv/guidance/architecture.md": "root-architecture" });
+		const { pi, captured } = createMockPi({ exec: stubGitExec({}) as never });
+		registerSessionHooks(pi);
+		const ctx = createMockCtx({ cwd: projectDir });
+		const start = captured.events.get("session_start")?.[0];
+
+		await start?.({ reason: "startup" } as never, ctx as never);
+		expect(sendsOf(pi, "rpiv-guidance")).toBe(1);
+
+		await captured.events.get("session_shutdown")?.[0]({ reason: "quit" } as never, ctx as never);
+		await start?.({ reason: "startup" } as never, ctx as never);
+		expect(sendsOf(pi, "rpiv-guidance")).toBe(2);
+	});
 });
 
 describe("session_compact hook", () => {

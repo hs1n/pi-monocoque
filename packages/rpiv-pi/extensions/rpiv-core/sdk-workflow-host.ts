@@ -493,7 +493,13 @@ export class SdkWorkflowHost implements WorkflowHostContext {
 				getSessionFile: () => session.sessionFile,
 			},
 			waitForIdle: () => this.waitForChildIdle(session),
-			sendUserMessage: (content) => session.sendUserMessage(content),
+			// Forward the delivery mode: Pi's `sendUserMessage` hands `deliverAs`
+			// straight to `prompt()` as `streamingBehavior`, which THROWS when the
+			// agent is already streaming and no mode was given. Dropping it here
+			// made every mid-stream re-prompt (the validation-retry path
+			// `askAgentToFix` and the resume nudge) fail the stage instead of
+			// queueing — the invariant `resendIntoChild` documents.
+			sendUserMessage: (content, options) => session.sendUserMessage(content, options),
 		};
 	}
 
