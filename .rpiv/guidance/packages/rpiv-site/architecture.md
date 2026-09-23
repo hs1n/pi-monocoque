@@ -1,63 +1,30 @@
 # rpiv-site
 
-## Monorepo Context
-Astro 5 static marketing site for the rpiv-pi family. Workspace package (`@juicesharp/rpiv-site`, `private: true`) — joins lockstep + shared CI infrastructure but **NOT a Pi extension**: no `pi` field, never published, never loaded by the Pi runtime. **Excluded from the root TypeScript project** (`tsconfig.base.json:exclude` lists `packages/rpiv-site/**`); it has its own `tsconfig.json` extending `astro/tsconfigs/strict`. Biome lints/formats `.ts` here via the root `packages/*/**/*.ts` include (plus site-only `.css`/`.html` patterns) — only `.astro`/`.mjs` and type-checking fall to Astro's own pipeline. Build invoked at the monorepo root via `npm run build:site`.
+Astro 5 static marketing site for the rpiv-pi family. Workspace package
+(`@juicesharp/rpiv-site`, `private: true`) — joins lockstep + shared CI
+infrastructure but **NOT a Pi extension**: no `pi` field, never published, never
+loaded by the Pi runtime. **Excluded from the root TypeScript project**
+(`tsconfig.base.json:exclude` lists `packages/rpiv-site/**`); it has its own
+`tsconfig.json` extending `astro/tsconfigs/strict`. Biome lints/formats `.ts` here
+via the root `packages/*/**/*.ts` include (plus site-only `.css`/`.html` patterns) —
+only `.astro`/`.mjs` and type-checking fall to Astro's own pipeline. Build invoked at
+the monorepo root via `npm run build:site`.
 
-## Responsibility
-Hand-built marketing tour at `https://rpiv-pi.com` plus a `/blog` and a `/docs` route tree. **This fork does not deploy it** — see Architectural Boundaries. The home page is positioning-first ("correct ≠ aligned, keep the driver in the loop") and composes AltHero → AltThesis → Install → AltFirstRun → WorkflowCatalog → InsideBuild → AltSurface → SiblingGrid → AltModels → AltRoadmap → SetupTrace (`Colophon` mounts globally in `Base.astro`); the earlier mechanism-first landing (`/classic`) is retired — git history keeps it. The flow surfaces the rpiv-pi pipelines, skills, agents, and sibling extensions. Spec content (skills, agents) is **read directly from the rpiv-pi sibling at build time** via cross-package globs — never duplicated.
+Hand-built marketing tour plus a `/blog` and a `/docs` route tree. Spec content
+(skills, agents) is **read directly from the rpiv-pi sibling at build time** via
+cross-package globs — never duplicated.
 
-## Dependencies
-- **`astro` ^5.0.0** (devDep): the entire framework — `.astro` SFCs, content collections, static output
-- **`@astrojs/sitemap` ^3.2.0** / **`@astrojs/rss` ^4.0.0** (devDep): `/sitemap-index.xml`; `/blog/rss.xml` feed builder
-- **`pagefind` ^1.5.2** (devDep): static search index + UI, mounted on docs pages via `Search.astro`
-- **`@fontsource/jetbrains-mono` ^5.2.8`** (runtime dep): bundled font, imported + preloaded in `src/layouts/Base.astro` (no CDN)
-- **`sharp`** (ambient — used only by `scripts/generate-og.mjs`, not in `package.json`): operator-only OG/apple-touch-icon rasteriser
+**This fork does not deploy it.** Upstream serves `dist/` via GitHub Pages with
+`public/CNAME` pinning the domain, deployed by `.github/workflows/deploy-site.yml` on
+pushes touching `packages/rpiv-site/**`. In this fork that workflow is
+`workflow_dispatch`-only and `public/CNAME` is deleted — the fork does not operate
+`rpiv-pi.com`, so nothing here publishes the site automatically; `site:` in
+`astro.config.mjs` still names upstream's domain and is inert until repointed.
 
-## Consumers
-- **GitHub Pages (upstream only)**: upstream serves the contents of `dist/` with `public/CNAME` pinning the domain, deployed by `.github/workflows/deploy-site.yml` on pushes touching `packages/rpiv-site/**`. **In this fork that workflow is `workflow_dispatch`-only and `public/CNAME` is deleted** — the fork does not operate `rpiv-pi.com`, so nothing here publishes the site automatically; `site:` in `astro.config.mjs` still names upstream's domain and is inert until repointed
-- **No runtime callers** — fully static, no API or backend
-
-## Module Structure
-```
-Build config         — astro.config.mjs (static output; /docs/getting-started → /docs redirect; Shiki
-                       transformer remapping github-dark inline colors to a CSS var; sitemap filter)
-                       + tsconfig.json; site has its own type universe
-public/              — Static assets copied verbatim (favicon.svg, apple-touch-icon, og-* images, robots.txt, .nojekyll); `CNAME` was removed in the fork
-scripts/generate-og.mjs — Operator-only build helper (sharp); NOT invoked by `astro build`
-src/pages/           — File-based routes (home + blog + docs trees) → see src/pages/architecture.md
-src/layouts/         — Base.astro (HTML shell, SEO, JSON-LD, bundled font) + DocsLayout.astro
-src/components/      — UI layer → see src/components/architecture.md
-src/content/ + content.config.ts — Content collections → see src/content/architecture.md
-src/lib/ + src/styles/ — Typed adapters/spec readers → see src/lib/architecture.md; global.css + tokens.css + prose.css (sumi/washi palette)
-```
-
-## Cross-Package Spec Loading (build-time only)
-```typescript
-// src/content.config.ts — spec-mirror collections reach OUT of the package via Astro's glob
-// loader so the site reads upstream rpiv-pi sources directly (no dup).
-const skillSpecs  = defineCollection({ loader: glob({ pattern: "*/SKILL.md", base: "../rpiv-pi/skills" }), schema: ... });
-const agentSpecs  = defineCollection({ loader: glob({ pattern: "*.md",       base: "../rpiv-pi/agents" }), schema: ... });
-// Visitor copy lives locally, joined by slug == upstream `name`. Schemas carry structured doc fields
-// (purpose/when_to_use/inputs/outputs/key_steps/related). Skills without visitor copy still index via
-// the spec fallback in src/lib/skills.ts — partial coverage is fine.
-// Local-only collections (no upstream mirror): extensions, posts, docs.
-```
-
-## Spec-Data Files (`src/lib/`)
-```typescript
-// siblings.ts — reads each sibling's package.json directly via readFileSync from
-//   "../../../<name>/package.json"; SIBLING_NAMES is the hand-curated tuple.
-// compat.ts — reads packages/rpiv-pi/package.json (rpiv-pi version) and the monorepo
-//   root package.json devDependencies pin of @earendil-works/pi-coding-agent (the tested
-//   compatibility anchor — every package peer-depends on "*", so there is no published
-//   floor); throws if the devDependency key is missing (build-time guard).
-// agents.ts / skills.ts — Astro content-collection adapters (use `astro:content`).
-//   Embed hand-curated tables: TIER_BY_NAME (capability tier per named agent), the
-//   PIPELINE/SECONDARY/CODE_REVIEW_FLOW tuples + ARTIFACT_WRITE_SITES / PIPELINE_META.
-// workflows.ts — hand-maintained presentation mirror of all four built-in pipelines
-//   (build/vet/polish/ship; nothing is omitted); build's runtime stages fold into a curated
-//   act spine. Components consume these typed APIs — never `getCollection()` directly.
-```
+The dependency list, the consumers/deploy detail, the module map, the cross-package
+spec-loading code, and the `src/lib/` spec-file inventory are in `details.md` beside
+this file — NOT auto-injected. Read it when you are changing the build, the spec
+adapters, or the page tree.
 
 ## Architectural Boundaries
 - **NO runtime — output is `static`** (`astro.config.mjs`); every data lookup runs in frontmatter at build time

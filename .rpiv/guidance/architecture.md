@@ -1,6 +1,8 @@
 # rpiv-mono
 
-Monorepo for Pi CLI plugins in the `@juicesharp/rpiv-*` family. Lockstep versions, single install, single publish pipeline. Targets Pi Agent CLI (`@earendil-works/pi-coding-agent`), not Claude Code.
+Monorepo for Pi CLI plugins in the `@juicesharp/rpiv-*` family. Lockstep versions,
+single install, single publish pipeline. Targets Pi Agent CLI
+(`@earendil-works/pi-coding-agent`), not Claude Code.
 
 > **This checkout is a fork of upstream, not upstream itself.** It is
 > `hs1n/pi-monocoque`, forked from `juicesharp/rpiv-mono` (kept as the `upstream`
@@ -25,66 +27,46 @@ Monorepo for Pi CLI plugins in the `@juicesharp/rpiv-*` family. Lockstep version
 > - **Never run `/rpiv-setup` in a session that loads this fork.** Its `SIBLINGS`
 >   registry installs the *upstream registry* copies, which would load alongside the
 >   local ones. `scripts/fork-pi-install.sh` mirrors that registry with local paths.
-> - **Nothing here can be published as-is.** Every package is still named
+> - **Nothing here may be published as-is.** Every package is still named
 >   `@juicesharp/rpiv-*`. Treat `node scripts/release.mjs` as inoperative: it commits and
 >   tags *before* publishing, so a scope mismatch leaves a half-finished release.
 > - **Remotes**: `origin` is SSH (`git@github.com:hs1n/pi-monocoque.git`) and needs the
 >   key configured in `~/.ssh/config`; `upstream` is HTTPS on purpose (public read-only,
 >   no key required).
 
-# Architecture
+The layout tree, per-package responsibilities, and the private/opt-in roster are in
+`details.md` beside this file — NOT auto-injected. Read it when you need to know
+where something lives.
 
-```
-rpiv-mono/
-├── packages/
-│   ├── rpiv-pi/                  — Umbrella: extension runtime + skills + agents (zero tools)
-│   ├── rpiv-<feature>/           — One Pi extension per directory; npm name @juicesharp/rpiv-<feature>
-│   ├── rpiv-site/                — Astro 5 marketing site (private). Excluded from root tsconfig + coverage scope
-│   ├── rpiv-telemetry/           — Private Pi extension: MLflow observability (private opt-in; not in siblings.ts)
-│   └── test-utils/               — Private workspace package: shared test fixtures (not published)
-├── test/                         — Repo-wide Vitest setup (homedir stub + env hygiene + pi-ai//compat mocks + beforeEach singleton resets)
-├── scripts/                      — Lockstep release pipeline (release.mjs + sync-versions.js) + repo guards (check-no-decision-codes.mjs, check-slice-overlap.mjs)
-│                                 — fork additions: fork-pi-install.sh (local-path Pi install), fork-license-audit.mjs (dependency license inventory), fork-rename-scope.mjs (npm-scope rename), fork-own-skill.mjs (take over a bundled skill into ~/.agents/skills)
-├── thoughts/shared/              — Pipeline artifacts: questions/, research/, solutions/, designs/, plans/, reviews/ (gitignored)
-├── vitest.config.ts              — Single Vitest runner; `include: ['packages/*/**/*.test.ts']`, setupFiles `['./test/setup.ts']`
-├── tsconfig.base.json            — Single shared TS config; no per-package tsconfig.json (rpiv-site has its own — excluded here)
-├── package.json                  — npm workspaces root
-└── biome.json                    — Single shared lint/format config
-```
+## Layout and build model
+- **Build model**: `noEmit: true` everywhere. Packages publish raw `.ts` (Pi loads `.ts` directly via the `pi` manifest). No `dist/`, no per-package tsconfig.json — one shared `tsconfig.base.json` (rpiv-site has its own, excluded from it).
+- **Plugin discovery**: each extension package's `package.json` carries a `pi` field — `pi.extensions: ["./index.ts"]` (`["./extension.ts"]` for rpiv-workflow/rpiv-telemetry; `["./extensions"]` for rpiv-pi) and optionally `pi.skills: ["./skills"]`; non-extension packages (rpiv-config, rpiv-site, test-utils) have no `pi` field. Pi loads the default-exported function with an `ExtensionAPI` instance.
+- **Sibling registry**: `packages/rpiv-pi/extensions/rpiv-core/siblings.ts` is the single source of truth. Adding an entry here propagates to `/rpiv-setup`, missing-plugin warnings, and presence detection (regex over `~/.pi/agent/settings.json`). A parallel `LEGACY_SIBLINGS` registry drives prune-on-upgrade for superseded packages. **No runtime imports of siblings** — Phase 1 zero-cross-imports contract.
+- **Opt-in extensions**: a published sibling becomes opt-in by being **absent from `siblings.ts`** (and from `rpiv-pi/package.json` `peerDependencies`). It still rides lockstep + shared CI infrastructure via the `packages/*` glob, but `/rpiv-setup` won't suggest it — users install it explicitly with `pi install`.
+- **Test runner**: Vitest at repo root; one runner with `include: ['packages/*/**/*.test.ts']` discovers every test file; `test/setup.ts` runs once per worker before any test file imports. Coverage excludes `**/index.ts`, `packages/test-utils/**`, `packages/rpiv-site/**`, and `packages/rpiv-telemetry/**`. No per-package vitest configs.
 
-**Build model**: `noEmit: true` everywhere. Packages publish raw `.ts` (Pi loads `.ts` directly via the `pi` manifest). No `dist/`, no per-package tsconfig.json.
-
-**Plugin discovery**: each extension package's `package.json` carries a `pi` field — `pi.extensions: ["./index.ts"]` (`["./extension.ts"]` for rpiv-workflow/rpiv-telemetry; `["./extensions"]` for rpiv-pi) and optionally `pi.skills: ["./skills"]`; non-extension packages (rpiv-config, rpiv-site, test-utils) have no `pi` field. Pi loads the default-exported function with an `ExtensionAPI` instance.
-
-**Sibling registry**: `packages/rpiv-pi/extensions/rpiv-core/siblings.ts` is the single source of truth. Adding an entry here propagates to `/rpiv-setup`, missing-plugin warnings, and presence detection (regex over `~/.pi/agent/settings.json`). The registry is architectural, not just family bookkeeping: it covers registered extensions generally — including pinned third-party runtime deps the family needs installed (the `@tintinweb/pi-subagents` Agent dispatcher, registered with a fork-detection regex; its unscoped legacy name rides `LEGACY_SIBLINGS` and is pruned on upgrade). A parallel `LEGACY_SIBLINGS` registry drives prune-on-upgrade for superseded packages. **No runtime imports of siblings** — Phase 1 zero-cross-imports contract.
-
-**Opt-in extensions**: a published sibling becomes opt-in by being **absent from `siblings.ts`** (and from `rpiv-pi/package.json` `peerDependencies`). It still rides lockstep + shared CI infrastructure via the `packages/*` glob, but `/rpiv-setup` won't suggest it — users install it explicitly with `pi install`. `rpiv-voice`, `rpiv-btw`, and `rpiv-warp` are currently opt-in this way. Private packages (`"private": true`) are a separate concern — they skip publish but otherwise follow the same lockstep rules; today's private set is `rpiv-site`, `rpiv-telemetry`, and `test-utils` (`rpiv-telemetry` is a private Pi extension — it ships `pi.extensions` but is absent from `siblings.ts`).
-
-**Test runner**: Vitest at repo root; one runner with `include: ['packages/*/**/*.test.ts']` discovers every test file; `test/setup.ts` runs once per worker before any test file imports. Coverage excludes `**/index.ts`, `packages/test-utils/**`, `packages/rpiv-site/**`, and `packages/rpiv-telemetry/**`. No per-package vitest configs.
-
-# Commands
+## Commands
 
 | Command | Description |
 |---|---|
 | `npm install` | One install at root; workspace symlinks under `node_modules/` |
 | `npm run check` | Biome (`--write --error-on-warnings`) + `tsc --noEmit -p tsconfig.base.json` |
-| `npx tsc --noEmit -p tsconfig.base.json` | **Read-only whole-tree typecheck** (no formatter side effects) — the check write-scoped probes (elaborate/implement lanes) run when they must not rewrite files outside their own set |
+| `npx tsc --noEmit -p tsconfig.base.json` | **Read-only whole-tree typecheck** (no formatter side effects) — use when a write-scoped probe must not rewrite files outside its own set |
 | `npm run check:files -- <paths...>` | Path-scoped Biome (`--write --error-on-warnings`) — rewrites ONLY the paths it is given; **the path-scoped auto-fix lint form** a phase's `#### Automated Verification:` uses to stay write-scoped to its own `files:` set |
-| `npm test` | Vitest at root (single runner; `include: ['packages/*/**/*.test.ts']` walks every package) |
+| `npm test` / `npm run coverage` | Vitest at root (single runner) / with V8 coverage |
 | `npm run build:site` | Build the Astro marketing site (`packages/rpiv-site`) — separate from publish |
-| `npm run coverage` | Vitest with V8 coverage |
 | `node scripts/release.mjs <patch\|minor\|major\|x.y.z>` | Cut a lockstep release — see `.rpiv/guidance/scripts/architecture.md` |
 | `node scripts/sync-versions.js` | Verify lockstep + rewrite intra-monorepo deps to `^<version>` |
-| `bash scripts/fork-pi-install.sh [-l] [--with btw,voice,warp,telemetry]` | **Fork-only.** Install this fork's packages into Pi by local path — the only supported install path here (`pi install git:<repo>` cannot work, see the banner). See `INSTALL-FORK.md` |
+| `bash scripts/fork-pi-install.sh [-l] [--with btw,voice,warp,telemetry]` | **Fork-only.** Install this fork's packages into Pi by local path — the only supported install path here. See `INSTALL-FORK.md` |
 | `node scripts/fork-license-audit.mjs .` | **Fork-only.** Dependency license inventory + copyleft/unknown flagging (Node built-ins only, no npx) |
-| `node scripts/fork-rename-scope.mjs <@scope>` | **Fork-only.** Rewrite the npm scope across the repo (idempotent, `--report` / `--dry-run`); re-run if the publishing account differs from the one assumed |
-| `node scripts/fork-own-skill.mjs <skill> [--list] [--check] [--remove <skill>]` | **Fork-only.** Copy a bundled skill into `~/.agents/skills` so it shadows the package one, carrying its `_shared/` deps. A project-level `.agents/skills` target warns: it is harvested only because of this fork's `agentsSkillDirs` fix in `skill-contracts-source.ts`, and Pi gates dispatching from it on project trust |
+| `node scripts/fork-rename-scope.mjs <@scope>` | **Fork-only.** Rewrite the npm scope across the repo (idempotent, `--report` / `--dry-run`) |
+| `node scripts/fork-own-skill.mjs <skill> [--list] [--check] [--remove <skill>]` | **Fork-only.** Copy a bundled skill into `~/.agents/skills` so it shadows the package one, carrying its `_shared/` deps |
 
 Husky hooks (local-only):
 - `pre-commit` — runs `npm run check:decision-codes` (fail-fast contamination guard) then `npm run check` (format + typecheck); restages files biome may have rewritten
 - `pre-push` — runs `npm run coverage` (full test + coverage thresholds gate)
 
-# Conventions
+## Conventions
 
 - **Lockstep versions**: every `packages/*/package.json` shares one `version`. Enforced by `sync-versions.js` (exit 1 on drift). `"private": true` packages bump too but are skipped at publish. **Naming**: directory `rpiv-<feature>` ↔ npm `@juicesharp/rpiv-<feature>`.
 - **Sibling deps as `peerDependencies: "*"`** — `rpiv-pi` peer-pins every registered sibling and `pi-*` runtime; bundlers never include them.
