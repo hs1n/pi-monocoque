@@ -53,7 +53,7 @@
  *   buildUserSkillContracts(<tmpdir>)>   # from packages/rpiv-pi/extensions/rpiv-core
  */
 
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -155,9 +155,16 @@ function ownSkill(name, opts) {
 		return true;
 	}
 
+	// Stage the copy beside the destination and swap only once it landed: removing
+	// first would leave NO skill behind when the copy fails (a read error mid-tree,
+	// a full disk) — and the bundled skill does not take over, because the
+	// user-level dir still exists and shadows it.
+	const staging = `${dest}.staging-${process.pid}`;
+	rmSync(staging, { recursive: true, force: true });
+	mkdirSync(dirname(staging), { recursive: true });
+	cpSync(src, staging, { recursive: true });
 	rmSync(dest, { recursive: true, force: true });
-	mkdirSync(dirname(dest), { recursive: true });
-	cpSync(src, dest, { recursive: true });
+	renameSync(staging, dest);
 
 	if (refs.length > 0) {
 		const sharedDest = join(opts.target, "_shared");
@@ -173,7 +180,10 @@ function ownSkill(name, opts) {
 	console.log(`    contract: ${hasContract(srcMd) ? "declared" : "MISSING — /wf will not see this skill"}`);
 	console.log(`    _shared:  ${refs.length === 0 ? "none referenced" : `${refs.length} copied (${refs.join(", ")})`}`);
 	for (const f of missing) console.error(`    ✗ ${f} referenced but absent from the bundled _shared/`);
-	return true;
+	// A skill whose own referenced helper could not be copied is BROKEN — the exact
+	// condition `--check` reports. Returning success here lets a caller (or a shell
+	// `&&`) treat a skill that will fail at its first `!` block as installed.
+	return missing.length === 0;
 }
 
 function listOwned(opts) {
@@ -206,6 +216,29 @@ function listOwned(opts) {
 		console.log(`  ${n.padEnd(28)} ${tags.join(" · ")}`);
 	}
 	return true;
+}
+
+/**
+ * After a removal, drop `_shared/` helpers no surviving owned skill references.
+ * The library owns that directory, so without this it accumulates the union of
+ * every skill ever owned — and nothing reports it, because `--check` only walks
+ * what a *current* skill references.
+ */
+function gcOrphanedShared(opts) {
+	const sharedDir = join(opts.target, "_shared");
+	if (!existsSync(sharedDir)) return;
+	const referenced = new Set();
+	for (const n of readdirSync(opts.target)) {
+		if (n.startsWith(".") || n.startsWith("_")) continue;
+		const md = readSkillMd(join(opts.target, n));
+		if (md === null) continue;
+		for (const f of sharedRefs(md)) referenced.add(f);
+	}
+	for (const f of readdirSync(sharedDir)) {
+		if (referenced.has(f)) continue;
+		rmSync(join(sharedDir, f), { recursive: true, force: true });
+		console.log(`  gc: _shared/${f} is no longer referenced by any owned skill`);
+	}
 }
 
 function checkOwned(opts) {
@@ -254,8 +287,16 @@ function main(argv) {
 	const rest = [];
 	for (let i = 0; i < argv.length; i += 1) {
 		const a = argv[i];
-		if (a === "--target") opts.target = argv[++i];
-		else if (a === "--force") opts.force = true;
+		if (a === "--target") {
+			const value = argv[++i];
+			// `--target` as the last argument used to set the target to `undefined`,
+			// which then stringified into every path as "undefined/...".
+			if (value === undefined || value.startsWith("--")) {
+				console.error("✗ --target needs a directory");
+				return 1;
+			}
+			opts.target = value;
+		} else if (a === "--force") opts.force = true;
 		else if (a === "--dry-run") opts.dryRun = true;
 		else rest.push(a);
 	}
@@ -280,11 +321,13 @@ function main(argv) {
 				console.error(`✗ ${n}: not owned (nothing at ${dest})`);
 				continue;
 			}
-			if (opts.dryRun) console.log(`[dry-run] would remove ${dest}`);
-			else {
-				rmSync(dest, { recursive: true, force: true });
-				console.log(`- ${n} removed; the bundled skill takes over on /reload`);
+			if (opts.dryRun) {
+				console.log(`[dry-run] would remove ${dest}`);
+				continue;
 			}
+			rmSync(dest, { recursive: true, force: true });
+			console.log(`- ${n} removed; the bundled skill takes over on /reload`);
+			gcOrphanedShared(opts);
 		}
 		return 0;
 	}
