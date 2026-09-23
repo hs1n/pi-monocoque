@@ -210,17 +210,27 @@ export function injectRootGuidance(cwd: string, pi: ExtensionAPI): void {
  * idempotence > reliability.
  *
  * Throttled to `TOOL_PATH_GUIDANCE_LIMIT` files, taken from the specific end of
- * the ladder BEFORE the dedup filter — filtering first would let an ancestor
- * through on every later touch of the same directory, which is exactly what the
- * throttle exists to avoid.
+ * the ladder AFTER the dedup filter. That order is the contract: the filter
+ * removes what is already in context, the throttle then picks the most specific
+ * of what remains. Slicing first would resolve to an already-injected leaf,
+ * return `null`, and drop a resolved-but-never-injected ancestor forever — the
+ * next touch of the same directory resolves the same leaf and skips again. So
+ * `null` here means "every resolved file is already injected", exactly once.
+ *
+ * The consequence is deliberate: an intermediate level is delivered on a LATER
+ * touch of that directory rather than alongside the leaf, which keeps any single
+ * touch to one file.
  *
  * Returns the `"\n\n---\n\n"`-joined formatted blocks, or `null` when nothing
  * resolves along the ladder OR every resolved file is already injected (marks
  * nothing in the null cases).
  */
 export function resolveAndFormatNewGuidance(filePath: string, cwd: string, toolName: string): string | null {
-	const resolved = takeDeepest(resolveGuidance(filePath, cwd), TOOL_PATH_GUIDANCE_LIMIT);
-	const newFiles = resolved.filter((g) => !injectedGuidance.has(g.relativePath));
+	const resolved = resolveGuidance(filePath, cwd);
+	const newFiles = takeDeepest(
+		resolved.filter((g) => !injectedGuidance.has(g.relativePath)),
+		TOOL_PATH_GUIDANCE_LIMIT,
+	);
 	if (newFiles.length === 0) return null;
 
 	// Mark before send — idempotence > reliability.

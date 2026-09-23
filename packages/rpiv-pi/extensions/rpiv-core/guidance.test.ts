@@ -165,6 +165,24 @@ describe("resolveAndFormatNewGuidance", () => {
 		expect(content).not.toContain("root");
 	});
 
+	it("delivers an intermediate level on a LATER touch rather than dropping it", () => {
+		// The discriminating case for filter-then-slice: the first touch sends only the
+		// leaf; the ancestor that was resolved but never injected is delivered by the
+		// next touch of that directory. Slicing before filtering drops it forever.
+		writeGuidanceTree(projectDir, {
+			".rpiv/guidance/architecture.md": "root",
+			".rpiv/guidance/packages/architecture.md": "mid",
+			".rpiv/guidance/packages/app/architecture.md": "leaf",
+		});
+		const first = resolveAndFormatNewGuidance(join(projectDir, "packages", "app", "x.ts"), projectDir, "read");
+		expect(first).toContain("leaf");
+		expect(first).not.toContain("mid");
+
+		const second = resolveAndFormatNewGuidance(join(projectDir, "packages", "app", "y.ts"), projectDir, "read");
+		expect(second).toContain("mid");
+		expect(second).not.toContain("root");
+	});
+
 	it("uses the deepest existing level when the leaf directory has no guidance of its own", () => {
 		writeGuidanceTree(projectDir, { ".rpiv/guidance/src/architecture.md": "src-level" });
 		const content = resolveAndFormatNewGuidance(join(projectDir, "src", "deep", "x.ts"), projectDir, "read");
