@@ -1,4 +1,4 @@
-import type { AssistantMessage, Message, ToolResultMessage, UserMessage } from "@earendil-works/pi-ai";
+import type { AssistantMessage, JsonObject, Message, ToolResultMessage, UserMessage } from "@earendil-works/pi-ai";
 import type { SessionEntry } from "@earendil-works/pi-coding-agent";
 
 export function makeUserMessage(text: string): UserMessage {
@@ -18,7 +18,7 @@ export function makeAssistantMessage(input: AssistantMessageInput): AssistantMes
 	const content: AssistantMessage["content"] = [];
 	if (input.text) content.push({ type: "text", text: input.text });
 	for (const tc of input.toolCalls ?? []) {
-		content.push({ type: "toolCall", id: tc.id, name: tc.name, arguments: tc.arguments });
+		content.push({ type: "toolCall", id: tc.id, name: tc.name, arguments: tc.arguments as JsonObject });
 	}
 	return { role: "assistant", content, timestamp: Date.now() } as unknown as AssistantMessage;
 }

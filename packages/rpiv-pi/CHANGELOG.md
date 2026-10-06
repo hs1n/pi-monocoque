@@ -7,6 +7,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Pi 1.0 compatibility for workflow child sessions.** Pi 0.80.8 replaced `createAgentSession({ modelRegistry })` with `modelRuntime`, so on newer Pi the borrowed registry was silently dropped and every `/wf` child defaulted its own model/auth runtime from disk (losing runtime API keys and in-memory OAuth state the launcher held). The SDK host now borrows the launcher registry's runtime as `modelRuntime` and still passes `modelRegistry` for older Pi. Dev dependencies move to Pi 1.0.4.
+
 ## [2.11.0] - 2026-09-21
 
 ### Changed

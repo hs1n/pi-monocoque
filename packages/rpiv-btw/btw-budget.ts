@@ -314,6 +314,16 @@ function truncateToFit(result: Message[], budget: number): boolean {
 				content[target.ci] = { ...part, text: `${part.text.slice(0, keepChars)}${marker}` };
 				result[target.mi] = { ...msg, content };
 			}
+		} else if (msg.role === "system") {
+			// pi-ai 1.x SystemMessage: string or text-only parts
+			if (typeof msg.content === "string") {
+				result[target.mi] = { ...msg, content: `${msg.content.slice(0, keepChars)}${marker}` };
+			} else {
+				const content = [...msg.content];
+				const part = content[target.ci];
+				content[target.ci] = { ...part, text: `${part.text.slice(0, keepChars)}${marker}` };
+				result[target.mi] = { ...msg, content };
+			}
 		} else {
 			// toolResult (msg narrowed to ToolResultMessage)
 			const content = [...msg.content];

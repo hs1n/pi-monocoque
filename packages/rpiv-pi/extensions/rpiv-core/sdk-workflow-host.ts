@@ -36,6 +36,7 @@ import { dirname, join } from "node:path";
 import type { Model } from "@earendil-works/pi-ai";
 import {
 	type AgentSession,
+	type CreateAgentSessionOptions,
 	createAgentSession,
 	createEventBus,
 	DefaultResourceLoader,
@@ -201,6 +202,23 @@ export const MAX_FANOUT_DEPTH = 2;
  * re-dispatch on resume and loop forever on an over-deep workflow). The message
  * is operator-grade, so the persisted `errMsg` reads clearly on its own.
  */
+type ChildModelRuntime = NonNullable<CreateAgentSessionOptions["modelRuntime"]>;
+
+/**
+ * The model/auth options a child borrows from the launcher's `ModelRegistry`.
+ * Pi 0.80.8 replaced `createAgentSession({ modelRegistry })` with `modelRuntime`;
+ * the extension-facing registry wraps that runtime in a TS-private field, so it is
+ * read through a shim (same approach as `@tintinweb/pi-subagents`). Both keys are
+ * passed: older Pi reads `modelRegistry`, newer Pi reads `modelRuntime` and ignores
+ * the other. No runtime found → newer Pi defaults one per child from disk.
+ */
+export function borrowedModelOptions(
+	modelRegistry: ModelRegistry,
+): { modelRuntime?: ChildModelRuntime } & Record<"modelRegistry", ModelRegistry> {
+	const runtime = (modelRegistry as unknown as { runtime?: ChildModelRuntime }).runtime;
+	return { modelRegistry, ...(runtime !== undefined && { modelRuntime: runtime }) };
+}
+
 export class FanoutDepthExceededError extends Error {
 	constructor(
 		readonly depth: number,
@@ -283,10 +301,9 @@ export class SdkWorkflowHost implements WorkflowHostContext {
 		const resourceLoader = await this.buildChildResourceLoader(childEventBus);
 		const { session } = await createAgentSession({
 			cwd: this.cwd,
-			// Borrow ONLY the registry; authStorage is still defaulted per child
-			// from ~/.pi/agent/auth.json. resourceLoader is SUPPLIED (filtered),
+			// Borrow ONLY the model/auth state; resourceLoader is SUPPLIED (filtered),
 			// not defaulted, so children skip launcher-only observer extensions.
-			modelRegistry: this.deps.modelRegistry,
+			...borrowedModelOptions(this.deps.modelRegistry),
 			resourceLoader,
 			sessionManager: this.createChildSessionManager(options),
 			model: this.resolveModelKey(options.model?.model),

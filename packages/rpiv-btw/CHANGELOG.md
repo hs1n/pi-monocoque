@@ -7,6 +7,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Pi 1.0 compatibility.** pi-ai 1.x adds a `system` message role; context truncation now handles it instead of treating it as a tool result.
+
 ## [2.11.0] - 2026-09-21
 
 ## [2.10.1] - 2026-09-13
