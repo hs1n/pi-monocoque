@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **`workflow-basics.md` now says what a run costs, and when the skill is the better call.** The doc described the graph shapes and left the trade-off to the reader's guess. The new section states the per-stage floor — every stage is a detached child session that reloads the extension and takes the project's guidance before any work begins — and the measurement behind it: one `/wf vet` over a one-file docs commit took 28 minutes to clear two stages, `goal` (a script stage, no model) and the `code-review` skill, so the review was effectively the whole cost. It names what the runner adds over invoking the skill directly — detached execution, gates, judged loops, a resumable trail, and specifically the re-entry into planning and implementation that `vet` and `polish` do on a failing review — so the choice is made before the run starts. Run caps are called out as not being the lever: they bound re-entries, not the price of one review; overriding the stage's model or effort is.
+
+### Fixed
+
+- **A message delivered into a running child queues instead of failing the stage.** Pi's sender forwards `deliverAs` to `prompt()` as `streamingBehavior`, which throws when the agent is already streaming and no mode was given. Dropping the option made every mid-stream re-prompt — the validation-retry path and the resume nudge — throw instead of queue. `DeliverAs` is now part of the host interface and is passed explicitly as `followUp` ("deliver when the agent stops"), never `steer`, because a re-prompt must not interleave into a turn that is still deciding what to do.
+
 ## [2.13.8] - 2026-10-12
 
 ## [2.13.7] - 2026-10-12
