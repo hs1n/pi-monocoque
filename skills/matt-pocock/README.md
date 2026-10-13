@@ -24,14 +24,32 @@ Six of upstream's `engineering/` skills are deliberately **absent**:
 None of the 22 declares a `contract:` block, so they are invisible to rpiv's contract harvesting
 (`buildUserSkillContracts`) and cannot perturb contract-driven routing.
 
-## Updating
+## Provenance
 
-Vendored from a local `~/.agents/skills` copy that carried **no version marker**, so the upstream
-commit it came from is unrecorded. Upstream's `package.json` read `1.3.1` when this was written;
-treat this copy as at or before that.
+[`PROVENANCE.json`](./PROVENANCE.json) is the machine-derived record: for each of the 22, the
+upstream `skillPath` and the installer's `skillFolderHash`. It is generated from the installer lock
+rather than written by hand, and those hashes make drift detectable without re-downloading
+anything.
+
+The copy came from an installer run on **2026-09-21** that recorded itself in
+`~/.agents/.skill-lock.json`. That lock held **25** entries against the 22 on disk — it still listed
+`code-review`, `implement` and `research`, which had been deleted from disk precisely because they
+collide. Upstream's `package.json` read `1.3.1` when this was written, so this copy predates that;
+the upstream commit itself is unrecorded, which is what the folder hashes are there to compensate
+for.
+
+## Updating — and the thing that will undo this
 
 To update: copy from upstream again, re-apply the exclusions above, re-check that no vendored name
-collides with `packages/rpiv-pi/skills/`, and record the upstream version here.
+collides with `packages/rpiv-pi/skills/`, and regenerate `PROVENANCE.json`.
+
+**Do not re-run the installer that put these in `~/.agents/skills`.** It is lock-driven, and its lock
+still carries all 25 names, so it will restore `code-review`, `implement` and `research` into a
+location that outranks the installed package — silently shadowing three skills the built-in `/wf`
+graphs dispatch by name. **That is the exact failure this directory exists to prevent**, and it is
+why the absence of those three is load-bearing rather than tidy. If the installer is wanted for
+something else, keep its output out of `~/.agents/skills`, or verify afterwards that the three names
+are still absent.
 
 ## The precedence trap this arrangement accepts
 
