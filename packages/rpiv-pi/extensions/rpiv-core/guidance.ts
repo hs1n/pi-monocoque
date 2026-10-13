@@ -22,8 +22,8 @@
  * and `injectRootGuidance` (dedup-Set owners), and `clearInjectionState`.
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import { dirname, isAbsolute, join, relative, sep } from "node:path";
+import { readdirSync, readFileSync } from "node:fs";
+import { basename, dirname, isAbsolute, join, relative, sep } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { FLAG_DEBUG, MSG_TYPE_GUIDANCE } from "./constants.js";
 
@@ -85,6 +85,33 @@ interface GuidanceFile {
 }
 
 /**
+ * Exact-case existence check for one file inside `dir`.
+ *
+ * `existsSync(join(dir, name))` is not enough on a case-insensitive filesystem —
+ * APFS and NTFS, the defaults on macOS and Windows. There the ladder's `AGENTS.md`
+ * candidate matches a neighbouring `agents.md`, and this repo has one:
+ * `packages/rpiv-pi/docs/agents.md` is a docs page about the bundled subagents, so
+ * touching any file under that directory injected ~4 KB of it labelled as
+ * `AGENTS.md` guidance. Worse than the waste, the ladder stops at the first match,
+ * so a real `.rpiv/guidance/<sub>/architecture.md` would have been shadowed by a
+ * case-colliding unrelated file.
+ *
+ * Comparing against the directory listing is case-exact on every filesystem, so a
+ * candidate matches the file it actually names. A missing or unreadable directory is
+ * a miss rather than an error, leaving the caller's next candidate to apply.
+ *
+ * Exported so tests can pin the case behaviour directly — the filesystem a test
+ * runs on decides whether an integration case exercises it at all.
+ */
+export function hasExactFile(dir: string, name: string): boolean {
+	try {
+		return readdirSync(dir).includes(name);
+	} catch {
+		return false;
+	}
+}
+
+/**
  * Resolve guidance files for a given file path.
  *
  * Walks from project root to the file's directory. At each depth, picks
@@ -126,15 +153,15 @@ export function resolveGuidance(filePath: string, projectDir: string): GuidanceF
 
 		for (const candidate of candidates) {
 			const absolute = join(projectDir, candidate.relative);
-			if (existsSync(absolute)) {
-				results.push({
-					relativePath: candidate.relative.split(sep).join("/"),
-					absolutePath: absolute,
-					content: readFileSync(absolute, "utf-8"),
-					kind: candidate.kind,
-				});
-				break; // first-match wins at this depth
-			}
+			if (!hasExactFile(dirname(absolute), basename(absolute))) continue;
+
+			results.push({
+				relativePath: candidate.relative.split(sep).join("/"),
+				absolutePath: absolute,
+				content: readFileSync(absolute, "utf-8"),
+				kind: candidate.kind,
+			});
+			break; // first-match wins at this depth
 		}
 	}
 
@@ -173,7 +200,7 @@ export function takeRootGuidance(cwd: string, trigger = "auto-loaded at session 
 	if (!force && injectedGuidance.has(relativePath)) return null;
 
 	const absolutePath = join(cwd, relativePath);
-	if (!existsSync(absolutePath)) return null;
+	if (!hasExactFile(dirname(absolutePath), basename(absolutePath))) return null;
 
 	let content: string;
 	try {

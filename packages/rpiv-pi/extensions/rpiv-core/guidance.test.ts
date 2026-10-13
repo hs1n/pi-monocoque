@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, type vi } from "vitest";
 import {
 	clearInjectionState,
 	handleToolCallGuidance,
+	hasExactFile,
 	injectRootGuidance,
 	resolveAndFormatNewGuidance,
 	resolveGuidance,
@@ -92,6 +93,16 @@ describe("injectRootGuidance", () => {
 		clearInjectionState();
 		injectRootGuidance(projectDir, pi);
 		expect(pi.sendMessage).toHaveBeenCalledTimes(2);
+	});
+
+	it("a case-colliding root file is not injected as root guidance", () => {
+		// `.rpiv/guidance/Architecture.md` is not `.rpiv/guidance/architecture.md`,
+		// but a case-insensitive filesystem says otherwise to existsSync.
+		writeGuidanceTree(projectDir, { ".rpiv/guidance/Architecture.md": "wrong-case" });
+		const { pi } = createMockPi();
+		injectRootGuidance(projectDir, pi);
+		expect(pi.sendMessage).not.toHaveBeenCalled();
+		expect(takeRootGuidance(projectDir)).toBeNull();
 	});
 
 	it("force-takes root guidance after another session marked it injected", () => {
@@ -242,5 +253,44 @@ describe("handleToolCallGuidance", () => {
 		expect(content).toContain("src (AGENTS.md)");
 		expect(content).not.toContain("root (architecture.md)");
 		expect(content).toContain("auto-loaded because write touched src/x.ts");
+	});
+});
+
+describe("guidance candidates are case-exact", () => {
+	// The ladder used to test `existsSync(join(dir, "AGENTS.md"))`, which on a
+	// case-insensitive filesystem (APFS, NTFS — the macOS and Windows defaults) matches
+	// a lowercase `agents.md`. This repo has one: `packages/rpiv-pi/docs/agents.md` is a
+	// docs page about the bundled subagents, and touching anything under that directory
+	// injected it labelled as `AGENTS.md` guidance.
+	//
+	// The two resolveGuidance cases below are true regressions on such a filesystem and
+	// pass vacuously on a case-sensitive one, which is why the helper's own behaviour is
+	// pinned separately — that assertion holds on either.
+
+	it("hasExactFile matches the stored name, not a case-insensitive sibling", () => {
+		writeGuidanceTree(projectDir, { "docs/agents.md": "docs-page" });
+		expect(hasExactFile(join(projectDir, "docs"), "AGENTS.md")).toBe(false);
+		expect(hasExactFile(join(projectDir, "docs"), "agents.md")).toBe(true);
+	});
+
+	it("a missing or unreadable directory is a miss, not a throw", () => {
+		expect(hasExactFile(join(projectDir, "nope"), "AGENTS.md")).toBe(false);
+	});
+
+	it("a lowercase agents.md is never injected under the agents kind", () => {
+		writeGuidanceTree(projectDir, { "src/agents.md": "docs-page" });
+		const resolved = resolveGuidance(join(projectDir, "src", "foo.ts"), projectDir);
+		expect(resolved.some((r) => r.kind === "agents")).toBe(false);
+		expect(resolved.some((r) => r.content === "docs-page")).toBe(false);
+	});
+
+	it("a case-colliding sibling does not shadow the shadow tree", () => {
+		writeGuidanceTree(projectDir, {
+			"docs/agents.md": "docs-page",
+			".rpiv/guidance/docs/architecture.md": "real-guidance",
+		});
+		const resolved = resolveGuidance(join(projectDir, "docs", "x.ts"), projectDir);
+		expect(resolved.map((r) => r.content)).toEqual(["real-guidance"]);
+		expect(resolved[0]?.kind).toBe("architecture");
 	});
 });
