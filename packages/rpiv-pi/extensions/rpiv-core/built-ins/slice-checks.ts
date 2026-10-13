@@ -82,9 +82,9 @@ const sliceShape = (round: Output | undefined): string | undefined => {
 	return d?.slices === undefined ? undefined : JSON.stringify({ slices: d.slices, coverage: d.coverage ?? null });
 };
 
-/** The verdict fields the cite-only discharge consults live in gates.ts as
- * `SeedOnlyVerdict` — the one spelling the classification, the discharge, and
- * the seed lift share. */
+/** The verdict fields the cite-only discharge consults live in gate-passes.ts
+ * (re-exported by the gates.ts facade) as `SeedOnlyVerdict` — the one spelling
+ * the classification, the discharge, and the seed lift share. */
 
 /**
  * Deterministic discharge of a CITE-ONLY `design-readiness` fail — the middle

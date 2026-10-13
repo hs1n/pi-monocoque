@@ -23,9 +23,9 @@ changing state handling or the overlay's lifecycle wiring.
 ## Architectural Boundaries
 - **Status transitions are a single declarative table** — `Record<TaskStatus, ReadonlySet<TaskStatus>>` in `state/invariants.ts`, never an `if/switch` ladder; adding a status is a one-line edit and mistakes surface as data
 - **NO replay from `tool_execution_end`** — `message_end` runs after, so the branch is stale; the widget reads live state via `getRenderState()` (the ctx-less foreground slot — `import { getRenderState } from "./state/store.js"`) instead
-- **`TOOL_NAME` and `WIDGET_KEY` are preserved verbatim** — renaming breaks session-history replay and persisted UI state
+- **`TOOL_NAME`, `STATE_ENTRY_TYPE` and `WIDGET_KEY` are preserved verbatim** — renaming breaks session-history replay and persisted UI state
 - **Delete is a tombstone** (`status: "deleted"`, terminal) — preserves ids so historic `blockedBy` references still resolve
-- **NO disk persistence** — state derives entirely from the session branch via the `details` envelope
+- **NO disk persistence** — state derives entirely from the session branch via the `details` envelope: `todo.ts` `execute()` also appends it as a `rpiv-todo-state` custom entry (`pi.appendEntry`) for every state change (`changesState(op)`), because a call made through another tool (`ctx.executeTool`, e.g. codemode) never lands as a standalone `toolResult` — Pi's codemode persists its `store()` the same way
 - **Mutation goes through `store.ts`** — reducer is pure; only `commitState` / `replaceState` / `evictSession` / `__resetState` write the session-slot Map (all keyed by sid); `setActiveRenderSession` / `clearActiveRenderSession` move the foreground pointer (a distinct concept, not a task-state writer)
 - **`session_compact`/`session_tree` share one extracted `replayAndRefresh` handler** (`index.ts`) — swallows ONLY the known stale-ctx error (`isStaleCtxError`: auto-compaction races session disposal); other errors are real replay bugs and propagate; the overlay refresh is sid-gated to the foreground
 - **Overlay teardown is try/finally** — `session_shutdown` always evicts the slot; the foreground's own shutdown (or an unknown/stale sid `""`, treated as foreground) then runs `todoOverlay?.dispose()` with `todoOverlay = undefined` + `clearActiveRenderSession()` in `finally` — `dispose()` can throw on a stale ui proxy, and a surviving pointer would target the already-evicted slot (overlay silently renders empty)
@@ -33,7 +33,7 @@ changing state handling or the overlay's lifecycle wiring.
 <important if="you are adding a new todo action">
 ## Adding an Action
 1. Add the literal to the `TaskAction` union (`tool/types.ts`) and to the action `StringEnum` in the tool params schema (`tool/`)
-2. Add the reducer branch in `state/state-reducer.ts` — extend the `Op` union and return `errorResult` on failures (errors are values, never throws)
+2. Add the reducer branch in `state/state-reducer.ts` — extend the `Op` union and return `errorResult` on failures (errors are values, never throws); decide in `changesState` (compiler-enforced exhaustive over `Op`) whether the new op persists a replay snapshot
 3. Extend the response-envelope's `formatContent` switch (`tool/response-envelope.ts`) — compiler-enforced exhaustive over `Op`; it owns content/details formatting
 4. Hook renderers (action glyph, status glyph, status color) in the view layer; if status-changing, extend the `VALID_TRANSITIONS` table in `state/invariants.ts` + the overlay's status-glyph and line formatter
 5. Update the `/todos` command if a new section is needed

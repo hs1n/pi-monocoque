@@ -66,6 +66,7 @@ SkillContractMap` (declared merged over harvested; empty `Map` when none).
 - **Mutable `LoadAccumulator` threaded through helpers** — new loader features add a field, not a parameter
 - **Pack files cannot set `default` OR declare `skillAliases`** — both envelope-only fields are hard-rejected on packs, eliminating "who set this?" ambiguity across overlapping packs
 - **Internal-only surfaces** — `applySkillAliases` is loader-internal, exported from `alias.ts` for `index.ts` only (the sibling-facing surface is `aliasSkills`, the pure transform); `__resetLoadCache` is test-only via `../internal.ts`, NOT the public barrel
+- **Overlays resolve this package and `typebox` through `virtualModules`, never through disk** — overlays live outside any `node_modules` tree and outside Pi's extension module mapping, so `overlayVirtualModules()` maps `@hs1n/rpiv-workflow` (`.`, `/registration`, `/startup`, `/runner` — NOT `/internal`) to the running package's entries and `typebox` (`/value`, `/compile`, each fail-soft) to the copy this package received from Pi, mirroring Pi's own loader (#298). Built lazily on first overlay import so the thin startup/registration graph never pulls the runner. Other bare imports still use Node resolution from the overlay's folder
 - **Overlay code is trusted local code** — jiti synchronously evaluates overlay top-level code on first load and on every edit (same trust level as a node script)
 
 <important if="you are adding a new layer source (e.g. workspace overlay)">

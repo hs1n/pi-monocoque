@@ -1,6 +1,6 @@
 {
 	"name": "@hs1n/rpiv-test-utils",
-	"version": "2.11.0",
+	"version": "2.13.8",
 	"description": "Internal test fixtures for rpiv-mono (not published)",
 	"private": true,
 	"type": "module",

@@ -8,7 +8,8 @@ right module, trace a dependency edge, or work on the host plumbing.
 
 Lives inside `packages/rpiv-pi/`; sibling tool source is at `../../../rpiv-<name>/`.
 This extension never statically value-imports a sibling from the entry graph —
-`siblings.ts` regex-detects them in `~/.pi/agent/settings.json`. Adding a sibling
+`siblings.ts` regex-detects them in `~/.pi/agent/settings.json` OR in the source paths
+of what is loaded (#216). Adding a sibling
 needs a `siblings.ts` entry plus a `peerDependencies` line pinned to `"*"` in
 `rpiv-pi/package.json`. Version changes flow through `node scripts/release.mjs` at
 monorepo root.
@@ -25,27 +26,36 @@ Each capability is a source module + co-located `<feature>.test.ts`.
 | `run-lane-registry.ts` | Process-global in-memory run/lane/question state; seeds pending fan-out unit lanes at `fanout` `onLoopStart` (`seedPendingUnits`) |
 | `session-capture.ts` | `session_start` capture of modelRegistry/uiContext/model, borrowed for per-child model resolution (replaced model-override's global `pi.setModel` flip) |
 | `subagent-usage.ts` | Process-global subagent token accumulator on a Symbol slot; fed by per-child EventBus subscriptions; rolled into lane rows |
-| `lane-*.ts` (family) | Lane UI: `belowEditor` dock (+dock-editor), `/lanes` switcher, self-windowing console, transcript replay live + disk-jsonl (`lane-transcript*`, `lane-tool-defs` renderer cache), progress/usage/streaming/failure, shared lane-list renderer, deferring relay-ui |
+| `lane-*.ts` (family) | Lane UI: `belowEditor` dock (+dock-editor), `/lanes` switcher, self-windowing console, transcript replay live + disk-jsonl (`lane-transcript*`, `lane-tool-defs` renderer cache), progress/usage/streaming/failure, shared lane-list renderer, deferring relay-ui. The console is an editor-slot `ui.custom`: in fullscreen Pi the viewport consumes PgUp/PgDn before it, so it also pages on `u`/`d` and takes the wheel via `handleMouse` (Pi offers wheel events to the component under the pointer first; `{ handled: true }` stops the parent scroll) — #173 |
 | `question-lifecycle.ts` | `workflow-question` lifecycle events from the registry via a `Symbol.for` global slot; the lane dock/console render them |
 | `*-command.ts` / `models-*` / `skill-*` | Registrars: setup, update-agents, models-config(+validate,+sources), models-picker, skill-bracket, skill-contracts-source (+outcome-derivation, artifact-collector), register-built-in-workflows (+built-in-workflows) |
 | `agent-enablement.ts` | Pure sibling-tool enablement map driving conditional frontmatter injection in `agents.ts` (currently empty) |
 | `rpiv-models/` | Nested subdir for the `/rpiv-models` cascade picker: `command.ts`, `index.ts`, `items.ts`, `overrides.ts` (+ unit tests) |
 | `built-ins/` | Extracted built-in-workflows compute clusters (gates, verdicts, checks, fixtures) — has its own architecture.md |
-| `*.ts` (utilities) | Primitive helpers: siblings, package-checks, paths, pi-installer, prune-legacy-siblings, bash-timeout, banner, constants, frontmatter, utils |
+| `workflows/` | Per-workflow authoring modules behind the built-ins: `shared.ts` (cross-workflow gate + prompt factories) + `build.ts` / `vet.ts` / `polish.ts` / `ship.ts` (one `defineWorkflow` graph each), composed position-pinned by `built-in-workflows.ts` |
+| `*.ts` (utilities) | Primitive helpers: siblings, package-checks, loaded-siblings, paths, pi-installer, prune-legacy-siblings, bash-timeout, banner, constants, frontmatter, utils |
 
 ## Dependencies
 
 - **`@earendil-works/pi-coding-agent`**: `ExtensionAPI`, event-type guards, Pi SDK session machinery (`createAgentSession` — `sdk-workflow-host.ts` only). **`@earendil-works/pi-tui`**: static in the lane-*/picker UI modules. **`@earendil-works/pi-ai`** (peer): `Model` types + value imports (`getSupportedThinkingLevels` in `rpiv-models/items.ts`).
 - **`@hs1n/rpiv-config`** (dependency): static value imports — `configPath` + `loadJsonConfigWithLegacyFallback` + `validateConfig` in `models-config.ts`; `parseModelKey` in `session-capture.ts` + `sdk-workflow-host.ts`; `loadJsonConfigWithLegacyFallback` + `modelKey` + `saveJsonConfig` in `rpiv-models/`.
-- **`typebox`** (dependency `^1.1.24`): `Type`/`Static` schema for `models.json` in `models-config.ts`.
+- **`typebox`** (`peerDependencies: "*"`, host-provided): `Type`/`Static` schema for `models.json` in `models-config.ts`. Pi supplies and aliases it at load time; never a `dependencies` entry (v2.12.0, #282).
 - **`@hs1n/rpiv-workflow`** (peer): guarded dynamic `import(...)` of `/startup` in `register-built-in-workflows.ts`, `workflow-execution-host.ts`, `lane-progress.ts`, `outcome-derivation.ts` (itself reached dynamically from `skill-contracts-source.ts`, keeping artifact-collector's static edge off the entry graph), `skill-contracts-source.ts`; of `/registration` in `models-config-sources.ts`; of `/runner` in `lane-switcher.ts` (rerun-failed-run callback). Degrades silently when absent (`isModuleNotFound` guard). Off-entry-graph modules statically value-import the peer — `built-in-workflows.ts`, `artifact-collector.ts`, and the whole `built-ins/` cluster (`/registration` + `/runner`; see the `built-ins/` architecture.md) — safe only because they are reached solely via those guarded dynamic imports; `skill-contracts-source.ts` sits on the entry graph and imports `/registration` types only.
 - **`@hs1n/rpiv-warp`** — DELETED by this fork along with `workflow-question-warp-bridge.ts`.
 - Node built-ins: `node:fs`, `node:path`, `node:url`, `node:os`, `node:child_process`.
 - External processes: `git` (via `pi.exec`), `pi` CLI (via `spawn` for the installer), `node` (the build workflow's code-splice stage shells out to `skills/_shared/stitch-elaborations.mjs` via `execFileSync`).
 
-Sibling *presence detection* stays filesystem-based (regex over settings); the only
-sibling loaded at runtime is `rpiv-workflow`, always through a guarded optional
-dynamic import.
+Sibling *presence detection* is settings ∪ loaded: `package-checks.ts` unions the
+settings regex with a runtime snapshot (`loaded-siblings.ts`
+`readLoadedSiblingSources(pi)` — `sourceInfo.path` of every tool and
+`source: "extension"` command, plus `marker` slots on `globalThis` for siblings with
+neither, today only rpiv-args) taken ONCE per pass (session_start maintenance,
+`/rpiv-setup`, `/rpiv-update-agents`) and threaded into the banner, the installer and
+both agents-sync gates. Omitting the snapshot is exactly the settings-only rule, so
+the union can only find MORE siblings (kits, `pi install -l`, `pi -e` — #216).
+`rpiv-workflow` and the opt-in `rpiv-warp` (deleted by this fork) load at runtime,
+always through guarded optional dynamic import; `sibling-import-graph.test.ts`
+enforces that no file statically reachable from `index.ts` value-imports a sibling.
 
 ## Consumers
 

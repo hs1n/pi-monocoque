@@ -1,6 +1,6 @@
 {
 	"name": "@hs1n/rpiv-i18n",
-	"version": "2.11.0",
+	"version": "2.13.8",
 	"description": "Pi extension. The localization foundation for rpiv-* skills: locale detection, the /languages command, the --locale flag, and a cross-package locale registry.",
 	"keywords": [
 		"pi-package",
@@ -50,7 +50,7 @@
 		]
 	},
 	"dependencies": {
-		"@hs1n/rpiv-config": "^2.11.0"
+		"@hs1n/rpiv-config": "^2.13.8"
 	},
 	"peerDependencies": {
 		"@earendil-works/pi-coding-agent": "*",

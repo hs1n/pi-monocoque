@@ -163,22 +163,51 @@ export const FAIL_BACKWARD_JUMP_EXHAUSTED = (info: BackwardJumpHaltInfo): Failur
 };
 
 /**
- * A decision edge terminated the chain because no branch matched — `match`
- * without a fallback saw an unexpected value (typically a failed verdict on a
- * gate whose only routes are pass arms). The run is blocked awaiting
- * intervention, not complete; `note` is the edge's own no-match diagnostic
- * (the ROUTE_NOTE `match` attaches), so the toast names the value that failed
- * to route. The stage's own output (its verdict) holds the findings.
+ * The meta unit-graph's non-resumable halt vocabulary (`meta/unit-graph.ts`
+ * `decide`): a unit that spent its correction budget (`N/M rounds spent`),
+ * early-stopped on an unchanged failure signature (`the same failures survived
+ * a correction`), hit an uncorrectable fatal (`<unit> FATAL — …`), or lost its
+ * gate record (`integrity stop`). These differ from a `match`-no-fallback stop
+ * in one decisive way: the round and generation counters are derived from the
+ * persisted trail, and NOTHING in the resume path resets them, so resuming
+ * re-reads the spent budget and re-decides the identical stop. A hand-fix
+ * cannot change that — the remedy is a fresh run, not `/wf @<runId>`.
  *
- * The toast names `/wf @<runId>` — resume re-runs the halted gate against
- * the repaired tree and continues on a pass, reusing every upstream
- * artifact; a bare "re-run" reads as "start over" and re-pays the whole
- * front-load (observed: full re-runs of research+plan for a one-line fix).
+ * `match`-no-fallback notes (`value "…" matched no branch`) never contain these
+ * phrases, so they keep the re-measurable "fix and resume" guidance; build/ship
+ * never emit this vocabulary as a route note (grep: `rounds spent` there is a
+ * code comment, not a `setRouteNote`).
  */
-export const FAIL_GATE_STOP = (stage: string, note: string, runId: string): FailureText => ({
-	toast: `✗ workflow stopped at "${stage}" — its routing gate matched no branch (${note}); see the stage's verdict for findings, then fix and resume with /wf @${runId}`,
-	error: `Routing gate after "${stage}" matched no branch: ${note}`,
-});
+const EXHAUSTION_HALT_NOTE = /\bFATAL —|\brounds spent\b|the same failures survived|integrity stop/;
+export const isExhaustionHalt = (note: string | undefined): boolean =>
+	note !== undefined && EXHAUSTION_HALT_NOTE.test(note);
+
+/**
+ * A decision edge terminated the chain. Two shapes reach here:
+ *
+ * 1. `match` without a fallback saw an unexpected value (typically a failed
+ *    verdict on a gate whose only routes are pass arms). The run is blocked
+ *    awaiting intervention, not complete; resume re-runs the halted gate
+ *    against the repaired tree and continues on a pass, reusing every upstream
+ *    artifact — so the toast names `/wf @<runId>` ("re-run" read as "start
+ *    over" and re-paid the whole front-load: full re-runs of research+plan for
+ *    a one-line fix). `note` is the edge's own no-match diagnostic.
+ *
+ * 2. A meta unit-graph halt whose correction budget is spent (see
+ *    `isExhaustionHalt`). Resume re-decides the same stop, so the guidance is
+ *    "fix, then start a fresh run" — and the toast drops "matched no branch",
+ *    which is wrong for a halt that DID route (to `stop`) deliberately.
+ */
+export const FAIL_GATE_STOP = (stage: string, note: string, runId: string): FailureText =>
+	isExhaustionHalt(note)
+		? {
+				toast: `✗ workflow halted at "${stage}" — ${note}; see the stage's verdict for findings. The correction budget is spent, so resuming re-decides the same stop — fix the artifact, then start a fresh run.`,
+				error: `Workflow halted at "${stage}" (budget exhausted): ${note}`,
+			}
+		: {
+				toast: `✗ workflow stopped at "${stage}" — its routing gate matched no branch (${note}); see the stage's verdict for findings, then fix and resume with /wf @${runId}`,
+				error: `Routing gate after "${stage}" matched no branch: ${note}`,
+			};
 
 /**
  * A loop produced zero units (push: empty array handled upstream as

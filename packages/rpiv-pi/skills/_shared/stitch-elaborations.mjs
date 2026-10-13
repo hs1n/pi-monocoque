@@ -75,7 +75,7 @@ const PHASE_HEADING_RE = /^## Phase (\d+):/;
 // packages/rpiv-pi/extensions/rpiv-core/built-ins/reconcile-directives.mjs —
 // importing them is impossible here: this script runs as a bare `node` CLI
 // spawned by the workflow host
-// (packages/rpiv-pi/extensions/rpiv-core/built-in-workflows.ts), with no
+// (packages/rpiv-pi/extensions/rpiv-core/workflows/build.ts), with no
 // loader that resolves package-root TypeScript. The close predicate below is
 // deliberately LOOSER than those twins (length-only, NOT same-char): a
 // backtick-opened fence closed by a bare `~~~` line is accepted. Closing that

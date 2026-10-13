@@ -51,7 +51,7 @@ type BasenameIndex = { index: Map<string, string[]>; truncated: boolean };
  * Index every source file's basename → its absolute path(s) under `cwd` — the
  * candidate pool behind the suffix fallback in `verifyCitations`. The generative
  * producers (slice/synthesize/elaborate) routinely cite a file by bare basename
- * (`built-in-workflows.ts:1431`) or by a package-relative suffix
+ * (`workflows/build.ts:699`) or by a package-relative suffix
  * (`validate/stage-rules.ts:70` for `packages/rpiv-workflow/validate/stage-rules.ts`)
  * — mechanical path-prefix omissions, not fabricated references. The basename
  * keys the candidates; `verifyCitations` narrows them by whole-segment suffix.

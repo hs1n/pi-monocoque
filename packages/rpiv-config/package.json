@@ -1,6 +1,6 @@
 {
 	"name": "@hs1n/rpiv-config",
-	"version": "2.11.0",
+	"version": "2.13.8",
 	"description": "Shared config I/O utilities for rpiv-mono sibling packages",
 	"keywords": [
 		"rpiv",
@@ -33,8 +33,8 @@
 	"exports": {
 		".": "./index.ts"
 	},
-	"dependencies": {
-		"typebox": "^1.1.24"
+	"peerDependencies": {
+		"typebox": "*"
 	},
 	"contributors": [
 		"juicesharp <https://github.com/juicesharp>"

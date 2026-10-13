@@ -1,7 +1,9 @@
 /**
- * Barrel for the extracted built-in-workflows leaf clusters. The monolith
- * `../built-in-workflows.ts` imports its relocated helpers from here. Each
- * re-export targets a `.js` specifier (Node16 ESM, source stays `.ts`).
+ * Barrel for the extracted built-in-workflows leaf clusters. The
+ * per-workflow modules (`../workflows/*.ts`, composed by the
+ * `../built-in-workflows.ts` barrel) import their relocated helpers from
+ * here. Each re-export targets a `.js` specifier (Node16 ESM, source stays
+ * `.ts`).
  */
 
 export { designOutcome, designParser, designStructure } from "./design.js";

@@ -86,6 +86,15 @@ Every workflow file is TypeScript, loaded via `jiti` (no build step required). I
 import { defineWorkflow, produces, acts, gate, gt, eq } from "@hs1n/rpiv-workflow";
 ```
 
+These imports work wherever the file lives, without a `node_modules` folder next to it. The loader maps them to the running copy of rpiv-workflow and to the `typebox` Pi provides:
+
+| Import | Resolves to |
+| --- | --- |
+| `@hs1n/rpiv-workflow`, `/registration`, `/startup`, `/runner` | the rpiv-workflow already loaded in Pi |
+| `typebox`, `typebox/value`, `typebox/compile` | the `typebox` Pi supplies to extensions |
+
+Any other package an overlay imports resolves normally from the overlay's own folder, so it must be installed where Node can find it.
+
 ## Where files resolve
 
 | Layer | Path |

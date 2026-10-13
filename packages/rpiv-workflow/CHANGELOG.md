@@ -2,6 +2,38 @@
 
 ## [Unreleased]
 
+## [2.13.8] - 2026-10-12
+
+## [2.13.7] - 2026-10-12
+
+## [2.13.6] - 2026-10-12
+
+### Fixed
+
+- **Overlay files can import the authoring DSL and `typebox` in a standard Pi install.** `config.ts` and `packs/*.ts` overlays are loaded by rpiv-workflow's own jiti, outside Pi's extension module mapping, so `import … from "@juicesharp/rpiv-workflow"` failed with `Cannot find module`, and so did `typebox`, which Pi provides to extensions rather than installing. It only worked when another package happened to leave a physical `typebox` in `node_modules`. The overlay loader now maps `@juicesharp/rpiv-workflow` (and `/registration`, `/startup`, `/runner`) to the running package and `typebox` (`/value`, `/compile`) to the copy Pi supplies, the same way Pi's loader does for extensions. ([#298](https://github.com/juicesharp/rpiv-mono/issues/298))
+
+## [2.13.5] - 2026-10-12
+
+## [2.13.4] - 2026-10-11
+
+## [2.13.3] - 2026-10-11
+
+## [2.13.2] - 2026-10-11
+
+## [2.13.1] - 2026-10-11
+
+## [2.13.0] - 2026-10-11
+
+### Fixed
+
+- **A budget-exhausted gate halt no longer tells the user to resume.** `FAIL_GATE_STOP` previously printed "fix and resume with `/wf @<runId>`" for every gate stop. That is correct for a `match`-no-fallback stop (resume re-grades the repaired tree and routes onward), but wrong for a meta unit-graph exhaustion halt: the round/generation counters are derived from the persisted trail and nothing in the resume path resets them, so `/wf @<id>` re-reads the spent budget and re-decides the identical stop — an observed "cannot restart" dead end. `FAIL_GATE_STOP` now recognizes the exhaustion vocabulary (`N/M rounds spent`, `the same failures survived a correction`, `<unit> FATAL — …`, `integrity stop`) and, for those, points at a fresh run instead of resume and drops the "matched no branch" phrasing (wrong for a halt that routed to `stop` deliberately). `match`-no-fallback stops keep the resume remedy unchanged.
+
+## [2.12.0] - 2026-09-30
+
+### Fixed
+
+- **`typebox` is declared as a `peerDependencies: "*"` entry, no longer a `dependencies` entry.** Pi provides `typebox` to extensions and aliases the bare specifier to its own bundled copy at load time, so the copy this manifest installed was dead weight at best and a second live instance at worst. Pi 0.99.1 warns at every startup about the old shape ("Host-provided extension packages must be declared in peerDependencies with a \"*\" range, not dependencies: typebox"); this clears it once the release is installed. Contributed in #282; reported in #266, #268, #272 and #277.
+
 ## [2.11.0] - 2026-09-21
 
 ## [2.10.1] - 2026-09-13

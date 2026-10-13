@@ -15,6 +15,59 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **Fork: a user skill under `.agents/skills` is dispatched by Pi but its `contract:` was never harvested.** `buildUserSkillContracts` enumerated Pi's skill locations through the `loadSkills` helper, which reads only `<agentDir>/skills` and `<cwd>/.pi/skills`. Pi's resource loader separately walks `<cwd>/.agents/skills` up to the git repo root plus `~/.agents/skills`, and dispatches from them — so a skill in any `.agents/skills` ran while the workflow engine kept whatever contract it already had for that name. A divergent `contract:` was ignored with no collision message, because the registry's `user-skills` owner never saw the file at all; the failure surfaced downstream, at a consumer of an artifact the skill never wrote. `buildUserSkillContracts` now passes `agentsSkillDirs(cwd)` (the same ancestor walk, nearest first, ending at `~/.agents/skills`) as `skillPaths`, so name dedup and specificity follow Pi's dispatch order. Every `.agents/skills` location was independently broken — the user-level one as much as the project-level one, despite the source comment claiming `loadSkills` reads "the SAME default locations Pi's own loader reads". A same-name override with a different contract now records the usual `last writer wins` collision instead of diverging silently. Pinned by four cases: `~/.agents/skills`, `<cwd>/.agents/skills`, the ancestor walk's git-root stop boundary, and nearest-declaration precedence for a name declared twice.
 
+## [2.13.8] - 2026-10-12
+
+### Fixed
+- The lane browser (`/lanes`) scrolls in Pi's fullscreen TUI. Pi keeps `PgUp`/`PgDn` for its own transcript there, so the browser now also pages with `u`/`d`, and the mouse wheel over the browser scrolls the selected lane's transcript instead of the parent session (Pi 0.87+; also while answering a parked question). Regular mode is unchanged (#173).
+- Siblings that load without their own settings entry are no longer reported missing. A sibling bundled inside another Pi package (a kit), installed per project (`pi install -l`), or loaded with `pi -e` now counts as present when it is actually loaded, so the missing-siblings banner stays quiet and `/rpiv-setup` no longer installs a second copy whose tools conflict. Detection only ever adds siblings: a sibling found in `settings.json` is still found, and a fresh install still lists everything (#216).
+
+## [2.13.7] - 2026-10-12
+
+## [2.13.6] - 2026-10-12
+
+## [2.13.5] - 2026-10-12
+
+### Fixed
+
+- **Workflow child sessions share the launcher's model runtime on Pi 0.80.8 and later.** Pi 0.80.8 replaced `createAgentSession({ modelRegistry })` with `modelRuntime` and ignores the old option, so every `/wf` stage and fanout unit built its own runtime from disk. Those children lost launcher-only model state: a `pi --api-key` key, providers registered by `-e` or launcher-only extensions, and a settings default model on an extension provider (the child quietly used another model). Children now receive the launcher's `ModelRuntime`, read from the `ModelRegistry` facade like `rpiv-advisor` and `rpiv-btw` already do. Pi 0.80.7 and earlier still get the registry. ([#293](https://github.com/juicesharp/rpiv-mono/issues/293))
+- **An unresolvable stage model fails the run instead of running on a different model.** A malformed or unknown model key from `models.json` used to pass `undefined` to the child, so Pi picked its default model with no warning. The host now throws `UnresolvedModelError` naming the key before it creates a child session, and the run halts with that message. ([#293](https://github.com/juicesharp/rpiv-mono/issues/293))
+
+## [2.13.4] - 2026-10-11
+
+## [2.13.3] - 2026-10-11
+
+## [2.13.2] - 2026-10-11
+
+## [2.13.1] - 2026-10-11
+
+## [2.13.0] - 2026-10-11
+
+### Changed
+
+- **`meta`: an exhausted `plan` unit now escalates to `acceptance` instead of halting.** Previously `plan` had no `onExhausted`, so three red correction rounds ended the run terminally — and because the round/generation counters are derived from the trail, `/wf @<id>` could not revive it (it re-decided the same stop). `plan` now carries `onExhausted: { escalateTo: "acceptance" }`, mirroring `implement → plan`: exhaustion opens a fresh generation, so `plan` re-plans from scratch (a clean `quick-plan`, not another surgical patch of a plan that kept introducing new defects) against an acceptance inventory the escalation lets `acceptance` revise. Bounded by the runner's absolute lap ceiling, which still halts a run where escalation also fails to converge.
+
+### Fixed
+
+- **Lane console keeps an embedded question at its full band.** `cappedTui` now marks its reported `terminal.rows` as an allocation, so `rpiv-ask-user-question`'s inline rendering (now how it always opens) uses the whole question band instead of capping it again to 70%, which hid options behind the scroll arrows.
+- **`validate` no longer fails the verdict on a comment-only gap**, matching `grade`'s comment-only rule. A Deviation or Potential Issue whose only remedy is comment/doc text — even when the text is wrong — changes no executable line and breaks no downstream stage, so it is reported but neither leaves a phase incomplete for `verdict: pass` nor forces `verdict: fail`. Removes the failure mode where such a gap forced `fail`, which the validate gate (acting only on `pass: false` risk rulings and `blockers`) could not remediate — halting the run with a verified implementation stranded.
+- **`lens-grade` say-do verdict path.** The skill no longer embeds a `__<unix-ms>` timestamp in the verdict filename, nor asks the grader to print the path on its last line. The name is now fully determined by the `--unit`/`--lens`/`--round`/`--generation` identity flags (`<unit>__<lens>__r<round>g<generation>.json`), and the reply ends with a plain `<lens>: PASS|FAIL` line. Removes the failure mode where the announced path diverged from the written one (the agent re-typing the volatile timestamp instead of copying it — observed as a fabricated, stale value). Round-distinctness is preserved by `r<round>g<generation>`; disk-first `verdictCollector` and `--prior` wiring are unaffected (both key off the captured artifact handle, not the filename format). `grade` (build pipeline) is independent and unchanged.
+
+## [2.12.0] - 2026-09-30
+
+### Added
+
+- **`/wf meta` — a graph of self-correcting units, the A/B challenger to `build`.** `defineUnitGraph` compiles an ordered list of units into an engine workflow. Each unit is a skill XOR a prompt and runs one loop: produce → deterministic checks (first, short-circuiting) → parallel lens graders → gate. A red gate returns ONLY the failing items to the producer or its fix arm as a scoped return record (unit, verdict, reason, evidence, scope); `maxRounds` is capped at 4, and an identical failure signature on two consecutive rounds stops the loop early. An exhausted unit halts, advances, or escalates to an earlier unit, and an escalation opens a new generation at both ends. Loop decisions are persisted on the gate record, so the routes only read them and a resume replays the same choices. `research` is the mandatory first unit. An accepted run writes the failures it corrected to `.rpiv/lessons/meta-lessons.json`, and later producers read the most frequent ones back as standing constraints — the cross-run learning edge. The built-in preset is `research → acceptance → plan (quick-plan) → implement (DAG fanout, escalates to plan) → commit`; its checks reuse build's plan citation check and execute the frozen acceptance commands. No confirm/demote passes and no slicing. `meta/ab.mjs` creates one git worktree per arm from the same commit so arms run in parallel, then compares outcome, time, sessions, tokens, re-entries, rounds and diff, plus a shared scorecard that runs every arm's acceptance commands and the user's `--eval` commands on every arm's tree. The inventory pins (fanout, halt and retry sets, outcome census, registered names, contract count, pipeline pointer) now include `meta`.
+- **`lens-grade` skill.** One skeptic on a panel: judges ONE target (an artifact or the working-tree diff) through ONE lens against a pass/fail rubric and writes a single JSON verdict (`<unit>__<lens>__r<round>g<generation>__<ms>.json`) with `pass`, `severity`, `findings[]` (each with a `where`) and scoped `feedback`. Judge only — never edits, never runs the code, no subagents. Dispatched in parallel by `meta`'s grader fanout, one session per lens; findings are kept stable across rounds so the loop can detect one that survived a correction unchanged.
+
+### Changed
+
+- **The `grade` skill rates comment-only findings `low`, never gate-blocking.** A finding whose ONLY remedy is comment text — a doc comment, a fixture or provenance label, an attribution, a cross-reference id, an indent, a stale date — is `low` even when the text is false: no executable line changes and no downstream stage fails as written. It is still reported so `amend` fixes it in passing. This drops the 2.11.0 clause that pushed a false claim inside copied text (a code block, JSDoc, or comment) to `medium`.
+
+### Fixed
+
+- **`typebox` is declared as a `peerDependencies: "*"` entry, no longer a `dependencies` entry.** Pi provides `typebox` to extensions and aliases the bare specifier to its own bundled copy at load time, so the copy this manifest installed was dead weight at best and a second live instance at worst. Pi 0.99.1 warns at every startup about the old shape ("Host-provided extension packages must be declared in peerDependencies with a \"*\" range, not dependencies: typebox"); this clears it once the release is installed. Contributed in #282; reported in #266, #268, #272 and #277.
+- **`meta` never judges or discards the user's uncommitted work.** Run 2026-09-27_11-36-01-edef: the implement unit's goal lens graded the WHOLE working-tree diff, including an unrelated uncommitted redesign from the night before, flagged it as off-goal, and the scoped fix — obeying "touch only the files the evidence names" — ran `git checkout --` on it. `build` and `ship` subtract the run-start baseline; `meta` did not. Three layers: (1) `captureGoalKeepingWip` backs up the pre-existing dirty set at run start — a binary patch of the tracked paths, copies of the untracked ones, and a `wip` record on the goal channel; (2) `wipIntact` is a check prepended to every side-effect unit, and a pre-existing path that is no longer dirty is a FATAL failure that stops `decide()` at once with no correction round, the note naming the restore command; (3) the side-effect graders' target and rubric and the correction record's GUARD line say to judge only this run's changes, list the pre-existing paths, and forbid `checkout`, `restore`, `reset`, `stash` and `clean`. Pinned by three regression tests over a real git repo.
+
 ## [2.11.0] - 2026-09-21
 
 ### Changed

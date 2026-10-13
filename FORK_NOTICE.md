@@ -8,7 +8,8 @@ It is **not affiliated with, endorsed by, or supported by** the upstream author.
 | Upstream | https://github.com/juicesharp/rpiv-mono |
 | Upstream author | Sergii Guslystyi ([@juicesharp](https://github.com/juicesharp), [rpiv-pi.com](https://rpiv-pi.com)) |
 | This fork | https://github.com/hs1n/pi-monocoque |
-| Forked from | `main` @ `d74b1c99830a565f3df3f37e0a36616d17ffc574` |
+| Forked from | `main` @ `d74b1c99830a565f3df3f37e0a36616d17ffc574` (v2.11.x) |
+| Upstream merged through | `main` @ `2d88b79c` — v2.13.8, 2026-10-12 |
 | License | MIT — see [`LICENSE`](./LICENSE) and `packages/*/LICENSE` |
 
 ## License and attribution
@@ -28,12 +29,21 @@ same notices.
 Only the following divergences exist, and they are all provenance/identity fixes rather
 than behavioral changes:
 
+- **Tracks upstream rather than freezing at the fork point.** The fork point was v2.11.x;
+  `upstream/main` @ `2d88b79c` (v2.13.8, 2026-10-12) is merged into `main`, so this is a
+  rebased-then-merged fork, not a snapshot. What rides on top of upstream is the scope
+  rename, the four deletions below, the fork's own install path and provenance docs, and
+  five behavioral changes: the `zh-TW` locale (+ the `LANG` region fix that makes it
+  reachable), guidance-injection throttling, the guidance docs split into auto-injected
+  rules + on-demand `details.md`, `.agents/skills` contract harvesting, and project-trust
+  gating for that harvest.
 - `upstream` git remote added for syncing.
 - README fork banner; CI/badges no longer point at the upstream repository or Codecov.
 - `packages/rpiv-site/public/CNAME` removed; the site's canonical URL no longer claims
   `rpiv-pi.com`.
-- `.github/workflows/deploy-site.yml` is manual-only, so this fork can never auto-publish a
-  site that looks like the upstream one.
+- `.github/workflows/deploy-site.yml` is deleted (it was manual-only after the fork point,
+  then removed along with `rpiv-site`), so this fork can never publish a site, automatically
+  or otherwise.
 - **Four packages are deleted outright: `rpiv-site`, `rpiv-telemetry`, `rpiv-voice`,
   `rpiv-warp`.** None of them was loaded by Pi here (all four were opt-in or private), so
   removing them changes no runtime behavior — it removes the Astro site and its dependency

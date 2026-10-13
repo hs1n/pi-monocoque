@@ -2721,6 +2721,25 @@ describe("resumeWorkflow — gate-stop halts (the re-measure)", () => {
 		expect(toast).toContain("resume with /wf @2026-06-03_07-30-00-ab12");
 	});
 
+	it("an exhausted-budget halt points at a fresh run, NOT resume (resume would re-decide the same stop)", () => {
+		// meta unit-graph exhaustion vocabulary — the round/generation counters are
+		// derived from the trail and never reset on resume, so `/wf @<id>` re-halts
+		// identically. Each exhaustion note must drop the resume remedy.
+		for (const note of [
+			"plan red — 3/3 rounds spent; 1 failure(s), first: missing await",
+			"plan red — the same failures survived a correction (round 2); 1 failure(s)",
+			"implement FATAL — the user's pre-existing work was lost; see trail",
+			"plan-verdicts: no gate record — terminated (integrity stop)",
+		]) {
+			const { toast, error } = FAIL_GATE_STOP("plan-gate", note, "2026-10-01_08-57-20-042b");
+			expect(toast).toContain("start a fresh run");
+			expect(toast).not.toContain("resume with /wf");
+			// "matched no branch" is wrong for a halt that routed to `stop` on purpose.
+			expect(toast).not.toContain("matched no branch");
+			expect(error).not.toContain("matched no branch");
+		}
+	});
+
 	it("multi-target side-effect gate: resume re-routes (idempotent re-stop) — never replays the arm", async () => {
 		const fixSpy = vi.fn();
 		const route: EdgeFn = defineRoute(["verify", "alt", "stop"], () => {

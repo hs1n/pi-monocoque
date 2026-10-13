@@ -22,10 +22,10 @@ internals are in `details.md` beside this file — NOT auto-injected.** Read it 
 you need to decide which module owns a change, or when you touch the host plumbing.
 
 ## Architectural Boundaries
-- **Editing `built-in-workflows.ts` requires the workflow-invariant check**: after any change to it, run `node packages/rpiv-pi/skills/elaborate/_helpers/validate-workflow-invariant.mjs` — it re-derives the live built-in workflows + skill contracts and surfaces `route-reads-unvalidated-data` (and other) validation issues before they ship. This is the project-specific invariant check the `elaborate`/`implement` self-check protocol asks the guidance to name.
+- **Editing `built-in-workflows.ts` or any `workflows/*.ts` module requires the workflow-invariant check**: after any change to them, run `node packages/rpiv-pi/skills/elaborate/_helpers/validate-workflow-invariant.mjs` — it re-derives the live built-in workflows + skill contracts and surfaces `route-reads-unvalidated-data` (and other) validation issues before they ship. This is the project-specific invariant check the `elaborate`/`implement` self-check protocol asks the guidance to name.
 - **NO business logic in the composer**: orchestration only — every capability owns its own registrar module. `index.ts` is a thin wiring file that still encodes ordering invariants (session-capture before skill-bracket; the rpiv-workflow-dependent registrars chained strictly in sequence inside an async IIFE to avoid a jiti half-initialized-barrel race)
 - **NO `ExtensionAPI` in pure-utility modules**: helpers (sibling registry, package checks, agent sync, installer, legacy pruner) take primitives only; the guidance engine takes `pi` explicitly
-- **Sibling imports are guarded + optional only**: presence detection stays filesystem-based (regex over `~/.pi/agent/settings.json`). No file statically reachable from `index.ts` may value-import a sibling — enforced by `sibling-import-graph.test.ts`; runtime loads (`rpiv-workflow`) are guarded dynamic imports that degrade silently when absent (`isModuleNotFound`)
+- **Sibling imports are guarded + optional only**: presence detection is settings ∪ loaded (never an import — `sourceInfo` paths and `globalThis` marker slots). No file statically reachable from `index.ts` may value-import a sibling — enforced by `sibling-import-graph.test.ts`; runtime loads (`rpiv-workflow`) are guarded dynamic imports that degrade silently when absent (`isModuleNotFound`)
 - **Hooks owning process-global state are root-gated + idempotent**: registered on the root launcher's `session_start` (`!ctx.hasUI || isLaneRelayUiContext(ctx.ui)` → return), skipped for detached children, safe under `/reload` — never in a module-load IIFE. A detached child re-loading rpiv-core must never overwrite the process-global executor provider
 - **Hooks also register once**: Pi calls the default export at session start *and* again inside every detached child session, which is why every registration is root-gated + idempotent
 - **Per-unit models are applied at child-session creation**, resolved through the captured registry — never via a global `pi.setModel()` flip
@@ -36,7 +36,7 @@ you need to decide which module owns a change, or when you touch the host plumbi
 ## Adding a New Tool
 New tools do not belong in rpiv-core. Add the tool to a sibling plugin instead:
 1. Add it to an existing sibling or create a new sibling plugin (see `.rpiv/guidance/architecture.md`)
-2. Add one entry to `SIBLINGS` in `siblings.ts` — presence detection, missing-plugin warning, and `/rpiv-setup` all pick it up automatically
+2. Add one entry to `SIBLINGS` in `siblings.ts` — presence detection, missing-plugin warning, and `/rpiv-setup` all pick it up automatically (a sibling with no tool or extension command must also set a `marker` slot on load and name it in its entry, as rpiv-args does)
 3. Pin the package in `rpiv-pi/package.json` `peerDependencies` as `"*"`
 </important>
 

@@ -10,7 +10,7 @@ state handling or the overlay's lifecycle wiring.
 - **`@earendil-works/pi-tui`** (peer): width-safe text helpers, render primitives
 - **`@hs1n/rpiv-i18n`** (peer, `"*"`, optional): locale lookups via `state/i18n-bridge.ts`
 - **`@hs1n/rpiv-config`** (dependency): `loadJsonConfigWithLegacyFallback`/`validateGuidanceFields` — XDG-path load with one-way legacy fallback; `config.ts` owns `TodoConfig` (prompt overrides + overlay settings `maxWidgetLines`/`collapseKey`, `config.ts:4-15`) and the collapse-key grammar validator
-- **`typebox`** (dependency — moved from peers so installers that don't materialise peer deps still resolve it): tool parameter schema
+- **`typebox`** (`peerDependencies: "*"`, host-provided): tool parameter schema. Pi supplies and aliases it at load time; never a `dependencies` entry (v2.12.0, #282)
 
 ## Consumers
 
@@ -56,7 +56,8 @@ export function getState(sessionId), getTodos(sessionId), getNextId(sessionId); 
 // getRenderState() = slotFor(activeRenderSession); setActiveRenderSession(id) claimed once by
 // first UI start; getActiveRenderSession() read by the index.ts sid-gate; clearActiveRenderSession() on teardown.
 
-// state/replay.ts — pure: walk branch, return fresh TaskState (last-writer-wins).
+// state/replay.ts — pure: walk branch, return fresh TaskState (last-writer-wins). Last
+// `rpiv-todo-state` custom entry wins; branches without one fall back to `todo` toolResult details.
 export function replayFromBranch(ctx): TaskState;
 ```
 
