@@ -15,6 +15,7 @@ import {
 	type ExtensionAPI,
 	type ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
+import { resolveSideCall } from "@hs1n/rpiv-sidecall";
 import { ensureUserTailForAdvisor, stripInflightAdvisorCall, stripToolDeclarations } from "./context.js";
 import { getInventoryMessage } from "./inventory.js";
 import {
@@ -31,7 +32,6 @@ import {
 	errNoApiKeyDetail,
 	msgConsulting,
 } from "./messages.js";
-import { getRuntimeCompleteSimple, loadCompleteSimple } from "./pi-compat.js";
 import { ADVISOR_SYSTEM_PROMPT } from "./prompt.js";
 import { getAdvisorEffort, getAdvisorModel } from "./state.js";
 
@@ -109,8 +109,8 @@ export async function executeAdvisor(
 	// credentials are applied inside Pi's runtime facade. A missing key is only
 	// fatal on legacy hosts without that facade, where the global completion
 	// fallback needs the key passed explicitly.
-	const runtimeCompleteSimple = getRuntimeCompleteSimple(ctx.modelRegistry);
-	if (!auth.apiKey && !runtimeCompleteSimple) {
+	const sideCall = resolveSideCall(ctx.modelRegistry);
+	if (!auth.apiKey && sideCall.mode !== "facade") {
 		return buildErrorResult(advisorLabel, effort, errNoApiKey(advisorLabel), errNoApiKeyDetail(advisor.provider));
 	}
 
@@ -136,16 +136,19 @@ export async function executeAdvisor(
 	});
 
 	try {
-		// Prefer Pi's auth-aware runtime facade (resolved once above, before the
-		// missing-key guard). Unlike the global compatibility function, it runs
+		// Prefer Pi's auth-aware runtime facade (the dispatch resolved above, before
+		// the missing-key guard). Unlike the global compatibility function, it runs
 		// request preparation and applies credential-derived fields such as GitHub
 		// Copilot's OAuth-specific baseUrl. Do not pass the preflight key/headers
 		// to this path: explicit overrides would bypass that resolution and
-		// reintroduce the endpoint mismatch.
-		const completeSimple = runtimeCompleteSimple ?? (await loadCompleteSimple());
-		const requestOptions = runtimeCompleteSimple
-			? { signal, reasoning: effort }
-			: { apiKey: auth.apiKey, headers: auth.headers, signal, reasoning: effort };
+		// reintroduce the endpoint mismatch. The thunk resolves INSIDE this try —
+		// a real /compat init failure belongs to the catch below, and the global
+		// import must not be reached at all when a facade exists.
+		const completeSimple = await sideCall.completeSimple();
+		const requestOptions =
+			sideCall.mode === "facade"
+				? { signal, reasoning: effort }
+				: { apiKey: auth.apiKey, headers: auth.headers, signal, reasoning: effort };
 
 		// Single dispatch point — both attempts reuse the SAME `messages` and
 		// `requestOptions`, so the retry cannot diverge from attempt 1. `tools: []`

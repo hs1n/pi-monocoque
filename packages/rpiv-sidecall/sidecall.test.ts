@@ -1,51 +1,62 @@
 /**
- * pi-compat tests — the host-version-tolerant `completeSimple` loader.
+ * sidecall tests — the host-version-tolerant surface this module owns.
  *
- * The consumer test files mock `@earendil-works/pi-ai/compat` to SUCCEED, so
- * the version-tolerance arms the shim exists for are exercised here instead:
+ * The consumer test files mock `@earendil-works/pi-ai/compat` to SUCCEED, so the
+ * version-tolerance arms the module exists for are exercised here instead:
  * /compat resolves (host >= 0.80.1), /compat unresolvable → root fallback
  * (host <= 0.79.x), a REAL /compat failure rethrows instead of masking, and a
  * host with neither export fails with a clear error.
  */
 
+import type { Message } from "@earendil-works/pi-ai";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getRuntimeCompleteSimple } from "./pi-compat.js";
+import { resolveSideCall, stripToolDeclarations } from "./sidecall.js";
 
-describe("getRuntimeCompleteSimple", () => {
-	it("returns a method bound to the host runtime", async () => {
+describe("resolveSideCall — facade path", () => {
+	it("reports `facade` and returns the runtime's own bound completeSimple", async () => {
 		const runtime = {
 			completeSimple: vi.fn(function (this: unknown) {
 				expect(this).toBe(runtime);
 				return Promise.resolve(undefined as never);
 			}),
 		};
-		const completeSimple = getRuntimeCompleteSimple({ runtime });
+		const dispatch = resolveSideCall({ runtime });
 
+		expect(dispatch.mode).toBe("facade");
+		const completeSimple = await dispatch.completeSimple();
 		expect(completeSimple).toBeTypeOf("function");
-		if (!completeSimple) throw new Error("expected runtime completion facade");
 		await completeSimple(undefined as never, undefined as never);
 		expect(runtime.completeSimple).toHaveBeenCalledOnce();
 	});
 
-	it("returns undefined for missing or malformed runtime facades", () => {
-		expect(getRuntimeCompleteSimple(undefined)).toBeUndefined();
-		expect(getRuntimeCompleteSimple({ runtime: null })).toBeUndefined();
-		expect(getRuntimeCompleteSimple({ runtime: { completeSimple: "not-a-function" } })).toBeUndefined();
+	it("reports `global` for missing or malformed runtime facades", () => {
+		expect(resolveSideCall(undefined).mode).toBe("global");
+		expect(resolveSideCall({ runtime: null }).mode).toBe("global");
+		expect(resolveSideCall({ runtime: { completeSimple: "not-a-function" } }).mode).toBe("global");
+	});
+
+	it("reports `global`, rather than throwing, when reading the slot itself throws", () => {
+		const registry = {
+			get runtime(): unknown {
+				throw new Error("private host shape");
+			},
+		};
+		expect(resolveSideCall(registry).mode).toBe("global");
 	});
 });
 
-describe("loadCompleteSimple", () => {
+describe("resolveSideCall — global path", () => {
 	afterEach(() => {
 		vi.doUnmock("@earendil-works/pi-ai/compat");
 		vi.doUnmock("@earendil-works/pi-ai");
 		vi.resetModules();
 	});
 
-	/** Import the shim AFTER the per-test doMocks so its dynamic imports resolve
+	/** Import the module AFTER the per-test doMocks so its dynamic imports resolve
 	 *  against them (vi.resetModules first drops any previously-cached copies). */
 	async function load(): Promise<unknown> {
-		const mod = await import("./pi-compat.js");
-		return mod.loadCompleteSimple();
+		const mod = await import("./sidecall.js");
+		return mod.resolveSideCall(undefined).completeSimple();
 	}
 
 	it("resolves completeSimple from /compat when the host exposes it (pi >= 0.80.1)", async () => {
@@ -85,6 +96,18 @@ describe("loadCompleteSimple", () => {
 		vi.doMock("@earendil-works/pi-ai/compat", () => ({}));
 		await expect(load()).rejects.toThrow(/completeSimple/);
 	});
+
+	it("never touches pi-ai when a facade exists", async () => {
+		vi.resetModules();
+		vi.doMock("@earendil-works/pi-ai/compat", () => {
+			throw new Error("the global entrypoint must not be reached");
+		});
+		const runtime = { completeSimple: vi.fn() };
+		const mod = await import("./sidecall.js");
+		const dispatch = mod.resolveSideCall({ runtime });
+		expect(dispatch.mode).toBe("facade");
+		await expect(dispatch.completeSimple()).resolves.toBeTypeOf("function");
+	});
 });
 
 describe("loadIsContextOverflow", () => {
@@ -94,10 +117,10 @@ describe("loadIsContextOverflow", () => {
 		vi.resetModules();
 	});
 
-	/** Import the shim AFTER the per-test doMocks so its dynamic imports resolve
+	/** Import the module AFTER the per-test doMocks so its dynamic imports resolve
 	 *  against them (vi.resetModules first drops any previously-cached copies). */
 	async function load(): Promise<unknown> {
-		const mod = await import("./pi-compat.js");
+		const mod = await import("./sidecall.js");
 		return mod.loadIsContextOverflow();
 	}
 
@@ -140,5 +163,31 @@ describe("loadIsContextOverflow", () => {
 		// graceful-degradation path would have resolved undefined here.
 		vi.doMock("@earendil-works/pi-ai", () => ({ isContextOverflow: vi.fn() }));
 		await expect(load()).rejects.toThrow();
+	});
+});
+
+describe("stripToolDeclarations", () => {
+	const userMessage = { role: "user", content: [{ type: "text", text: "hi" }], timestamp: 0 } as unknown as Message;
+	const systemWithTools = {
+		role: "system",
+		content: [{ type: "text", text: "you have tools" }],
+		timestamp: 0,
+		toolsAdded: [{ name: "advisor" }],
+		toolsRemoved: [{ name: "bash" }],
+	} as unknown as Message;
+
+	it("returns the same array when no system message declares tools", () => {
+		const messages = [userMessage];
+		expect(stripToolDeclarations(messages)).toBe(messages);
+	});
+
+	it("drops the deltas and keeps the prompt text by reference", () => {
+		const [, stripped] = stripToolDeclarations([userMessage, systemWithTools]);
+		expect((stripped as { toolsAdded?: unknown }).toolsAdded).toBeUndefined();
+		expect((stripped as { toolsRemoved?: unknown }).toolsRemoved).toBeUndefined();
+		expect(stripped.content).toBe(systemWithTools.content);
+		// Untouched neighbours keep their identity.
+		const untouched = [systemWithTools, userMessage];
+		expect(stripToolDeclarations(untouched)[1]).toBe(userMessage);
 	});
 });

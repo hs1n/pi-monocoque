@@ -8,7 +8,8 @@ Single-tool extension implementing the advisor-strategy pattern: registers an `a
 
 ## Dependencies
 - **`@earendil-works/pi-coding-agent`** (peer): `ExtensionAPI`, branch-to-LLM converter, dynamic border
-- **`@earendil-works/pi-ai`** (peer): `Model`/`Api`/`ThinkingLevel` types plus a static value import of `getSupportedThinkingLevels` (`advisor/command.ts` effort picker); only `completeSimple` is resolved at runtime by `advisor/pi-compat.ts`
+- **`@earendil-works/pi-ai`** (peer): `Model`/`Api`/`ThinkingLevel` types plus a static value import of `getSupportedThinkingLevels` (`advisor/command.ts` effort picker); only `completeSimple` is resolved at runtime, by the shared `@hs1n/rpiv-sidecall`
+- **`@hs1n/rpiv-sidecall`** (dependency): `resolveSideCall` (host path + callable for the side call) and `stripToolDeclarations` (re-exported by `advisor/context.ts` so the barrel's surface is unchanged)
 - **`@earendil-works/pi-tui`** (peer): containers, select list, layout primitives
 - **`@hs1n/rpiv-config`** (dependency): `validateGuidanceFields` (persisted prompt overrides), `modelKey`/`parseModelKey` (config codec + blocklist canonicalization)
 - **`typebox`** (`peerDependencies: "*"`, host-provided): empty parameter schema. Pi supplies and aliases `typebox` at load time, so it is never a `dependencies` entry — an installed copy would be a second live instance (v2.12.0, #282)
@@ -23,7 +24,6 @@ advisor/         — One-concern-per-file core, re-exported via advisor/index.ts
                      register/execute/prompt/command — tool reg, side-call, prompt loader, command
                      handlers/restore/state/policy — gating, restore, model+effort, blocklist
                      messages/config/context/inventory — strings, config codec, tail-massage, cache
-                     pi-compat — host-version-tolerant completeSimple loader (/compat first, root fallback)
 advisor-ui.ts    — Selector panel/picker/filter UI primitives.  fuzzy.ts — fuzzy model-name matcher for the picker.
 prompts/         — System-prompt asset shipped via the `files` array. Loaded once at init.
 ```
@@ -70,18 +70,18 @@ const { messages: sessionMessages } = buildSessionContext(ctx.sessionManager.get
 const branchMessages = ensureUserTailForAdvisor(stripInflightAdvisorCall(stripToolDeclarations(convertToLlm(sessionMessages))));
 const inventoryMessage = getInventoryMessage(pi.getAllTools()); // signature-keyed cache on a globalThis Symbol — rebuilds only when the tool-name set changes
 const messages = inventoryMessage ? [inventoryMessage, ...branchMessages] : branchMessages;
-const runtime = getRuntimeCompleteSimple(ctx.modelRegistry); // resolved BEFORE the try and the missing-key guard — OAuth hosts resolve ok:true with
-// no literal apiKey, so a missing key is fatal only when the facade is also absent (!auth.apiKey && !runtime). The resolver never throws (returns
-// undefined on odd host shapes); inside the try, loadCompleteSimple failures and the call itself share errCallThrew
-const response = await (runtime ?? (await loadCompleteSimple()))(advisor, { systemPrompt: ADVISOR_SYSTEM_PROMPT, messages, tools: [] },
-    runtime ? { signal, reasoning: effort } : { apiKey: auth.apiKey, headers: auth.headers, signal, reasoning: effort }); // NEVER hand preflight auth to the runtime facade — overrides bypass credential-derived baseUrl
+const sideCall = resolveSideCall(ctx.modelRegistry); // SYNCHRONOUS probe, BEFORE the try and the missing-key guard — OAuth hosts resolve ok:true
+// with no literal apiKey, so a missing key is fatal only when mode === "global". The probe never throws (an odd host shape reads as "global").
+const completeSimple = await sideCall.completeSimple(); // the thunk resolves INSIDE the try, so a /compat init failure shares errCallThrew with the call
+const response = await completeSimple(advisor, { systemPrompt: ADVISOR_SYSTEM_PROMPT, messages, tools: [] },
+    sideCall.mode === "facade" ? { signal, reasoning: effort } : { apiKey: auth.apiKey, headers: auth.headers, signal, reasoning: effort }); // NEVER hand preflight auth to the runtime facade — overrides bypass credential-derived baseUrl
 // Branch on response.stopReason: "aborted" | "error" | empty text | success
 ```
 
 ## Architectural Boundaries
 - **NO main-transcript writes** — the advisor reply is returned as the tool result; never appended via `sendMessage`
 - **NO tools for the advisor** — the system prompt forbids tool calls; `completeSimple` is single-shot
-- **NO static `completeSimple` import** — pi >= 0.80.1 exports it from `@earendil-works/pi-ai/compat`, <= 0.79.x from the root; `pi-compat.ts` `loadCompleteSimple()` resolves against the HOST's copy (peer pinned `"*"`) and is the single migration point when `/compat` is deleted. Its root fallback fires only on resolution failures (`ERR_PACKAGE_PATH_NOT_EXPORTED`/`ERR_MODULE_NOT_FOUND`/`MODULE_NOT_FOUND`, walked through the `cause` chain) so genuine `/compat` init errors surface instead of being masked
+- **NO static `completeSimple` import** — pi >= 0.80.1 exports it from `@earendil-works/pi-ai/compat`, <= 0.79.x from the root; resolution lives in `@hs1n/rpiv-sidecall`, which resolves against the HOST's copy (peer pinned `"*"`) and is the single migration point when `/compat` is deleted. Its root fallback fires only on resolution failures (`ERR_PACKAGE_PATH_NOT_EXPORTED`/`ERR_MODULE_NOT_FOUND`/`MODULE_NOT_FOUND`, walked through the `cause` chain) so genuine `/compat` init errors surface instead of being masked
 - **Sentinel values for selector choices** — collision-proof versus `provider:modelId` keys
 - **Config file mode 0o600** — best-effort `chmod`; never throws on filesystems that lack chmod
 

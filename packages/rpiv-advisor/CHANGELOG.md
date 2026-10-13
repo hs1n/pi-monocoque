@@ -7,6 +7,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- The host-version-tolerant `completeSimple` resolution moves to the shared `@hs1n/rpiv-sidecall` package, which now owns the `/compat`-first lookup, the resolution-failure code set and the runtime-facade probe that this package and `rpiv-btw` each implemented separately; `stripToolDeclarations` moves there with it. No behaviour change: the facade is still probed before the missing-key guard, and the global import still resolves inside the call's own error boundary.
+
 ## [2.13.8] - 2026-10-12
 
 ## [2.13.7] - 2026-10-12

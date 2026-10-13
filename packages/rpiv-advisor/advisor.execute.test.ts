@@ -237,7 +237,7 @@ describe("executeAdvisor — 4 StopReason branches", () => {
 		const { pi, captured } = createMockPi();
 		registerAdvisorTool(pi);
 		const ctx = createMockCtx();
-		// getRuntimeCompleteSimple() returns completeSimple.bind(runtime), so the
+		// resolveSideCall() returns runtime.completeSimple.bind(runtime), so the
 		// two mockReturnValueOnce resolutions are consumed by the bound method.
 		const runtime = {
 			completeSimple: vi

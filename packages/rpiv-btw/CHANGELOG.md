@@ -7,6 +7,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- The host-version-tolerant `completeSimple` resolution moves to the shared `@hs1n/rpiv-sidecall` package, which now owns the `/compat`-first lookup, the resolution-failure code set and the runtime-facade probe that this package and `rpiv-advisor` each implemented separately; `loadIsContextOverflow` and `stripToolDeclarations` move there with it. No behaviour change: the facade is still probed before the missing-key guard, and the global import still resolves inside the call's own error boundary. `rpiv-btw` gains its first `dependencies` entry for it.
+
+### Removed
+- `pi-compat.ts` — its contents moved to `@hs1n/rpiv-sidecall`, and its tests moved with it rather than being kept as a second byte-identical copy.
+
 ## [2.13.8] - 2026-10-12
 
 ## [2.13.7] - 2026-10-12

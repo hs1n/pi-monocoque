@@ -19,10 +19,10 @@ import {
 	type ExtensionContext,
 	type SessionEntry,
 } from "@earendil-works/pi-coding-agent";
+import { loadIsContextOverflow, resolveSideCall, stripToolDeclarations } from "@hs1n/rpiv-sidecall";
 import { type CappedHistory, capHistory, type FitBranchResult, fitBranch } from "./btw-budget.js";
 import { assistantMessageText, type BtwTurn, userMessageText } from "./btw-messages.js";
 import { showBtwOverlay } from "./btw-ui.js";
-import { getRuntimeCompleteSimple, loadCompleteSimple, loadIsContextOverflow } from "./pi-compat.js";
 
 // ---------------------------------------------------------------------------
 // Constants — flat named consts, grouped by concern (advisor pattern, b9428e9)
@@ -88,19 +88,11 @@ interface BtwState {
  * tool loadout as `toolsAdded`/`toolsRemoved` on transcript `system` messages,
  * and providers resolve the request's tools from them, so `tools: []` alone
  * would leave /btw able to stop on `toolUse` with no answer (#295). The prompt
- * text stays.
+ * text stays. The stripping is shared with the advisor's side call, which needs
+ * the same guarantee, and lives in rpiv-sidecall.
  */
 export function branchToContextMessages(branch: SessionEntry[]): Message[] {
 	return stripToolDeclarations(convertToLlm(buildSessionContext(branch).messages));
-}
-
-function stripToolDeclarations(messages: Message[]): Message[] {
-	if (!messages.some((m) => m.role === "system" && (m.toolsAdded || m.toolsRemoved))) return messages;
-	return messages.map((m) => {
-		if (m.role !== "system" || (!m.toolsAdded && !m.toolsRemoved)) return m;
-		const { toolsAdded: _added, toolsRemoved: _removed, ...rest } = m;
-		return rest;
-	});
 }
 
 /** The /btw snapshot: the main agent's context messages, plus its context entries
@@ -298,8 +290,8 @@ export async function executeBtw(
 	// credentials are applied inside Pi's runtime facade. A missing key is only
 	// fatal on legacy hosts without that facade, where the global completion
 	// fallback needs the key passed explicitly.
-	const runtimeCompleteSimple = getRuntimeCompleteSimple(ctx.modelRegistry);
-	if (!auth.apiKey && !runtimeCompleteSimple) {
+	const sideCall = resolveSideCall(ctx.modelRegistry);
+	if (!auth.apiKey && sideCall.mode !== "facade") {
 		return { kind: "error", error: errNoApiKey(modelLabel) };
 	}
 
@@ -314,16 +306,19 @@ export async function executeBtw(
 	let built = buildBtwMessages(ctx, userMessage);
 
 	try {
-		// Prefer Pi's auth-aware runtime facade (resolved once above, before the
-		// missing-key guard). Unlike the global compatibility function, it runs
+		// Prefer Pi's auth-aware runtime facade (the dispatch resolved above, before
+		// the missing-key guard). Unlike the global compatibility function, it runs
 		// request preparation and applies credential-derived fields — OAuth
 		// tokens, GitHub Copilot's OAuth-specific baseUrl. Do not pass the
 		// preflight key/headers to that path: explicit overrides would bypass
-		// that resolution.
-		const completeSimple = runtimeCompleteSimple ?? (await loadCompleteSimple());
-		const requestOptions = runtimeCompleteSimple
-			? { signal: controller.signal } // own AbortController, NOT ctx.signal (Decision 8)
-			: { apiKey: auth.apiKey, headers: auth.headers, signal: controller.signal };
+		// that resolution. The thunk resolves INSIDE this try — a real /compat init
+		// failure belongs to the catch below, and the global import must not be
+		// reached at all when a facade exists.
+		const completeSimple = await sideCall.completeSimple();
+		const requestOptions =
+			sideCall.mode === "facade"
+				? { signal: controller.signal } // own AbortController, NOT ctx.signal (Decision 8)
+				: { apiKey: auth.apiKey, headers: auth.headers, signal: controller.signal };
 		const overflowFn = await loadIsContextOverflow();
 		let retried = false;
 		const callCompleteSimple = async (

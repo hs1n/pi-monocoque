@@ -45,12 +45,8 @@ export function ensureUserTailForAdvisor(messages: Message[]): Message[] {
 // tools from those `toolsAdded`/`toolsRemoved` deltas — so `tools: []` alone
 // leaves the executor's tools callable and the advisor can stop on `toolUse`
 // with no text (#295). Drop the deltas, keep the prompt text; the inventory
-// message already tells the advisor what the executor's tools are.
-export function stripToolDeclarations(messages: Message[]): Message[] {
-	if (!messages.some((m) => m.role === "system" && (m.toolsAdded || m.toolsRemoved))) return messages;
-	return messages.map((m) => {
-		if (m.role !== "system" || (!m.toolsAdded && !m.toolsRemoved)) return m;
-		const { toolsAdded: _added, toolsRemoved: _removed, ...rest } = m;
-		return rest;
-	});
-}
+// message already tells the advisor what the executor's tools are. The
+// stripping itself is shared with the family's other side call (`/btw`), which
+// needs the same guarantee, so it lives in rpiv-sidecall and is re-exported
+// here: this module stays the branch-message surface published by the barrel.
+export { stripToolDeclarations } from "@hs1n/rpiv-sidecall";

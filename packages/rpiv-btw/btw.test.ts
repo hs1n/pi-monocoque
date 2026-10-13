@@ -24,25 +24,22 @@ vi.mock("@earendil-works/pi-ai/compat", async (importOriginal) => {
 	};
 });
 
-// Mock the loader so the overflow gate is controllable independently of the
-// real isContextOverflow regex behavior. loadCompleteSimple is routed to the
-// shared completeSimple spy (above) so existing mockResolvedValueOnce chains
-// keep working; loadIsContextOverflow defaults to undefined (legacy host, no
-// retry) and is overridden per-test in the overflow-retry suite.
-// getRuntimeCompleteSimple stays REAL: mock hosts have no `runtime` slot, so
-// tests default to the legacy path, and runtime-facade tests opt in by
-// defining a `runtime` slot on ctx.modelRegistry.
-vi.mock("./pi-compat.js", async (importOriginal) => {
-	const actual = await importOriginal<typeof import("./pi-compat.js")>();
-	return {
-		getRuntimeCompleteSimple: actual.getRuntimeCompleteSimple,
-		loadCompleteSimple: vi.fn(),
-		loadIsContextOverflow: vi.fn(),
-	};
+// Mock only the overflow loader, so the gate is controllable independently of
+// the real isContextOverflow regex behavior: it defaults to undefined (legacy
+// host, no retry) and is overridden per-test in the overflow-retry suite.
+// resolveSideCall stays REAL: mock hosts have no `runtime` slot, so tests
+// default to the global path, and runtime-facade tests opt in by defining a
+// `runtime` slot on ctx.modelRegistry. That global path imports pi-ai's /compat,
+// which this file mocks to the shared completeSimple spy (above), so existing
+// mockResolvedValueOnce chains keep working.
+vi.mock("@hs1n/rpiv-sidecall", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("@hs1n/rpiv-sidecall")>();
+	return { ...actual, loadIsContextOverflow: vi.fn() };
 });
 
 import type { AssistantMessage, UserMessage } from "@earendil-works/pi-ai";
 import { completeSimple } from "@earendil-works/pi-ai/compat";
+import { loadIsContextOverflow } from "@hs1n/rpiv-sidecall";
 import {
 	assistantMessageText,
 	BTW_STATE_KEY,
@@ -58,7 +55,6 @@ import {
 	registerMessageEndSnapshot,
 	userMessageText,
 } from "./btw.js";
-import { loadCompleteSimple, loadIsContextOverflow } from "./pi-compat.js";
 
 // Pins the substring `isStaleCtxError` matches in pi-core's invalidated-proxy error.
 const STALE_CTX_MESSAGE = "This extension ctx is stale after session replacement or reload.";
@@ -79,11 +75,7 @@ function makeCompletionResponse(input: {
 
 beforeEach(() => {
 	vi.mocked(completeSimple).mockReset();
-	vi.mocked(loadCompleteSimple).mockReset();
 	vi.mocked(loadIsContextOverflow).mockReset();
-	// Route the loader to the shared completeSimple spy so existing
-	// mockResolvedValueOnce(makeCompletionResponse(...)) chains keep working.
-	vi.mocked(loadCompleteSimple).mockResolvedValue(completeSimple as never);
 	// Default: legacy host (isContextOverflow absent) → no retry. Per-test
 	// overrides set a real overflowFn to exercise the gate.
 	vi.mocked(loadIsContextOverflow).mockResolvedValue(undefined);

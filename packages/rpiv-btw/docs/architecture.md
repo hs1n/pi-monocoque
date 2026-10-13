@@ -12,7 +12,6 @@ rpiv-btw/
 ├── btw-budget.ts        — history cap + branch fit
 ├── btw-messages.ts      — BtwTurn + message-text extractors
 ├── btw-ui.ts            — bottom-anchored overlay and key handling
-├── pi-compat.ts         — host-tolerant pi-ai /compat loaders
 └── prompts/btw-system.txt — system prompt for the side call
 ```
 
@@ -113,7 +112,7 @@ Hints are joined with `" · "` and truncated to the panel width.
 
 pi-ai resolves at runtime against the *host's* copy (all three pi peers are
 declared `"*"`), and pi moved the global dispatch API to a `/compat` entrypoint
-in 0.80.1. `pi-compat.ts` therefore resolves `completeSimple` lazily:
+in 0.80.1. `@hs1n/rpiv-sidecall` therefore resolves `completeSimple` lazily:
 
 1. `import("@earendil-works/pi-ai/compat")` — pi >= 0.80.1.
 2. On a **module-resolution** failure only, fall back to
@@ -153,10 +152,10 @@ rest render inside the overlay in the error style.
 
 ## Boundaries
 
-- **No runtime dependencies.** No `dependencies`, no `devDependencies` — only the
-  three `@earendil-works` peers.
-- **No sibling imports at runtime.** `pi-compat.ts` deliberately duplicates
-  rpiv-core's `isModuleNotFound` rather than importing it, because the rpiv
-  packages never import each other at runtime.
+- **One runtime dependency, and it is not a sibling.** `@hs1n/rpiv-sidecall`
+  supplies the host-tolerant side-call surface; no `devDependencies`, and the
+  three `@earendil-works` peers are peer-pinned `"*"`. A library package is how
+  the family shares behaviour without an extension-to-extension import — see
+  `docs/adr/0001-shared-family-behaviour-lives-in-library-packages.md`.
 - **Standalone.** rpiv-btw is excluded from `rpiv-pi`'s auto-install sibling list,
   and a test asserts that exclusion.

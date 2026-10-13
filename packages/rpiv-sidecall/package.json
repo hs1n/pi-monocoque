@@ -1,0 +1,42 @@
+{
+	"name": "@hs1n/rpiv-sidecall",
+	"version": "2.13.8",
+	"description": "Shared host-version-tolerant side-call surface for pi-monocoque sibling packages",
+	"keywords": [
+		"rpiv",
+		"sidecall",
+		"shared-utility"
+	],
+	"type": "module",
+	"license": "MIT",
+	"author": "hs1n",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/hs1n/pi-monocoque.git",
+		"directory": "packages/rpiv-sidecall"
+	},
+	"homepage": "https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-sidecall#readme",
+	"bugs": {
+		"url": "https://github.com/hs1n/pi-monocoque/issues"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"test": "vitest run"
+	},
+	"files": [
+		"index.ts",
+		"sidecall.ts",
+		"CHANGELOG.md"
+	],
+	"exports": {
+		".": "./index.ts"
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-ai": "*"
+	},
+	"contributors": [
+		"juicesharp <https://github.com/juicesharp>"
+	]
+}
