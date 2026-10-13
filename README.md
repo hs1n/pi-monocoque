@@ -5,10 +5,11 @@ skill pipeline and the tools it composes. Eleven packages, lockstep versions, in
 into Pi as a Pi source.
 
 **This is a personal fork** of [juicesharp/rpiv-mono](https://github.com/juicesharp/rpiv-mono),
-maintained by [@hs1n](https://github.com/hs1n). It is not affiliated with, endorsed by, or
-supported by the upstream author. What the fork changes — and what it owes upstream under
-MIT — is in [FORK_NOTICE.md](./FORK_NOTICE.md); upstream's own README is preserved at
-[docs/upstream/README.md](./docs/upstream/README.md).
+maintained by [@hs1n](https://github.com/hs1n) and **frozen at that project's v2.13.8** —
+there is no upstream remote and no merge path; later upstream work is not adopted here. It is
+not affiliated with, endorsed by, or supported by the upstream author. What the fork changes
+— and what it owes upstream under MIT — is in [FORK_NOTICE.md](./FORK_NOTICE.md); upstream's
+own README is preserved at [docs/upstream/README.md](./docs/upstream/README.md).
 
 ## Install
 

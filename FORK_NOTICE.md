@@ -9,7 +9,7 @@ It is **not affiliated with, endorsed by, or supported by** the upstream author.
 | Upstream author | Sergii Guslystyi ([@juicesharp](https://github.com/juicesharp), [rpiv-pi.com](https://rpiv-pi.com)) |
 | This fork | https://github.com/hs1n/pi-monocoque |
 | Forked from | `main` @ `d74b1c99830a565f3df3f37e0a36616d17ffc574` (v2.11.x) |
-| Upstream merged through | `main` @ `2d88b79c` — v2.13.8, 2026-10-12 |
+| Upstream merged through | `main` @ `2d88b79c` — v2.13.8, 2026-10-12 (final sync; the remote was removed afterwards) |
 | License | MIT — see [`LICENSE`](./LICENSE) and `packages/*/LICENSE` |
 
 ## License and attribution
@@ -29,15 +29,19 @@ same notices.
 Only the following divergences exist, and they are all provenance/identity fixes rather
 than behavioral changes:
 
-- **Tracks upstream rather than freezing at the fork point.** The fork point was v2.11.x;
-  `upstream/main` @ `2d88b79c` (v2.13.8, 2026-10-12) is merged into `main`, so this is a
-  rebased-then-merged fork, not a snapshot. What rides on top of upstream is the scope
-  rename, the four deletions below, the fork's own install path and provenance docs, and
-  five behavioral changes: the `zh-TW` locale (+ the `LANG` region fix that makes it
-  reachable), guidance-injection throttling, the guidance docs split into auto-injected
-  rules + on-demand `details.md`, `.agents/skills` contract harvesting, and project-trust
-  gating for that harvest.
-- `upstream` git remote added for syncing.
+- **Frozen at upstream v2.13.8 — this is a standalone project now, not a tracking fork.**
+  The fork point was v2.11.x; `upstream/main` @ `2d88b79c` (v2.13.8, 2026-10-12) was merged in
+  as the **final** upstream sync, and the `upstream` remote was then removed. There is no
+  merge path any more and none is planned: upstream's later fixes and features are the
+  maintainer's to write here. What rides on top of that revision is the scope rename, the
+  four deletions below, the fork's own install path and provenance docs, and six behavioral
+  changes: the `zh-TW` locale (+ the `LANG` region fix that makes it reachable),
+  guidance-injection throttling, the guidance docs split into auto-injected rules +
+  on-demand `details.md`, `.agents/skills` contract harvesting, project-trust gating for
+  that harvest, and local-path resolution in `/rpiv-setup`.
+  (To consult upstream later without adopting tracking: `git remote add upstream
+  https://github.com/juicesharp/rpiv-mono.git && git fetch upstream`, then `git
+  cherry-pick <sha>` — take a commit; don't merge a branch.)
 - README fork banner; CI/badges no longer point at the upstream repository or Codecov.
 - `packages/rpiv-site/public/CNAME` removed; the site's canonical URL no longer claims
   `rpiv-pi.com`.
@@ -51,8 +55,7 @@ than behavioral changes:
   bridge, along with the guidance files, tests, and CI/config wiring that pointed at them.
   `rpiv-warp`'s only in-tree consumer was the guarded `workflow-question-warp-bridge.ts` in
   `rpiv-core`, which is deleted with it. `scripts/fork-pi-install.sh` now takes only
-  `--with btw`. **This widens the divergence from upstream**: upstream merges touching those
-  paths will conflict, and re-adding one is a `git revert` of this deletion plus a
+  `--with btw`. Re-adding one of those packages is a `git revert` of this deletion plus a
   `pi install`.
 - Codecov upload removed from `.github/workflows/ci.yml` (it required upstream's OIDC
   identity and failed the build in a fork).

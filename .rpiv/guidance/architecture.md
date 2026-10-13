@@ -4,11 +4,12 @@ Monorepo for the `@hs1n/rpiv-*` Pi plugins. Lockstep versions, single install,
 no publish pipeline. Targets Pi Agent CLI
 (`@earendil-works/pi-coding-agent`), not Claude Code.
 
-> **This checkout is a fork of upstream, not upstream itself.** It is
-> `hs1n/pi-monocoque`, forked from `juicesharp/rpiv-mono` (kept as the `upstream`
-> remote; `origin` is the fork). Everything below this banner is upstream's framing
-> and is accurate about the code; these are the deltas an agent working here must not
-> get wrong:
+> **This is a standalone fork of upstream, not upstream itself.** It is
+> `hs1n/pi-monocoque`, forked from `juicesharp/rpiv-mono` and **frozen at that project's
+> v2.13.8** (`2d88b79c`, 2026-10-12): the `upstream` remote was removed after the final
+> sync, so there is no merge path and none is planned. Everything below this banner is
+> upstream's framing and is accurate about the code; these are the deltas an agent working
+> here must not get wrong:
 >
 > - **Provenance and obligations** — `FORK_NOTICE.md`. MIT requires upstream's
 >   copyright notices to stay; `LICENSE` and every `packages/*/LICENSE` are unmodified.
@@ -38,8 +39,9 @@ no publish pipeline. Targets Pi Agent CLI
 >   (see the install bullet above). Versions are hand-maintained lockstep: bump them and
 >   run `npm run versions:sync`.
 > - **Remotes**: `origin` is SSH (`git@github.com:hs1n/pi-monocoque.git`) and needs the
->   key configured in `~/.ssh/config`; `upstream` is HTTPS on purpose (public read-only,
->   no key required).
+>   key configured in `~/.ssh/config`. There is no `upstream` remote — to consult upstream
+>   later, `git remote add upstream https://github.com/juicesharp/rpiv-mono.git` (HTTPS,
+>   public read-only) and cherry-pick a commit rather than merging a branch.
 
 The layout tree, per-package responsibilities, and the private/opt-in roster are in
 `details.md` beside this file — NOT auto-injected. Read it when you need to know
