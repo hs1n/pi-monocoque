@@ -13,8 +13,12 @@
  * import of sibling packages (keeps rpiv-core pure-orchestrator).
  */
 
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 export interface SiblingPlugin {
-	/** Install spec passed to `pi install`. Prefixed with `npm:` for Pi's installer. */
+	/** Install spec passed to `pi install`. `npm:`-prefixed — see `resolveInstallSpec`. */
 	readonly pkg: string;
 	/**
 	 * Case-insensitive regex that matches the package in settings.json AND in the
@@ -30,6 +34,30 @@ export interface SiblingPlugin {
 	readonly marker?: string;
 	/** What the sibling provides — shown in /rpiv-setup confirmation and reports. */
 	readonly provides: string;
+}
+
+/**
+ * This repo's `packages/` directory, resolved from this module's own location
+ * (`packages/rpiv-pi/extensions/rpiv-core/`). Identical in a checkout and in a git
+ * install (Pi clones the repo, keeping the layout).
+ */
+const REPO_PACKAGES_DIR = fileURLToPath(new URL("../../../../packages/", import.meta.url));
+
+/**
+ * The spec `pi install` should be handed for a registry entry.
+ *
+ * This repo has **no publish path**, so `@hs1n/rpiv-*` is module identity, not a registry
+ * entry — `npm:@hs1n/rpiv-todo` resolves nowhere. When the sibling's own package directory
+ * is present next to this one (always, in this repo), install it by local path: Pi records
+ * the path rather than copying, so `/reload` picks up edits. Anything else — a third-party
+ * dependency such as `@tintinweb/pi-subagents`, or a copy of rpiv-pi installed standalone
+ * with no sibling dirs beside it — keeps its npm spec, which is upstream's behavior.
+ */
+export function resolveInstallSpec(pkg: string): string {
+	const match = /^npm:@hs1n\/(rpiv-[a-z0-9-]+)$/.exec(pkg);
+	if (!match) return pkg;
+	const dir = join(REPO_PACKAGES_DIR, match[1]);
+	return existsSync(join(dir, "package.json")) ? dir : pkg;
 }
 
 export const SIBLINGS: readonly SiblingPlugin[] = [

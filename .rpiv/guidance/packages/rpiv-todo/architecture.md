@@ -1,6 +1,6 @@
 # rpiv-todo
 
-Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the
+Sibling Pi extension in `pi-monocoque`. Lockstep version with the rest of the
 `@hs1n/rpiv-*` family — never bump independently. Claude-Code-parity task management
 for Pi. Registers a single multiplexed `todo` tool (action-discriminated:
 create/update/list/get/delete/clear), the `/todos` slash command, a persistent

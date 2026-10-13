@@ -6,7 +6,7 @@ the loader, the runner, the command surface, or the public exports.
 
 ## Monorepo Context
 
-Published Pi extension in `rpiv-mono`. Lockstep version with the rest of the
+Pi extension in `pi-monocoque`, nothing is published. Lockstep version with the rest of the
 `@hs1n/rpiv-*` family. Listed in `siblings.ts`; suggested by `/rpiv-setup` and
 pre-pinned in rpiv-pi's `peerDependencies`.
 

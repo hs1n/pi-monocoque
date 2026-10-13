@@ -5,8 +5,8 @@ has read them all.
 
 ## The premise
 
-A README is a **front door, not a manual**. It is the npm package page, the GitHub
-landing page, and — increasingly — the first thing a coding agent reads before it
+A README is a **front door, not a manual**. It is the package page on GitHub and —
+increasingly — the first thing a coding agent reads before it
 decides whether to install anything. All three audiences want the same first 30
 seconds: *what is this, is it for me, how do I start.* None of them want the
 authoring DSL in paragraph four.
@@ -37,8 +37,8 @@ Fixed. Do not reorder, do not invent new top-level sections, do skip any section
 that would be empty or padding.
 
 ```
-# <npm package name>
-[badges: npm version, license]
+# <package name>
+[badge: license]
 [cover image]
 
 <lede — 2–3 sentences>
@@ -54,11 +54,12 @@ that would be empty or padding.
 ## License
 ```
 
-### `# <npm package name>`
+### `# <package name>`
 
-The published name, `@hs1n/rpiv-x` — that is what a reader searched for.
-Badges go directly under the H1 (npm version, license), then the cover image.
-Badges at the bottom of a page are decoration; at the top they are metadata.
+The package name, `@hs1n/rpiv-x` — that is what a reader searched for. **No npm-version
+badge**: nothing here is published, so it would 404. The license badge goes directly under
+the H1, then the cover image. Badges at the bottom of a page are decoration; at the top
+they are metadata.
 
 ### Lede
 
@@ -77,11 +78,14 @@ The one command, plus the restart note. Nothing else.
 
 ````md
 ```sh
-pi install npm:@hs1n/rpiv-x
+pi install git:github.com/hs1n/pi-monocoque
 ```
 
-Restart your Pi session.
+Restart Pi, or `/reload` in a running session.
 ````
+
+One exception: an opt-in package (`rpiv-btw`) is absent from the root `pi` manifest, so it
+documents its own local-path install instead.
 
 ### `## Quick start`
 
@@ -134,12 +138,17 @@ Troubleshooting section is worse than none: it implies the package is fragile.
    user may configure an advisor model".
 7. **Facts only.** No aspirational features, no roadmap, no rationale essays. If a
    design decision needs defending, it is a `docs/` topic or a blog post.
-8. **Sibling links are real links.** Cross-package references point at the npm
-   package or the GitHub directory, never a bare name.
+8. **Sibling links are real links.** Cross-package references point at the sibling's
+   directory under `packages/`, never a bare name and never an npm page (there are none).
 
-## What ships in the tarball
+## `files` arrays (hygiene, not shipping)
 
-`docs/` holds two things with opposite economics, and they are packaged
+Nothing here is published any more, so no tarball is produced — but every package still
+declares `files` and `verifyShipManifest` still fails a test when the declaration and the
+on-disk production `.ts` tree disagree. Treat it as an invariant that keeps a future
+distribution route (a tarball, a registry, a vendored copy) a one-step change.
+
+`docs/` holds two things with opposite economics, and they are declared
 differently:
 
 | | Reference markdown | Cover and screenshot art |
@@ -148,35 +157,33 @@ differently:
 | Version-sensitive | Yes — it documents this release's flags and defaults | No |
 | How it is consumed | Read as a file | Fetched over HTTP by absolute URL |
 
-The tarball is the *versioned* artifact; the repo is the rolling one. Docs that
-describe a specific release belong pinned to that release, so every published
-package with a `docs/` directory carries:
+The declaration is the *shippable* set; the repo is the rolling one. A package with a
+`docs/` directory declares:
 
 ```json
 "files": ["…", "docs/", "!docs/*.png", "!docs/*.jpg", "!docs/*.svg", "…"]
 ```
 
-Markdown ships; art does not. Art is only ever referenced by absolute
-`raw.githubusercontent.com` URL, so excluding it breaks nothing and drops ~92%
-of the packed size on image-heavy packages. Pi materialises installs under
-`~/.pi/agent/npm/node_modules/`, so the shipped markdown is reachable on disk.
+Markdown is declared; art is not. Art is only ever referenced by absolute
+`raw.githubusercontent.com` URL, so excluding it costs nothing and keeps ~92%
+of the packable size off an image-heavy package. (For a npm-installed third-party
+package, Pi materialises it under `~/.pi/agent/npm/node_modules/`, so the markdown is
+reachable on disk there.)
 
 Use the `docs/` + negation form, not a `docs/*.md` glob: `verifyShipManifest`
 computes staleness with a literal `existsSync`, so a glob is flagged as a ghost
 entry, while `!`-prefixed entries are skipped by both of its checks.
 
 > [!NOTE]
-> Known gap, deliberately unfixed: README links point at `/blob/main/`, so a
-> reader pinned to an older version clicks through to current docs. The shipped
-> tarball copy is version-correct, but nobody thinks to look for it. The fix —
-> rewriting `main` to the version tag in `release.mjs` at publish time — is not
-> worth building while one major is live and effectively everyone runs latest.
-> Revisit when two majors are supported at once.
+> Known gap, deliberately unfixed: README links point at `/blob/main/`, so a reader
+> pinned to an older commit clicks through to current docs. There is no publish step to
+> pin a copy at, so the rolling repo is the only artifact; revisit if this is ever
+> distributed by tag.
 
 ## Internal packages
 
-`rpiv-config`, `test-utils`, `rpiv-site`, `rpiv-telemetry` are not consumer
-installs. They get a short internal README instead — under 60 lines:
+`rpiv-config` and `test-utils` are not consumer installs. They get a short internal README
+instead — under 60 lines:
 
 ```
 # <package name>

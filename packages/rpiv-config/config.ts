@@ -1,5 +1,5 @@
 /**
- * rpiv-config — shared config I/O utilities for rpiv-mono sibling packages.
+ * rpiv-config — shared config I/O utilities for pi-monocoque sibling packages.
  *
  * Provides JSON config load/save with crash-resistant defaults, path resolution,
  * guidance-field validation, env-var fallback, and TypeBox-driven schema validation.

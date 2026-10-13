@@ -1,7 +1,7 @@
 # rpiv-advisor
 
 ## Monorepo Context
-Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`.
+Sibling Pi extension in `pi-monocoque`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`.
 
 ## Responsibility
 Single-tool extension implementing the advisor-strategy pattern: registers an `advisor` tool (zero parameters) and the matching slash command. When the executor calls `advisor()`, the tool serializes the current conversation branch and forwards it to a separately-configured reviewer model (typically a stronger reviewer). The tool is registered at load but kept inactive until a model is selected; selection persists at the XDG-resolved `configPath("rpiv-advisor", "advisor.json")` (chmod 0600); reads fall back one-way to the legacy `~/.config` file via `loadJsonConfigWithLegacyFallback` only when no file exists at the XDG path.

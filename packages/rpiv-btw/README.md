@@ -1,6 +1,5 @@
 # @hs1n/rpiv-btw
 
-[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-btw.svg)](https://www.npmjs.com/package/@hs1n/rpiv-btw)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
@@ -17,11 +16,19 @@ transcript and never touches disk.
 
 ## Install
 
+`rpiv-btw` is **opt-in** — it is deliberately absent from the monorepo's root `pi`
+manifest, so `pi install git:github.com/hs1n/pi-monocoque` does **not** load it. Install the
+repo, then add btw by local path:
+
 ```sh
-pi install npm:@hs1n/rpiv-btw
+git clone git@github.com:hs1n/pi-monocoque ~/src/pi-monocoque
+cd ~/src/pi-monocoque && npm install
+scripts/fork-pi-install.sh --with btw
 ```
 
-Restart your Pi session.
+Restart Pi, or `/reload` in a running session. Per-package installs record the path rather
+than copying, so keep the checkout where it is.
+
 
 ## Quick start
 
@@ -92,10 +99,10 @@ pick, but Pi needs an active model with working credentials (`/login`).
 
 ## Related
 
-- [`@hs1n/rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi) — the
+- [`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi) — the
   umbrella package. It does not install `rpiv-btw`; install this one yourself when
   you want `/btw`.
-- [juicesharp/rpiv-mono](https://github.com/hs1n/pi-monocoque#readme) — the rest
+- [pi-monocoque](https://github.com/hs1n/pi-monocoque#readme) — the rest
   of the rpiv family.
 
 ## License

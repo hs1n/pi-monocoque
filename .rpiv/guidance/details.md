@@ -1,4 +1,4 @@
-# rpiv-mono — layout and package roster (NOT auto-injected)
+# pi-monocoque — layout and package roster (NOT auto-injected)
 
 Reference material split out of `architecture.md` so the auto-injected block carries
 the rules that decide whether a change is correct. Read this when you need to know

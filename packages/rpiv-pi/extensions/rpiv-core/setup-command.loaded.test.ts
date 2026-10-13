@@ -14,7 +14,7 @@ vi.mock("./pi-installer.js", () => ({ spawnPiInstall: vi.fn(async () => ({ code:
 
 import { spawnPiInstall } from "./pi-installer.js";
 import { registerSetupCommand } from "./setup-command.js";
-import { SIBLINGS } from "./siblings.js";
+import { resolveInstallSpec, SIBLINGS } from "./siblings.js";
 import { getPiAgentSettingsPath } from "./utils.js";
 
 const KIT = "/home/u/.pi/agent/npm/node_modules/frida-pi-studio/node_modules";
@@ -60,6 +60,9 @@ describe("/rpiv-setup — siblings loaded outside settings (#216)", () => {
 	it("nothing loaded: offers every undeclared sibling, as before", async () => {
 		writeSettings([]);
 		await runSetup([]);
-		expect(vi.mocked(spawnPiInstall).mock.calls.map(([pkg]) => pkg)).toEqual(SIBLINGS.map((s) => s.pkg));
+		// Registry order, with this repo's own siblings resolved to local paths (no publish path).
+		expect(vi.mocked(spawnPiInstall).mock.calls.map(([pkg]) => pkg)).toEqual(
+			SIBLINGS.map((s) => resolveInstallSpec(s.pkg)),
+		);
 	});
 });

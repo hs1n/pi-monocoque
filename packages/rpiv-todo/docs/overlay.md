@@ -1,7 +1,7 @@
 # Overlay and `/todos` display
 
 How
-[`@hs1n/rpiv-todo`](https://www.npmjs.com/package/@hs1n/rpiv-todo)
+[`@hs1n/rpiv-todo`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-todo)
 renders the task list — when the overlay appears, what each glyph means, how
 overflow is trimmed, and which strings localize.
 
@@ -115,7 +115,7 @@ tasks. Tombstoned tasks are never listed.
 
 The overlay heading, the `+N more` summary, the collapse hint, the `/todos`
 section headers, and the status words all localize through
-[`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n)
+[`@hs1n/rpiv-i18n`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n)
 when that package is installed. Bundled locales: `de`, `en`, `es`, `fr`, `pt`,
 `pt-BR`, `ru`, `uk`, `zh`.
 

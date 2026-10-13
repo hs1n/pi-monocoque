@@ -1,7 +1,7 @@
 # rpiv-btw
 
 ## Monorepo Context
-Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. Not in `rpiv-pi`'s auto-install bundle (dropped from `siblings.ts` and its `peerDependencies`) — installed and loaded independently.
+Sibling Pi extension in `pi-monocoque`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. Not in `rpiv-pi`'s auto-install bundle (dropped from `siblings.ts` and its `peerDependencies`) — installed and loaded independently.
 
 ## Responsibility
 Slash-command-only Pi extension. Spawns a one-off side call to the same primary model with a read-only clone of the current conversation as context, renders the answer in a bottom-anchored ephemeral overlay, and never writes back to the main agent's transcript or to disk. Per-session history is process-scoped via a `globalThis` Symbol-keyed singleton.

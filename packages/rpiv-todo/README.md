@@ -1,6 +1,5 @@
 # @hs1n/rpiv-todo
 
-[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-todo.svg)](https://www.npmjs.com/package/@hs1n/rpiv-todo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
@@ -18,11 +17,25 @@ on long research → design → implement sessions.
 
 ## Install
 
+This package ships inside [`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque) — an
+11-package monorepo with **no registry route**, so there is no `@hs1n/rpiv-*` entry on npm.
+Install the repo as a Pi source:
+
 ```sh
-pi install npm:@hs1n/rpiv-todo
+pi install git:github.com/hs1n/pi-monocoque
 ```
 
-Restart your Pi session.
+Restart Pi, or `/reload` in a running session. The pipeline's `Agent` tool comes from a
+third-party package and is installed separately:
+
+```sh
+pi install npm:@tintinweb/pi-subagents@0.21.0
+```
+
+[INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) covers the
+live-checkout install (`pi install <path>`, edits picked up by `/reload`) and the
+per-package form (`scripts/fork-pi-install.sh`).
+
 
 ## Quick start
 
@@ -64,7 +77,7 @@ by status.
 - **Parallel sessions stay separate.** Task state is keyed by session, so a
   detached or child session can neither read nor overwrite the foreground list.
 - **Localized UI, no setup required.** Nine locales ship with the package and
-  activate when [`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n)
+  activate when [`@hs1n/rpiv-i18n`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n)
   is installed; without it, everything falls back to English.
 
 ## Configuration
@@ -106,15 +119,15 @@ this file — it never writes one. Full semantics:
 - A Pi Agent host. No API key, no model selection, no native dependencies.
 - An interactive session for the panel and `/todos`. Headless runs still get the
   `todo` tool; nothing is rendered.
-- [`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n)
+- [`@hs1n/rpiv-i18n`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n)
   is an optional peer — install it for a localized UI, skip it for English.
 
 ## Related
 
-- [`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n)
+- [`@hs1n/rpiv-i18n`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n)
   ([source](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n))
   — localizes this extension's UI chrome and adds a `/languages` picker.
-- [`@hs1n/rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi)
+- [`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi)
   ([source](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi))
   — the umbrella package that installs this extension alongside its siblings.
 

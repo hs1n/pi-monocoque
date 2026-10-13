@@ -110,7 +110,8 @@ loaded with `pi -e`. They no longer trigger the missing-siblings banner, and
 `/rpiv-setup` does not install a second copy whose tools would conflict. No sibling is
 statically imported from the entry graph; a test enforces that.
 
-`/rpiv-setup` installs whichever of these eight packages are neither declared nor loaded:
+`/rpiv-setup` installs whichever of these eight packages are neither declared nor loaded — by
+local path for this repo's own seven, from npm for `@tintinweb/pi-subagents`:
 
 | Package | Provides |
 | --- | --- |

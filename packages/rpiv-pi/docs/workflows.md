@@ -3,7 +3,7 @@
 The four `/wf` pipelines `@hs1n/rpiv-pi` contributes, and the hand-driven
 skill chains to reach for when you don't want a whole pipeline.
 
-`/wf` itself ships with [`@hs1n/rpiv-workflow`](https://www.npmjs.com/package/@hs1n/rpiv-workflow),
+`/wf` itself ships with [`@hs1n/rpiv-workflow`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-workflow),
 which `/rpiv-setup` installs. rpiv-pi registers its built-ins into that runner at
 session start; if the runner is not installed, the built-ins simply do not appear.
 

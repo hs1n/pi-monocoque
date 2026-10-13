@@ -52,9 +52,14 @@ describe("generateRunId", () => {
 
 	it("generates distinct ids for two same-second calls (collision protection)", () => {
 		const fixed = new Date(2026, 4, 20, 15, 30, 45);
-		const ids = new Set(Array.from({ length: 20 }, () => generateRunId(fixed)));
-		// 20 calls, 65536 possible suffixes — duplicates are astronomically unlikely.
-		expect(ids.size).toBe(20);
+		// The clock alone cannot separate two same-second runs — the per-call suffix does.
+		// Asserted on the mechanism rather than on 20 draws being pairwise distinct: with a
+		// 65536-wide suffix space the birthday bound puts that at ~0.3% per run, which made
+		// this test flake (observed). Both halves below are deterministic.
+		expect(generateRunId(fixed, "0123")).toBe("2026-05-20_15-30-45-0123");
+		expect(generateRunId(fixed, "4567")).toBe("2026-05-20_15-30-45-4567");
+		// A defaulted call draws its own suffix — same timestamp, still a fresh id.
+		expect(generateRunId(fixed)).toMatch(/^2026-05-20_15-30-45-[0-9a-f]{4}$/);
 	});
 });
 

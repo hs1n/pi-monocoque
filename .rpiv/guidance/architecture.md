@@ -1,4 +1,4 @@
-# rpiv-mono
+# pi-monocoque
 
 Monorepo for the `@hs1n/rpiv-*` Pi plugins. Lockstep versions, single install,
 no publish pipeline. Targets Pi Agent CLI
@@ -12,8 +12,9 @@ no publish pipeline. Targets Pi Agent CLI
 >
 > - **Provenance and obligations** — `FORK_NOTICE.md`. MIT requires upstream's
 >   copyright notices to stay; `LICENSE` and every `packages/*/LICENSE` are unmodified.
->   The README/roadmap/docs prose is upstream's and states the *upstream* author's
->   views. `rpiv`, `rpiv-pi`, `juicesharp`, `rpiv-pi.com`, and the npm scope
+>   `README.md` is this fork's own front door; upstream's README and roadmap are kept
+>   verbatim under `docs/upstream/` and state the *upstream* author's views.
+>   `rpiv`, `rpiv-pi`, `juicesharp`, `rpiv-pi.com`, and the npm scope
 >   `@juicesharp` identify upstream — that scope is not ours.
 > - **Installing into Pi — `pi install git:github.com/hs1n/pi-monocoque` is the primary
 >   path.** Pi's git source clones the repo and treats the clone root as the package
@@ -24,9 +25,12 @@ no publish pipeline. Targets Pi Agent CLI
 >   For a live checkout (`/reload` picks up edits) use `pi install <checkout path>` — same
 >   manifest, no clone — or `scripts/fork-pi-install.sh` for the per-package form. See
 >   `INSTALL-FORK.md`.
-> - **Never run `/rpiv-setup` in a session that loads this fork.** Its `SIBLINGS`
->   registry installs the *upstream registry* copies, which would load alongside the
->   local ones. `scripts/fork-pi-install.sh` mirrors that registry with local paths.
+> - **`/rpiv-setup` installs from this checkout, not a registry.** There is no publish path
+>   here, so a sibling's `npm:@hs1n/rpiv-*` name resolves nowhere; `resolveInstallSpec()`
+>   (`siblings.ts`) maps each registered sibling to its local package directory when that
+>   directory exists beside rpiv-pi, and leaves third-party entries
+>   (`@tintinweb/pi-subagents`) on npm. `scripts/fork-pi-install.sh` installs the same set
+>   non-interactively.
 > - **The workspace scope is `@hs1n`, and nothing is published to npm.** Every package
 >   here is named `@hs1n/rpiv-*` so it cannot collide with upstream's `@juicesharp`
 >   scope, which is not ours. There is **no publish path at all** — the release script

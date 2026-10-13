@@ -1,5 +1,7 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { LEGACY_SIBLINGS, SIBLINGS } from "./siblings.js";
+import { LEGACY_SIBLINGS, resolveInstallSpec, SIBLINGS } from "./siblings.js";
 
 describe("SIBLINGS registry", () => {
 	it("contains 8 entries (pi-subagents at SIBLINGS[0] — tintinweb fork is the dispatch runtime)", () => {
@@ -92,5 +94,34 @@ describe("LEGACY_SIBLINGS registry", () => {
 	it("pi-subagents legacy match does NOT catch pi-subagents-legacy (word boundary)", () => {
 		const piSubagents = LEGACY_SIBLINGS.find((l) => l.label === "pi-subagents");
 		expect(piSubagents?.matches.test("pi-subagents-legacy")).toBe(false);
+	});
+});
+
+describe("resolveInstallSpec", () => {
+	it("resolves this repo's own siblings to their local package directory", () => {
+		const spec = resolveInstallSpec("npm:@hs1n/rpiv-todo");
+		expect(spec).not.toMatch(/^npm:/);
+		expect(spec.endsWith("/packages/rpiv-todo")).toBe(true);
+		expect(existsSync(join(spec, "package.json"))).toBe(true);
+	});
+
+	it("resolves every @hs1n sibling in the registry to a directory that exists", () => {
+		for (const s of SIBLINGS.filter((s) => s.pkg.startsWith("npm:@hs1n/"))) {
+			const spec = resolveInstallSpec(s.pkg);
+			expect(spec, s.pkg).not.toMatch(/^npm:/);
+			expect(existsSync(join(spec, "package.json")), spec).toBe(true);
+		}
+	});
+
+	it("leaves a third-party sibling on npm", () => {
+		expect(resolveInstallSpec("npm:@tintinweb/pi-subagents")).toBe("npm:@tintinweb/pi-subagents");
+	});
+
+	it("falls back to the npm spec when the package directory is absent", () => {
+		expect(resolveInstallSpec("npm:@hs1n/rpiv-nonexistent")).toBe("npm:@hs1n/rpiv-nonexistent");
+	});
+
+	it("passes through a non-npm spec untouched", () => {
+		expect(resolveInstallSpec("/some/local/path")).toBe("/some/local/path");
 	});
 });

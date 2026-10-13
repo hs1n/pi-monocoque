@@ -1,7 +1,7 @@
 # rpiv-ask-user-question
 
 ## Monorepo Context
-Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`. Used by `rpiv-pi` skills for developer checkpoints.
+Sibling Pi extension in `pi-monocoque`. Lockstep version with the rest of the `@hs1n/rpiv-*` family. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`. Used by `rpiv-pi` skills for developer checkpoints.
 
 ## Responsibility
 Single-tool extension exposing `ask_user_question` — a TUI option selector with inline free-text input on every question type. The "Chat about this" escape hatch was removed; Esc is the only way to abandon without answering. Returns a structured questionnaire result.

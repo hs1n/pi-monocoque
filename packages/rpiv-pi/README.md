@@ -1,6 +1,6 @@
 # @hs1n/rpiv-pi
 
-[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-pi.svg)](https://www.npmjs.com/package/@hs1n/rpiv-pi)
+[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-pi.svg)](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
@@ -19,16 +19,30 @@ structured, reviewable multi-stage work instead of one very long chat turn.
 
 ## Install
 
+`rpiv-pi` ships inside [`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque), a
+11-package monorepo with **no registry route** — there is no `@hs1n/rpiv-*` entry on npm.
+Install the repo as a Pi source:
+
 ```sh
-pi install npm:@hs1n/rpiv-pi
+pi install git:github.com/hs1n/pi-monocoque
 ```
 
-Restart your Pi session.
+Restart Pi, or `/reload` in a running session. The pipeline's `Agent` tool comes from a
+third-party package and is installed separately:
+
+```sh
+pi install npm:@tintinweb/pi-subagents@0.21.0
+```
+
+[INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) covers the
+live-checkout install (`pi install <path>`, edits picked up by `/reload`) and the
+per-package form (`scripts/fork-pi-install.sh`).
 
 ## Quick start
 
 rpiv-pi registers no tools of its own — it drives the ones its sibling extensions
-provide. Install them in one step, then restart Pi again:
+provide. If any are missing, one command installs them (by local path here; from npm for
+the third-party `Agent` dispatcher):
 
 ```
 /rpiv-setup
@@ -119,8 +133,8 @@ no overrides.
 | --- | --- |
 | [Pi Agent](https://github.com/badlogic/pi-mono) 0.80.x or 1.x | The host. Install it globally so `pi` is on your PATH. Workflow child sessions are tested against Pi 0.80.6, 1.0.4, and 1.1.0 |
 | A model provider | Pi's own `/login` or `~/.pi/agent/models.json` — see [docs/models-config.md](./docs/models-config.md) |
-| [`@tintinweb/pi-subagents`](https://www.npmjs.com/package/@tintinweb/pi-subagents) | Supplies the `Agent` tool. Without it the parallel-analysis skills cannot dispatch. Installed by `/rpiv-setup` |
-| [`@hs1n/rpiv-workflow`](https://www.npmjs.com/package/@hs1n/rpiv-workflow) | Supplies `/wf`. Without it the four built-in workflows do not register. Installed by `/rpiv-setup` |
+| [`@tintinweb/pi-subagents`](https://www.npmjs.com/package/@tintinweb/pi-subagents) | Supplies the `Agent` tool. Without it the parallel-analysis skills cannot dispatch. Installed by `/rpiv-setup` (from npm) |
+| [`@hs1n/rpiv-workflow`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-workflow) | Supplies `/wf`. Without it the four built-in workflows do not register. Installed by `/rpiv-setup` |
 | `git` *(optional)* | Branch, commit, and user context. If it fails, injection is skipped and nothing else changes |
 | Node.js 22+ | Runtime for Pi and rpiv-pi's bundled scripts |
 
@@ -132,8 +146,8 @@ You need no build step and no native dependency.
 | --- | --- | --- |
 | Session-start banner: *N sibling extension(s) missing* | Sibling plugins not installed | Run `/rpiv-setup`, then restart Pi |
 | Session-start banner: *bundled agents need attention* | A bundled agent changed upstream and your on-disk copy was edited | Run `/rpiv-update-agents` — it overwrites rpiv-managed files, and never touches agents you added yourself |
-| `/rpiv-setup` or `/rpiv-models` says it requires interactive mode | Running headless | Install manually with `pi install npm:<pkg>`, or hand-edit `models.json` |
-| `/rpiv-setup` fails on one package | Network or registry issue | Retry that package with `pi install npm:<pkg>`, then re-run `/rpiv-setup` |
+| `/rpiv-setup` or `/rpiv-models` says it requires interactive mode | Running headless | Install manually with `pi install <path>` (third-party packages: their npm name), or hand-edit `models.json` |
+| `/rpiv-setup` fails on one package | The package's directory or its npm dependency is unreachable | Retry that package with `pi install <path>`, then re-run `/rpiv-setup` |
 | `/lanes` reports *No in-flight runs* (and `ctrl+q` does nothing) | Nothing is running | Expected — the browser only opens over live lanes |
 | `ctrl+q` does nothing | `RPIV_LANES_HOTKEY` is set to `off`, empty, or an unrecognized key id | Unset it, or use `/lanes` |
 | A stage stalls, then reports a per-command timeout | A bash command wedged past the watchdog | Raise `RPIV_BASH_TIMEOUT_MS` (max 1800000) before starting Pi |
@@ -141,19 +155,19 @@ You need no build step and no native dependency.
 
 ## Related
 
-`/rpiv-setup` installs the ones marked auto; the rest are standalone
-`pi install npm:@hs1n/rpiv-<name>`.
+`/rpiv-setup` installs the ones marked auto (local paths from this checkout); the rest are
+standalone packages under [`packages/`](https://github.com/hs1n/pi-monocoque/tree/main/packages).
 
 | Package | Role | Auto |
 | --- | --- | :---: |
-| [`@hs1n/rpiv-workflow`](https://www.npmjs.com/package/@hs1n/rpiv-workflow) | `/wf` runner — chains skills into typed multi-stage pipelines | ✓ |
-| [`@hs1n/rpiv-args`](https://www.npmjs.com/package/@hs1n/rpiv-args) | `$1` / `$ARGUMENTS` placeholders in skill bodies | ✓ |
-| [`@hs1n/rpiv-ask-user-question`](https://www.npmjs.com/package/@hs1n/rpiv-ask-user-question) | Structured questionnaires back to you | ✓ |
-| [`@hs1n/rpiv-todo`](https://www.npmjs.com/package/@hs1n/rpiv-todo) | Live task overlay surviving `/reload` | ✓ |
-| [`@hs1n/rpiv-advisor`](https://www.npmjs.com/package/@hs1n/rpiv-advisor) | Escalate to a stronger reviewer model | ✓ |
-| [`@hs1n/rpiv-web-tools`](https://www.npmjs.com/package/@hs1n/rpiv-web-tools) | Web search + fetch with pluggable providers | ✓ |
-| [`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n) | Localization SDK for the rpiv TUI strings | ✓ |
-| [`@hs1n/rpiv-warp`](https://www.npmjs.com/package/@hs1n/rpiv-warp) | Warp Blocked badge on parked lane questions | — |
+| [`@hs1n/rpiv-workflow`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-workflow) | `/wf` runner — chains skills into typed multi-stage pipelines | ✓ |
+| [`@hs1n/rpiv-args`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-args) | `$1` / `$ARGUMENTS` placeholders in skill bodies | ✓ |
+| [`@hs1n/rpiv-ask-user-question`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-ask-user-question) | Structured questionnaires back to you | ✓ |
+| [`@hs1n/rpiv-todo`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-todo) | Live task overlay surviving `/reload` | ✓ |
+| [`@hs1n/rpiv-advisor`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-advisor) | Escalate to a stronger reviewer model | ✓ |
+| [`@hs1n/rpiv-web-tools`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-web-tools) | Web search + fetch with pluggable providers | ✓ |
+| [`@hs1n/rpiv-i18n`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n) | Localization SDK for the rpiv TUI strings | ✓ |
+| [`@hs1n/rpiv-warp`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-warp) | Warp Blocked badge on parked lane questions | — |
 
 ## License
 

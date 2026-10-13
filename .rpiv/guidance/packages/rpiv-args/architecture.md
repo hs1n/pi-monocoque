@@ -1,7 +1,7 @@
 # rpiv-args
 
 ## Monorepo Context
-Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`.
+Sibling Pi extension in `pi-monocoque`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`.
 
 ## Responsibility
 Three-hook extension that hardens Pi's `/skill:<name> <args>` invocation surface against LLM attention drift:

@@ -1,6 +1,5 @@
 # @hs1n/rpiv-ask-user-question
 
-[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-ask-user-question.svg)](https://www.npmjs.com/package/@hs1n/rpiv-ask-user-question)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
@@ -13,11 +12,25 @@ Let the model ask you instead of guessing. This extension gives [Pi Agent](https
 
 ## Install
 
+This package ships inside [`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque) — an
+11-package monorepo with **no registry route**, so there is no `@hs1n/rpiv-*` entry on npm.
+Install the repo as a Pi source:
+
 ```sh
-pi install npm:@hs1n/rpiv-ask-user-question
+pi install git:github.com/hs1n/pi-monocoque
 ```
 
-Restart your Pi session.
+Restart Pi, or `/reload` in a running session. The pipeline's `Agent` tool comes from a
+third-party package and is installed separately:
+
+```sh
+pi install npm:@tintinweb/pi-subagents@0.21.0
+```
+
+[INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) covers the
+live-checkout install (`pi install <path>`, edits picked up by `/reload`) and the
+per-package form (`scripts/fork-pi-install.sh`).
+
 
 ## Quick start
 
@@ -86,8 +99,8 @@ No native dependencies, no compiler, no API keys — the extension makes no mode
 
 ## Related
 
-- [`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n) — optional; installing it renders the dialog chrome in your language and adds `/languages`.
-- [`@hs1n/rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi) — the umbrella package whose workflow skills use `ask_user_question` as their developer checkpoint. `/rpiv-setup` offers to install this extension.
+- [`@hs1n/rpiv-i18n`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n) — optional; installing it renders the dialog chrome in your language and adds `/languages`.
+- [`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi) — the umbrella package whose workflow skills use `ask_user_question` as their developer checkpoint. `/rpiv-setup` offers to install this extension.
 
 ## License
 

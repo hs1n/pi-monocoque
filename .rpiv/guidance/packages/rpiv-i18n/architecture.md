@@ -1,7 +1,7 @@
 # rpiv-i18n
 
 ## Monorepo Context
-Sibling Pi extension in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`. Other rpiv-* packages declare it as an **optional** peer (`peerDependenciesMeta.optional: true`); `rpiv-todo` and `rpiv-ask-user-question` already do. Carries an `exports` map (`{ ".": "./i18n.ts", "./loader": "./loader.ts" }`) — bare-name imports hit the public SDK; the `./loader` subpath exposes the locale-file loader without pulling `i18n-ui.ts`/pi-tui.
+Sibling Pi extension in `pi-monocoque`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. Listed in `siblings.ts`; peer-pinned by `rpiv-pi` as `"*"`. Other rpiv-* packages declare it as an **optional** peer (`peerDependenciesMeta.optional: true`); `rpiv-todo` and `rpiv-ask-user-question` already do. Carries an `exports` map (`{ ".": "./i18n.ts", "./loader": "./loader.ts" }`) — bare-name imports hit the public SDK; the `./loader` subpath exposes the locale-file loader without pulling `i18n-ui.ts`/pi-tui.
 
 ## Responsibility
 Localization SDK + extension. Two concerns:

@@ -50,7 +50,7 @@ Pi's `ExtensionAPI` structurally satisfies `WorkflowHost` and its
 `ExtensionCommandContext` satisfies the observer surface — embedders pass their
 existing Pi handles through unchanged. The full executor port
 (`spawnChild` + `maxConcurrency`) is satisfied by `SdkWorkflowHost` in
-[`@hs1n/rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi). A
+[`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi). A
 compile-time tripwire (`host.test.ts`) fails immediately if Pi's types ever drift
 below the observer port; the executor-satisfaction assertion lives in rpiv-pi,
 because rpiv-workflow must not import rpiv-pi.

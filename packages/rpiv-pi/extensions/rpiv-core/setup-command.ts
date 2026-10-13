@@ -16,6 +16,7 @@ import { findMissingSiblings } from "./package-checks.js";
 import { spawnPiInstall } from "./pi-installer.js";
 import { findLegacySiblings, pruneLegacySiblings } from "./prune-legacy-siblings.js";
 import type { SiblingPlugin } from "./siblings.js";
+import { resolveInstallSpec } from "./siblings.js";
 import { getPiAgentSettingsPath, toErrorMessage } from "./utils.js";
 
 const INSTALL_TIMEOUT_MS = 120_000;
@@ -43,7 +44,7 @@ function buildConfirmBody(missing: SiblingPlugin[], legacyEntries: string[]): st
 	const lines: string[] = ["rpiv-pi will apply the following changes:", ""];
 	if (missing.length > 0) {
 		lines.push("Install via `pi install`:");
-		for (const m of missing) lines.push(`  • ${m.pkg}  (required — provides ${m.provides})`);
+		for (const m of missing) lines.push(`  • ${resolveInstallSpec(m.pkg)}  (required — provides ${m.provides})`);
 		lines.push("");
 	}
 	const settingsPath = getPiAgentSettingsPath();
@@ -106,19 +107,21 @@ async function installMissing(
 	const succeeded: string[] = [];
 	const failed: Array<{ pkg: string; error: string }> = [];
 	for (const { pkg } of missing) {
-		ui.notify(msgInstalling(pkg), "info");
+		// Local path for this repo's own siblings (no publish path), npm spec otherwise.
+		const spec = resolveInstallSpec(pkg);
+		ui.notify(msgInstalling(spec), "info");
 		try {
-			const result = await spawnPiInstall(pkg, INSTALL_TIMEOUT_MS);
+			const result = await spawnPiInstall(spec, INSTALL_TIMEOUT_MS);
 			if (result.code === 0) {
-				succeeded.push(pkg);
+				succeeded.push(spec);
 			} else {
 				failed.push({
-					pkg,
+					pkg: spec,
 					error: (result.stderr || result.stdout || `exit ${result.code}`).trim().slice(0, STDERR_SNIPPET_CHARS),
 				});
 			}
 		} catch (err) {
-			failed.push({ pkg, error: toErrorMessage(err) });
+			failed.push({ pkg: spec, error: toErrorMessage(err) });
 		}
 	}
 	return { succeeded, failed };

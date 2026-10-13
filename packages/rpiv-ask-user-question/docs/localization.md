@@ -12,7 +12,7 @@ pi install npm:@hs1n/rpiv-i18n
 ```
 
 Restart your Pi session. If you installed through
-[`@hs1n/rpiv-pi`](https://www.npmjs.com/package/@hs1n/rpiv-pi) and ran
+[`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi) and ran
 `/rpiv-setup`, you already have it.
 
 The dependency is a genuinely optional peer. This package loads the SDK inside a
@@ -81,7 +81,7 @@ No code change is required.
 
 The loader iterates the SDK's supported-locale list over this directory at startup, so a
 new file is picked up automatically. See the
-[`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n) README,
+[`@hs1n/rpiv-i18n`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n) README,
 section "Contributing translations", for the full convention.
 
 Keys are looked up individually with an English fallback, so a partially translated file

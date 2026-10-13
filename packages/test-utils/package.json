@@ -1,7 +1,7 @@
 {
 	"name": "@hs1n/rpiv-test-utils",
 	"version": "2.13.8",
-	"description": "Internal test fixtures for rpiv-mono (not published)",
+	"description": "Internal test fixtures for pi-monocoque (workspace-only, never installed)",
 	"private": true,
 	"type": "module",
 	"license": "MIT",

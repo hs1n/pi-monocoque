@@ -36,7 +36,7 @@ parallel-analysis skills have nothing to dispatch to.
 | --- | --- |
 | `artifacts-locator` | Discovers prior research, designs, plans, and reviews in `.rpiv/artifacts/`. The research equivalent of `codebase-locator`. |
 | `artifacts-analyzer` | Deep-dives one research topic across `.rpiv/artifacts/`. The research equivalent of `codebase-analyzer`. |
-| `web-search-researcher` | Researches information that only exists on the web, via deep search and fetch. Needs [`@hs1n/rpiv-web-tools`](https://www.npmjs.com/package/@hs1n/rpiv-web-tools) for `web_search` / `web_fetch`. |
+| `web-search-researcher` | Researches information that only exists on the web, via deep search and fetch. Needs [`@hs1n/rpiv-web-tools`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-web-tools) for `web_search` / `web_fetch`. |
 
 ## How they reach disk
 

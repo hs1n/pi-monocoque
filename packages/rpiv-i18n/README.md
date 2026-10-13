@@ -1,6 +1,5 @@
 # @hs1n/rpiv-i18n
 
-[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-i18n.svg)](https://www.npmjs.com/package/@hs1n/rpiv-i18n)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
@@ -16,11 +15,25 @@ their own TUI strings translatable — three lines, with English fallback per ke
 
 ## Install
 
+This package ships inside [`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque) — an
+11-package monorepo with **no registry route**, so there is no `@hs1n/rpiv-*` entry on npm.
+Install the repo as a Pi source:
+
 ```sh
-pi install npm:@hs1n/rpiv-i18n
+pi install git:github.com/hs1n/pi-monocoque
 ```
 
-Restart your Pi session.
+Restart Pi, or `/reload` in a running session. The pipeline's `Agent` tool comes from a
+third-party package and is installed separately:
+
+```sh
+pi install npm:@tintinweb/pi-subagents@0.21.0
+```
+
+[INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) covers the
+live-checkout install (`pi install <path>`, edits picked up by `/reload`) and the
+per-package form (`scripts/fork-pi-install.sh`).
+
 
 ## Quick start
 
@@ -138,11 +151,11 @@ are Unix conventions and are not exercised on Windows.
 
 ## Related
 
-- [@hs1n/rpiv-pi](https://www.npmjs.com/package/@hs1n/rpiv-pi) — the
+- [@hs1n/rpiv-pi](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi) — the
   umbrella package; its `/rpiv-setup` installs this one for you.
-- [@hs1n/rpiv-todo](https://www.npmjs.com/package/@hs1n/rpiv-todo),
-  [@hs1n/rpiv-ask-user-question](https://www.npmjs.com/package/@hs1n/rpiv-ask-user-question),
-  and [@hs1n/rpiv-voice](https://www.npmjs.com/package/@hs1n/rpiv-voice)
+- [@hs1n/rpiv-todo](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-todo),
+  [@hs1n/rpiv-ask-user-question](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-ask-user-question),
+  and [@hs1n/rpiv-voice](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-voice)
   — extensions that follow your `/languages` choice today. Each treats this
   package as an optional peer and stays online in English without it.
 

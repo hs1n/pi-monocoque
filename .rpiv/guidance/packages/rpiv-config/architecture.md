@@ -1,10 +1,10 @@
 # rpiv-config
 
 ## Monorepo Context
-Published plain library in `rpiv-mono`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. NOT a Pi extension — no `pi` field, no `siblings.ts` entry, not auto-suggested by `/rpiv-setup`. Opt-in dependency: siblings add it to their `dependencies` explicitly.
+Library (not published) in `pi-monocoque`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. NOT a Pi extension — no `pi` field, no `siblings.ts` entry, not auto-suggested by `/rpiv-setup`. Opt-in dependency: siblings add it to their `dependencies` explicitly.
 
 ## Responsibility
-Shared JSON config I/O utilities for rpiv-mono sibling packages: load/save with crash-resistant defaults, path resolution, guidance-field validation, env-var fallback, and TypeBox-driven schema validation. Stateless — no module-level singletons, no globalThis caches, no side effects.
+Shared JSON config I/O utilities for pi-monocoque sibling packages: load/save with crash-resistant defaults, path resolution, guidance-field validation, env-var fallback, and TypeBox-driven schema validation. Stateless — no module-level singletons, no globalThis caches, no side effects.
 
 ## Dependencies
 - **`typebox`** (`peerDependencies: "*"`, host-provided): `Value` (Clean, Clone, Create) for schema-driven validation; `TObject` / `Static` for type inference. Every consumer is a Pi extension and Pi aliases `typebox` for transitive imports too, so this package must not install its own copy — it was the transitive source of the duplicate every extension inherited (v2.12.0, #282)

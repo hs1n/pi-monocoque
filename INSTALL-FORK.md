@@ -128,8 +128,10 @@ Expected: eight extensions under `packages/` (or under the clone in `~/.pi/agent
 `errors: 0`. Set `PI_CODING_AGENT_DIR` to a scratch directory to run that check against
 an isolated settings file without touching your real install.
 
-## Do not run `/rpiv-setup`
+## `/rpiv-setup` installs from this checkout
 
-`/rpiv-setup` installs the sibling registry's `npm:@hs1n/rpiv-*` entries — names that do
-not exist on any registry, because this fork has no publish path. It cannot install
-anything here; use one of the three installs above.
+`/rpiv-setup` reads the sibling registry (`siblings.ts`) and installs whatever is neither
+declared nor loaded. Since this repo has no publish path, `resolveInstallSpec()` maps each
+of its own `npm:@hs1n/rpiv-*` entries to the matching local package directory; a third-party
+entry (`@tintinweb/pi-subagents`) keeps its npm spec. So the command is safe to run here —
+it cannot pull an upstream copy of these extensions, because no such registry entry exists.

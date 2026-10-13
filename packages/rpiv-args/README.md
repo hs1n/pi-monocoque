@@ -1,6 +1,5 @@
 # @hs1n/rpiv-args
 
-[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-args.svg)](https://www.npmjs.com/package/@hs1n/rpiv-args)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
@@ -18,11 +17,25 @@ parameterize them instead of keeping one hard-coded copy per case.
 
 ## Install
 
+This package ships inside [`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque) — an
+11-package monorepo with **no registry route**, so there is no `@hs1n/rpiv-*` entry on npm.
+Install the repo as a Pi source:
+
 ```sh
-pi install npm:@hs1n/rpiv-args
+pi install git:github.com/hs1n/pi-monocoque
 ```
 
-Restart your Pi session.
+Restart Pi, or `/reload` in a running session. The pipeline's `Agent` tool comes from a
+third-party package and is installed separately:
+
+```sh
+pi install npm:@tintinweb/pi-subagents@0.21.0
+```
+
+[INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) covers the
+live-checkout install (`pi install <path>`, edits picked up by `/reload`) and the
+per-package form (`scripts/fork-pi-install.sh`).
+
 
 ## Quick start
 
@@ -113,7 +126,7 @@ directory.
 
 ## Related
 
-- [@hs1n/rpiv-pi](https://www.npmjs.com/package/@hs1n/rpiv-pi) —
+- [@hs1n/rpiv-pi](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi) —
   the umbrella package. Its `/rpiv-setup` command installs `rpiv-args` along
   with the rest of the family, and its lane transcript hides the
   `Skill input:` line from the displayed conversation.

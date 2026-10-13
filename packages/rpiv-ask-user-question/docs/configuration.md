@@ -114,7 +114,7 @@ tool, so changes take effect on the next Pi restart.
 | `XDG_CONFIG_HOME` | Relocates the config directory, as described above. Must be absolute. |
 
 `LANG` and `LC_ALL` influence the dialog language, but they are read by
-[`@hs1n/rpiv-i18n`](https://www.npmjs.com/package/@hs1n/rpiv-i18n) rather than
+[`@hs1n/rpiv-i18n`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n) rather than
 by this package — see [localization.md](./localization.md).
 
 No other environment variables are read. The package makes no model calls, so it needs no

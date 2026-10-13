@@ -26,7 +26,7 @@ detached-execution host.
 | `/skill:<name>` | Invoke a skill (e.g. `/skill:commit`, `/skill:discover`) |
 | `/rpiv-update-agents` | Sync bundled agents into `~/.pi/agent/agents/`; clean up legacy per-cwd agent dirs |
 | `/lanes` | Open the lane browser for detached `/wf` runs (equivalents: `^Q`, `↓` on an empty prompt) |
-| `/rpiv-setup` | Install missing sibling plugins; prune `LEGACY_SIBLINGS` from `~/.pi/agent/settings.json` |
+| `/rpiv-setup` | Install missing sibling plugins (local paths from this checkout; npm for third-party entries); prune `LEGACY_SIBLINGS` from `~/.pi/agent/settings.json` |
 | `/rpiv-models` | Model/effort cascade picker — set per-skill/preset overrides written to `models.json` |
 
 Sibling-plugin commands are registered by the siblings themselves once installed.

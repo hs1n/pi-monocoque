@@ -1,7 +1,7 @@
 {
 	"name": "@hs1n/rpiv-config",
 	"version": "2.13.8",
-	"description": "Shared config I/O utilities for rpiv-mono sibling packages",
+	"description": "Shared config I/O utilities for pi-monocoque sibling packages",
 	"keywords": [
 		"rpiv",
 		"config",
