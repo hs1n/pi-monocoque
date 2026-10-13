@@ -74,7 +74,24 @@ run() {
 }
 
 # Third-party sibling that does not live in this repo (SIBLINGS[0] upstream).
-run pi install ${SCOPE[@]+"${SCOPE[@]}"} --approve "npm:@tintinweb/pi-subagents"
+#
+# Pinned because `pi install` keeps whatever version is already in ~/.pi/agent/npm, so an
+# unpinned install is not an upgrade: this checkout found a stale 0.19.0 there. Versions
+# < 0.20.0 declare `typebox` (and `@sinclair/typebox`) as a `dependencies` entry, which Pi
+# rejects at every startup — "Host-provided extension packages must be declared in
+# peerDependencies with a \"*\" range" — because an installed copy bypasses the loader's
+# alias and puts a second live typebox in the process. 0.20.0+ peer-pins it `"*"`.
+# Anything at or above the floor is left alone (never downgraded); bump deliberately.
+PI_SUBAGENTS_FLOOR=0.20.0
+PI_SUBAGENTS_INSTALL=0.21.0
+SUBAGENTS_MANIFEST="$HOME/.pi/agent/npm/node_modules/@tintinweb/pi-subagents/package.json"
+OUTDATED_SUBAGENTS=$(node -e 'const fs=require("node:fs"),[p,floor]=process.argv.slice(1);let have="";try{have=JSON.parse(fs.readFileSync(p,"utf8")).version||""}catch{};const cmp=(a,b)=>{const A=a.split(".").map(Number),B=b.split(".").map(Number);for(let i=0;i<3;i++){const d=(A[i]||0)-(B[i]||0);if(d)return d}return 0};process.stdout.write(have&&cmp(have,floor)<0?have:"")' "$SUBAGENTS_MANIFEST" "$PI_SUBAGENTS_FLOOR")
+if [ -n "$OUTDATED_SUBAGENTS" ]; then
+	echo "@tintinweb/pi-subagents $OUTDATED_SUBAGENTS predates $PI_SUBAGENTS_FLOOR (typebox was a dependency there) — installing $PI_SUBAGENTS_INSTALL"
+	run pi install ${SCOPE[@]+"${SCOPE[@]}"} --approve "npm:@tintinweb/pi-subagents@$PI_SUBAGENTS_INSTALL"
+else
+	run pi install ${SCOPE[@]+"${SCOPE[@]}"} --approve "npm:@tintinweb/pi-subagents"
+fi
 
 for pkg in $CORE; do
 	dir="$REPO_ROOT/packages/$pkg"

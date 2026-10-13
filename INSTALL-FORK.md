@@ -65,7 +65,11 @@ scripts/fork-pi-install.sh --dry-run
 
 The script installs the same sibling set `/rpiv-setup` would
 (`packages/rpiv-pi/extensions/rpiv-core/siblings.ts`), plus `@tintinweb/pi-subagents`
-from npm. Skip `/rpiv-setup` afterwards — it would install the **upstream** registry
+from npm, **≥ 0.20.0** — earlier releases declare `typebox` as a `dependencies` entry,
+which makes Pi warn at every startup about a duplicate runtime module (and `pi install`
+reuses whatever version is already in `~/.pi/agent/npm`, so an unpinned install does not
+upgrade it). The script replaces a stale one and never downgrades a newer one.
+Skip `/rpiv-setup` afterwards — it would install the **upstream** registry
 copies of those siblings next to your fork's local ones.
 
 Update by `git pull` in the checkout, then `/reload` in Pi. Re-run the script only
