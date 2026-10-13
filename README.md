@@ -44,6 +44,7 @@ verification): [INSTALL-FORK.md](./INSTALL-FORK.md).
 | [`rpiv-i18n`](./packages/rpiv-i18n) | Localization SDK for the sibling extensions (includes `zh-TW`). |
 | [`rpiv-btw`](./packages/rpiv-btw) | `/btw` — a side conversation that never touches the transcript. Opt-in: not in the root manifest. |
 | [`rpiv-config`](./packages/rpiv-config) | Shared XDG-aware JSON config I/O for the siblings. Not a Pi extension. |
+| [`rpiv-sidecall`](./packages/rpiv-sidecall) | Shared host-version-tolerant side-call surface: which host path a side call takes, and the callable it dispatches through. Not a Pi extension. |
 | `test-utils` | Shared test fixtures. Private, workspace-only. |
 
 ## Using the pipeline

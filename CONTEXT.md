@@ -50,6 +50,15 @@ Every `packages/*/package.json` shares one `version`, hand-maintained and enforc
 `sync-versions.js`. Nothing is published, so the version is a marker, not a release.
 _Avoid_: semver, independently versioned
 
+### Side calls
+
+**side call**:
+A one-off model call an extension makes outside the main transcript — its own prompt, no
+tools, nothing written back. `rpiv-advisor` and `rpiv-btw` are the two surfaces that make
+one; `rpiv-sidecall` is the shared module that resolves how to make one across host
+versions.
+_Avoid_: sub-call, secondary request, side conversation (`/btw`'s overlay is its UI, not the call)
+
 ### Skill ownership
 
 Two skill sources are installed here — `skills/matt-pocock/` (Matt Pocock's engineering skills,
