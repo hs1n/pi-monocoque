@@ -2,9 +2,10 @@
 
 Pi CLI plugin package: extends the Pi coding agent with TypeScript runtime
 infrastructure, slash commands, and Markdown-based AI workflow skills. Umbrella
-package in `rpiv-mono` — lockstep version with the rest of the `@hs1n/rpiv-*` family;
-all releases cut from the monorepo root via `node scripts/release.mjs`, **never
-`npm version` here individually**.
+package in `pi-monocoque` — lockstep version with the rest of the `@hs1n/rpiv-*`
+family; versions are hand-maintained at the monorepo root (then
+`npm run versions:sync`), **never `npm version` here individually**, and nothing is
+published.
 
 Sibling source lives at `../<name>/` and their tools are wired in via
 `extensions/rpiv-core/siblings.ts` (regex-based filesystem detection — **no runtime

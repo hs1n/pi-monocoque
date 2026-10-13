@@ -11,8 +11,8 @@ This extension never statically value-imports a sibling from the entry graph —
 `siblings.ts` regex-detects them in `~/.pi/agent/settings.json` OR in the source paths
 of what is loaded (#216). Adding a sibling
 needs a `siblings.ts` entry plus a `peerDependencies` line pinned to `"*"` in
-`rpiv-pi/package.json`. Version changes flow through `node scripts/release.mjs` at
-monorepo root.
+`rpiv-pi/package.json`. Versions are hand-maintained lockstep at the monorepo root;
+nothing is published.
 
 ## Module Structure
 

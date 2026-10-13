@@ -1,7 +1,7 @@
 # rpiv-mono
 
-Monorepo for Pi CLI plugins in the `@hs1n/rpiv-*` family. Lockstep versions,
-single install, single publish pipeline. Targets Pi Agent CLI
+Monorepo for the `@hs1n/rpiv-*` Pi plugins. Lockstep versions, single install,
+no publish pipeline. Targets Pi Agent CLI
 (`@earendil-works/pi-coding-agent`), not Claude Code.
 
 > **This checkout is a fork of upstream, not upstream itself.** It is
@@ -15,25 +15,24 @@ single install, single publish pipeline. Targets Pi Agent CLI
 >   The README/roadmap/docs prose is upstream's and states the *upstream* author's
 >   views. `rpiv`, `rpiv-pi`, `juicesharp`, `rpiv-pi.com`, and the npm scope
 >   `@juicesharp` identify upstream — that scope is not ours.
-> - **Installing into Pi — `pi install git:<this repo>` does not work and must not be
->   used.** Pi's git source clones the repo and treats the clone root as the package
->   root, with no subdirectory support, and this monorepo root declares neither a `pi`
->   manifest nor the conventional resource dirs, so a root install loads zero
->   resources. It also fails before that: pi runs `npm install --omit=dev`, and the
->   root's `prepare: husky` needs a devDependency. Install each package by local path
->   with `scripts/fork-pi-install.sh` — see `INSTALL-FORK.md`. Local paths are recorded
->   in Pi settings, not copied, so Pi loads live from this checkout and `/reload` picks
->   up edits without reinstalling.
+> - **Installing into Pi — `pi install git:github.com/hs1n/pi-monocoque` is the primary
+>   path.** Pi's git source clones the repo and treats the clone root as the package
+>   root with no subdirectory support, so the **root `pi` manifest** in `package.json`
+>   is what makes that work: it lists all eight extensions and `packages/rpiv-pi/skills`.
+>   Pi then runs `npm install --omit=dev` in the clone, which is why the root `prepare`
+>   is `husky || true` (husky is a devDependency and would otherwise fail the install).
+>   For a live checkout (`/reload` picks up edits) use `pi install <checkout path>` — same
+>   manifest, no clone — or `scripts/fork-pi-install.sh` for the per-package form. See
+>   `INSTALL-FORK.md`.
 > - **Never run `/rpiv-setup` in a session that loads this fork.** Its `SIBLINGS`
 >   registry installs the *upstream registry* copies, which would load alongside the
 >   local ones. `scripts/fork-pi-install.sh` mirrors that registry with local paths.
-> - **The workspace scope is `@hs1n`, and nothing is published under it yet.** Every
->   package here is named `@hs1n/rpiv-*`; upstream's `@juicesharp` scope is not ours and
->   `npm publish` there would be rejected. The rename was done by
->   `scripts/fork-rename-scope.mjs` (parameterized on the owning npm account —
->   `npm whoami`), so re-targeting costs one re-runnable command. Until a release is
->   actually published, treat `node scripts/release.mjs` as inoperative: it commits and
->   tags *before* publishing, so a scope mismatch leaves a half-finished release.
+> - **The workspace scope is `@hs1n`, and nothing is published to npm.** Every package
+>   here is named `@hs1n/rpiv-*` so it cannot collide with upstream's `@juicesharp`
+>   scope, which is not ours. There is **no publish path at all** — the release script
+>   was deleted with the npm distribution route; the repo is distributed as a Pi source
+>   (see the install bullet above). Versions are hand-maintained lockstep: bump them and
+>   run `npm run versions:sync`.
 > - **Remotes**: `origin` is SSH (`git@github.com:hs1n/pi-monocoque.git`) and needs the
 >   key configured in `~/.ssh/config`; `upstream` is HTTPS on purpose (public read-only,
 >   no key required).
@@ -43,10 +42,10 @@ The layout tree, per-package responsibilities, and the private/opt-in roster are
 where something lives.
 
 ## Layout and build model
-- **Build model**: `noEmit: true` everywhere. Packages publish raw `.ts` (Pi loads `.ts` directly via the `pi` manifest). No `dist/`, no per-package tsconfig.json — one shared `tsconfig.base.json`.
+- **Build model**: `noEmit: true` everywhere. Packages ship raw `.ts` (Pi loads `.ts` directly via the `pi` manifest). No `dist/`, no per-package tsconfig.json — one shared `tsconfig.base.json`. The repo root carries its own `pi` manifest (8 extensions + `packages/rpiv-pi/skills`) so `pi install git:<repo>` or a root local-path install loads the whole set.
 - **Plugin discovery**: each extension package's `package.json` carries a `pi` field — `pi.extensions: ["./index.ts"]` (`["./extension.ts"]` for rpiv-workflow; `["./extensions"]` for rpiv-pi) and optionally `pi.skills: ["./skills"]`; non-extension packages (rpiv-config, test-utils) have no `pi` field. Pi loads the default-exported function with an `ExtensionAPI` instance.
 - **Sibling registry**: `packages/rpiv-pi/extensions/rpiv-core/siblings.ts` is the single source of truth. Adding an entry here propagates to `/rpiv-setup`, missing-plugin warnings, and presence detection (regex over `~/.pi/agent/settings.json` ∪ the source paths of loaded tools / extension commands, plus an optional per-sibling `marker` for a sibling that registers neither — #216). The registry is architectural, not just family bookkeeping: it covers registered extensions generally — including pinned third-party runtime deps the family needs installed (the `@tintinweb/pi-subagents` Agent dispatcher, registered with a fork-detection regex; its unscoped legacy name rides `LEGACY_SIBLINGS` and is pruned on upgrade). A parallel `LEGACY_SIBLINGS` registry drives prune-on-upgrade for superseded packages. **No runtime imports of siblings** — Phase 1 zero-cross-imports contract.
-- **Opt-in extensions**: a published sibling becomes opt-in by being **absent from `siblings.ts`** (and from `rpiv-pi/package.json` `peerDependencies`). It still rides lockstep + shared CI infrastructure via the `packages/*` glob, but `/rpiv-setup` won't suggest it — users install it explicitly with `pi install`. `rpiv-btw` is the one remaining opt-in sibling. **This fork deleted `rpiv-voice`, `rpiv-warp`, `rpiv-telemetry`, and `rpiv-site`** — see `FORK_NOTICE.md`; anything still naming them (a stray `--with` flag, a doc table) is stale.
+- **Opt-in extensions**: a sibling becomes opt-in by being **absent from `siblings.ts`** (and from `rpiv-pi/package.json` `peerDependencies`) **and absent from the root `pi` manifest**. It still rides lockstep + shared CI infrastructure via the `packages/*` glob, but `/rpiv-setup` won't suggest it and a git install won't load it — `scripts/fork-pi-install.sh --with <name>` installs it by local path. `rpiv-btw` is the one remaining opt-in sibling. **This fork deleted `rpiv-voice`, `rpiv-warp`, `rpiv-telemetry`, and `rpiv-site`** — see `FORK_NOTICE.md`; anything still naming them (a stray `--with` flag, a doc table) is stale.
 - **Test runner**: Vitest at repo root; one runner with `include: ['packages/*/**/*.test.ts']` discovers every test file; `test/setup.ts` runs once per worker before any test file imports. Coverage excludes `**/index.ts` and `packages/test-utils/**`. No per-package vitest configs.
 
 ## Commands
@@ -60,8 +59,8 @@ where something lives.
 | `npx tsc --noEmit -p tsconfig.base.json` | **Read-only whole-tree typecheck** (no formatter side effects) — the check write-scoped probes (elaborate/implement lanes) run when they must not rewrite files outside their own set |
 | `npm run check:files -- <paths...>` | Path-scoped Biome (`--write --error-on-warnings`) — rewrites ONLY the paths it is given; **the path-scoped auto-fix lint form** a phase's `#### Automated Verification:` uses to stay write-scoped to its own `files:` set |
 | `npm test` / `npm run coverage` | Vitest at root (single runner) / with V8 coverage |
-| `node scripts/release.mjs <patch\|minor\|major\|x.y.z>` | Cut a lockstep release — see `.rpiv/guidance/scripts/architecture.md` |
-| `node scripts/sync-versions.js` | Verify lockstep + rewrite intra-monorepo deps to `^<version>` |
+| `npm run versions:sync` | Verify lockstep + rewrite intra-monorepo deps to `^<version>` (no publish path — see `.rpiv/guidance/scripts/architecture.md`) |
+| `pi install git:github.com/hs1n/pi-monocoque` | Install this repo into Pi as a Pi source; `pi install <checkout path>` does the same from a live checkout |
 | `bash scripts/fork-pi-install.sh [-l] [--with btw]` | **Fork-only.** Install this fork's packages into Pi by local path — the only supported install path here. See `INSTALL-FORK.md` |
 | `node scripts/fork-license-audit.mjs .` | **Fork-only.** Dependency license inventory + copyleft/unknown flagging (Node built-ins only, no npx) |
 | `node scripts/fork-rename-scope.mjs <@scope>` | **Fork-only.** Rewrite the npm scope across the repo (idempotent, `--report` / `--dry-run`) |
@@ -73,17 +72,18 @@ Husky hooks (local-only):
 
 ## Conventions
 
-- **Lockstep versions**: every `packages/*/package.json` shares one `version`. Enforced by `sync-versions.js` (exit 1 on drift). `"private": true` packages bump too but are skipped at publish. **Naming**: directory `rpiv-<feature>` ↔ npm `@hs1n/rpiv-<feature>`.
+- **Lockstep versions**: every `packages/*/package.json` shares one `version`. Enforced by `sync-versions.js` (exit 1 on drift). Versions are hand-maintained — nothing publishes them. **Naming**: directory `rpiv-<feature>` ↔ npm name `@hs1n/rpiv-<feature>` (the npm name is module identity and import specifier, not a registry entry).
 - **Sibling deps as `peerDependencies: "*"`** — `rpiv-pi` peer-pins every registered sibling and `pi-*` runtime; bundlers never include them.
 - **Host-provided packages as `peerDependencies: "*"`, never `dependencies`** — Pi ships `typebox` and the `@earendil-works/pi-{ai,agent-core,coding-agent,tui}` trio (plus the legacy `@mariozechner/*` spellings) itself and aliases the bare specifier to its own copy at load time. An installed copy bypasses that alias and puts two live copies of the same module in one process (schemas built by one, validated by the other) — Pi warns about every such manifest at startup. Enforced by `scripts/check-host-provided-deps.mjs` (`npm run check:host-provided-deps`, the first stage of `npm run check`) across the root manifest and all `packages/*`. `devDependencies` are exempt (root dev-time pins resolve for `tsc`/Vitest only) and `jiti` is **not** host-provided — the extension loader does not alias it, so it stays a real `dependencies` entry. The same script also scans `packages/**/*.ts` for `typebox` import specifiers and rejects any subpath outside the host's six aliases (`typebox`, `typebox/compile`, `typebox/value` + the `@sinclair/typebox` spellings) — the manifest half alone would only move an unaliased import from a warning to `ERR_MODULE_NOT_FOUND`.
 - **`files` arrays** explicitly list `.ts` source + asset directories (e.g., `prompts/`); `.rpiv/` is never shipped; directory entries need a `!**/*.test.ts` negation (as in rpiv-pi/rpiv-web-tools/rpiv-workflow/rpiv-advisor) to keep co-located tests out of the tarball; dev-only fixture trees are excluded the same way (rpiv-pi's `built-ins/__fixtures__/`).
 - **`type: "module"` everywhere** with Node16 resolution; relative imports use `.js` extensions from `.ts` source. Test files co-locate as `*.test.ts` next to production sources.
 - **No decision-code citations in committed `.ts`** — comments state the contract in place, never cite parenthesized plan/phase codes; enforced by `scripts/check-no-decision-codes.mjs` (`npm run check:decision-codes`, the first pre-commit stage).
 
-<important if="you are cutting or planning a release">
-## Releasing
-- Publishing is local-only — CI (`.github/workflows/ci.yml`) runs check + coverage but never publishes npm packages (the marketing site deploys separately via `deploy-site.yml`). Use `node scripts/release.mjs` from monorepo root — never `npm version` inside a package.
-- Lockstep means every workspace package gets the same new version. `"private": true` blocks publish but not version bumping. Detailed pipeline: see `.rpiv/guidance/scripts/architecture.md`
+<important if="you are bumping versions or the Pi host pin">
+## Versioning
+- **There is no release pipeline and nothing is published.** The repo is distributed as a Pi source (`pi install git:github.com/hs1n/pi-monocoque`) or from a local checkout; CI runs check + coverage only.
+- Versions are hand-maintained lockstep: edit them, then `npm run versions:sync` (fails if packages drifted, rewrites intra-monorepo deps to `^<version>`). CHANGELOGs are historical — add entries under `[Unreleased]` by hand.
+- The `@earendil-works/pi-*` devDependencies are pinned **exact** and mirrored in root `overrides`; bumping them means `npm install` + `npm run check` + `npx vitest run` + a real load against that host version. Details: `.rpiv/guidance/scripts/architecture.md`
 </important>
 
 <important if="you are adding a new sibling Pi extension package">
@@ -94,8 +94,9 @@ Husky hooks (local-only):
 4. Pin in `packages/rpiv-pi/package.json` `peerDependencies` as `"*"`
 5. Author `.rpiv/guidance/packages/rpiv-<name>/architecture.md` for the new layer
 6. Add `"test": "vitest run"` to the package `scripts` (Vitest's root `include` glob picks the new file up automatically — no per-package config)
-7. Run `node scripts/sync-versions.js` to wire intra-monorepo deps (or run any `npm run version:*` script, which delegates to it)
-8. Add a `CHANGELOG.md` containing `## [Unreleased]` so `release.mjs` picks it up
+7. Run `npm run versions:sync` to wire intra-monorepo deps
+8. Add a `CHANGELOG.md` containing `## [Unreleased]` (hand-maintained history)
+9. Add the package's extension entry to the root `package.json` `pi.extensions` list, or a git/root install will not load it
 9. If the package owns module-level singleton state, export a reset function and wire it into `test/setup.ts` `beforeEach` (also clear any `globalThis[Symbol.for(...)]` cache the package owns)
 10. If the package consumes UI strings, declare `@hs1n/rpiv-i18n` in `peerDependencies` + `peerDependenciesMeta.optional: true` and call `registerStrings(<pkg-name>, byLocale)` at extension load — see `.rpiv/guidance/packages/rpiv-i18n/architecture.md`
 </important>

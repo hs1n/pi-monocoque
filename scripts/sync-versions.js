@@ -40,10 +40,8 @@ for (const [name, version] of Object.entries(versionMap).sort()) {
 const versions = new Set(Object.values(versionMap));
 if (versions.size > 1) {
 	console.error("\n❌ ERROR: Not all packages have the same version!");
-	console.error("Expected lockstep versioning. Run one of:");
-	console.error("  npm run version:patch");
-	console.error("  npm run version:minor");
-	console.error("  npm run version:major");
+	console.error("Expected lockstep versioning. Bump every package.json to the same");
+	console.error("version by hand, then re-run this script to rewrite intra-monorepo deps.");
 	process.exit(1);
 }
 

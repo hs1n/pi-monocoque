@@ -1,7 +1,7 @@
 # test-utils (@hs1n/rpiv-test-utils)
 
 ## Monorepo Context
-Private workspace package under `packages/test-utils/`. Joins lockstep via `sync-versions.js readdirSync("packages")`; `"private": true` blocks `npm publish`. NOT a Pi sibling — no `pi.extensions` field, not listed in `siblings.ts`. Consumed only by `*.test.ts` files across the monorepo.
+Private workspace package under `packages/test-utils/`. Joins lockstep via `sync-versions.js readdirSync("packages")`; `"private": true` and the absence of any publish path keep it in-repo. NOT a Pi sibling — no `pi.extensions` field, not listed in `siblings.ts`, not in the root `pi` manifest. Consumed only by `*.test.ts` files across the monorepo.
 
 ## Responsibility
 Shared test fixtures: factory stubs for the Pi `ExtensionAPI` / `ExtensionContext` surface, detached-execution workflow-host doubles (`spawnChild` session chains, concurrency fakes), synthetic session-entry builders, tool-contract assertions, deterministic theme/TUI fixtures, host-environment doubles (filesystem state writers, child-process stubs, fetch interception, exec stubs), and ship-manifest verification (`verifyShipManifest` — proves a package's `files` array covers its on-disk production `.ts` tree). Keeps every test file from re-inventing capture buckets and ensures one canonical shape for tracking registrations (tools, commands, shortcuts, flags, events).

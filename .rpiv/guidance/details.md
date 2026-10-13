@@ -7,20 +7,18 @@ where something lives or what a package's role is.
 ## Layout
 
 ```
-rpiv-mono/
+pi-monocoque/
 ├── packages/
 │   ├── rpiv-pi/                  — Umbrella: extension runtime + skills + agents (zero tools)
-│   ├── rpiv-<feature>/           — One Pi extension per directory; npm name @juicesharp/rpiv-<feature>
-│   ├── rpiv-site/                — DELETED by this fork (was: Astro 5 marketing site)
-│   ├── rpiv-telemetry/           — DELETED by this fork (was: private MLflow observability extension)
-│   └── test-utils/               — Private workspace package: shared test fixtures (not published)
+│   ├── rpiv-<feature>/           — One Pi extension per directory; npm name @hs1n/rpiv-<feature> (module identity, not a registry entry — nothing is published)
+│   └── test-utils/               — Private workspace package: shared test fixtures (never installed into Pi)
 ├── test/                         — Repo-wide Vitest setup (homedir stub + env hygiene + pi-ai//compat mocks + beforeEach singleton resets)
-├── scripts/                      — Lockstep release pipeline (release.mjs + sync-versions.js) + repo guards (check-no-decision-codes.mjs, check-slice-overlap.mjs)
-│                                 — fork additions: fork-pi-install.sh (local-path Pi install), fork-license-audit.mjs (dependency license inventory), fork-rename-scope.mjs (npm-scope rename), fork-own-skill.mjs (take over a bundled skill into ~/.agents/skills)
+├── scripts/                      — Repo guards (check-no-decision-codes.mjs, check-file-sizes.mjs, check-host-provided-deps.mjs, check-slice-overlap.mjs) + sync-versions.js (lockstep)
+│                                 — fork additions: fork-pi-install.sh (local-path Pi install), fork-license-audit.mjs (dependency license inventory), fork-rename-scope.mjs (scope rename), fork-own-skill.mjs (take over a bundled skill into ~/.agents/skills)
 ├── thoughts/shared/              — Pipeline artifacts: questions/, research/, solutions/, designs/, plans/, reviews/ (gitignored)
 ├── vitest.config.ts              — Single Vitest runner; `include: ['packages/*/**/*.test.ts']`, setupFiles `['./test/setup.ts']`
 ├── tsconfig.base.json            — Single shared TS config; no per-package tsconfig.json
-├── package.json                  — npm workspaces root
+├── package.json                  — npm workspaces root + the root `pi` manifest (8 extensions + rpiv-pi/skills) that makes `pi install git:<repo>` work
 └── biome.json                    — Single shared lint/format config
 ```
 
@@ -48,4 +46,4 @@ This fork deleted four packages — `rpiv-site`, `rpiv-telemetry`, `rpiv-voice`,
   warns: it is harvested only because of this fork's `agentsSkillDirs` fix in
   `skill-contracts-source.ts`, and Pi gates dispatching from it on project trust.
 
-Full release pipeline: `.rpiv/guidance/scripts/architecture.md`.
+Full guard/versioning reference: `.rpiv/guidance/scripts/architecture.md`.

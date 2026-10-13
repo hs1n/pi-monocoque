@@ -147,7 +147,8 @@ Optionally `pi uninstall npm:@tintinweb/pi-subagents` if no other plugin needs i
 restart Pi. Your `.rpiv/artifacts/` tree, `~/.config/rpiv-pi/models.json`, and
 `~/.pi/agent/agents/` are left in place — delete them by hand if you want them gone.
 
-## Releasing
+## Versioning
 
-Every `@hs1n/rpiv-*` package ships in lockstep from the monorepo root via
-`node scripts/release.mjs`. Never run `npm version` inside this package.
+Every `@hs1n/rpiv-*` package ships in lockstep from the monorepo root. Versions are
+hand-maintained and nothing is published — `npm run versions:sync` at the root verifies
+parity and rewrites intra-monorepo deps. Never run `npm version` inside this package.
