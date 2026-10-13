@@ -74,7 +74,7 @@ where something lives.
 
 Husky hooks (local-only):
 - `pre-commit` — runs `npm run check:decision-codes` (fail-fast contamination guard) then `npm run check:file-sizes` (fail-fast size-growth ratchet), then `npm run check` (format + typecheck); restages files biome may have rewritten
-- `pre-push` — runs `npm run coverage` (full test + coverage thresholds gate)
+- `pre-push` — runs `npm run coverage` (full test + coverage thresholds gate) with a cleared `coverage/.tmp`, and retries once if it fails: the v8 provider merges one temp file per test file and a worker recycled under load can leave one missing (`ENOENT coverage/.tmp/coverage-<n>.json`), which aborts an unrelated push. A real failure fails both attempts.
 
 ## Conventions
 
@@ -116,7 +116,7 @@ Husky hooks (local-only):
   - `beforeEach` enforces four reset rules: (1) every package with module-level singleton state exports a reset function and is invoked from `beforeEach`; (2) every `globalThis[Symbol.for(...)]` cache that intentionally survives `vi.resetModules()` is cleared; (3) every config file a package persists under `~/.config/rpiv-<name>/` (or `~/.pi/`) is `rmSync`-ed so filesystem-driven detection starts from a clean state — new code resolves these paths via `@hs1n/rpiv-config`'s XDG-aware `configPath()` (honors `XDG_CONFIG_HOME`, one-way legacy fallback via `loadJsonConfigWithLegacyFallback()`); (4) env hygiene — `PI_CODING_AGENT_DIR`, `XDG_CONFIG_HOME`, and `WEB_SEARCH_PROVIDER` are deleted (at module load AND per test) and the XDG pi agent dir (`~/.config/pi/agent`) is `rmSync`-ed.
 - **Fixtures**: import factories from `@hs1n/rpiv-test-utils` — see `.rpiv/guidance/packages/test-utils/architecture.md`.
 - **When adding a package with module-level singleton state**: export a reset (`__resetState` for fresh state, or named reset like `invalidateSkillIndex`) AND wire it into `test/setup.ts` `beforeEach` in the same change.
-- **Pre-commit vs pre-push**: tests do NOT run on commit (only Biome + `tsc --noEmit`). Full coverage gates push.
+- **Pre-commit vs pre-push**: tests do NOT run on commit (only Biome + `tsc --noEmit`). Full coverage gates push, with one retry — see the `pre-push` line above for why. `git push` runs that gate even when there is nothing to push, so a no-op push costs the same ~90 s.
 </important>
 
 <important if="you are touching tool registration, schemas, or session hooks anywhere in the monorepo">
