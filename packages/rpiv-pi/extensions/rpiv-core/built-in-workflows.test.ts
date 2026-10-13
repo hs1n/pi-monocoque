@@ -1370,9 +1370,7 @@ describe("converging-loop replay pinning (local halts + external tuples + carry-
 				meta: {},
 				data: { phase_count: 8 },
 			}) as unknown as Output;
-		const round1 = PLAN_DIMENSIONS.map((d) =>
-			verdict(d, d === "completeness" || d === "correctness" ? false : true, PLAN),
-		);
+		const round1 = PLAN_DIMENSIONS.map((d) => verdict(d, !(d === "completeness" || d === "correctness"), PLAN));
 		const state1: Record<string, Output[]> = { plans: [plan(PLAN)], "code-verdicts": round1 };
 		const first = countBlocking(state1, CODE_LANE);
 		expect(first).toBe(2);

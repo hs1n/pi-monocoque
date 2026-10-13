@@ -440,12 +440,12 @@ describe("build slice-check (deterministic floor)", () => {
 		// Drop c2 from every slice's covers — the frozen first cut still claims it.
 		writeFileSync(
 			join(tmpDir, rel),
-			map({
+			`${map({
 				count: 2,
 				coverage: COV,
 				sliceLines:
 					"  - { n: 1, title: A, deps: [], covers: [c1] }\n  - { n: 2, title: B, deps: [1], covers: [c1] }\n",
-			}) + "**Draws on:** src/seed.ts:20\n",
+			})}**Draws on:** src/seed.ts:20\n`,
 		);
 		const data = structureRun()({
 			cwd: tmpDir,

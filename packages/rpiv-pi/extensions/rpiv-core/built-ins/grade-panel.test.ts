@@ -984,7 +984,7 @@ describe("build grade panel re-grades only the pending dimensions (P2)", () => {
 		// attribute to the enclosing phase.
 		const verdicts = [...passingOthers(), correctnessFailing("Phase 3 > packages/x/CHANGELOG.md")];
 		const fenced = (entry: string) =>
-			"intro line\n```markdown\n## [Unreleased]\n\n### Added\n\n- " + entry + "\n```\ntail line";
+			`intro line\n\`\`\`markdown\n## [Unreleased]\n\n### Added\n\n- ${entry}\n\`\`\`\ntail line`;
 		const prior = planFrom([phase(3, fenced("old changelog entry")), phase(5, "shared phase 5 content")]);
 		const current = planFrom([phase(3, fenced("NEW changelog entry")), phase(5, "shared phase 5 content")]);
 		expect(await labelsWithPrior(verdicts, prior, current)).toEqual(["correctness"]);
