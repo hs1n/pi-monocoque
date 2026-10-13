@@ -10,7 +10,6 @@ host.
 rpiv-pi/
 ├── extensions/rpiv-core/   — Pi runtime extension (TypeScript): session hooks, /rpiv-* commands, sibling registry, guidance + git-context injection, model-management subsystem, built-in `/wf` workflows, detached `/wf` execution (SDK workflow host, lane dock/browser, question lifecycle). The sole TS surface in this package.
 │   └── built-ins/          — Compute clusters behind the four built-in workflows (gates, verdicts, checks) — has its own architecture.md
-├── scripts/                — Internal post-install user utilities (currently a guidance-format migration CLI). Distinct from monorepo-root scripts/.
 ├── agents/                 — Named subagent profile library (Markdown). Read-only specialists dispatched by skills via the Agent tool.
 └── skills/                 — User-invocable workflow definitions (Markdown). Each non-underscore subfolder is one skill (SKILL.md + optional support dirs like templates/ or _helpers/); `_shared/` holds cross-skill `.mjs` helper scripts.
 ```

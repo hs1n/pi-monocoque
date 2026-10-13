@@ -8,7 +8,7 @@ whether the model may reach for it on its own.
 - **Invoke** — `/skill:<name>` from inside a Pi session, or as a stage of a `/wf`
   workflow (see [workflows.md](./workflows.md)).
 - **Auto** — ✓ means the model may select the skill by itself from your prompt.
-  21 of the 30 skills set `disable-model-invocation: true` and are marked —;
+  22 of the 29 skills set `disable-model-invocation: true` and are marked —;
   those run *only* on an explicit `/skill:<name>` or a workflow dispatch. A short
   stage index is injected at session start so the model still knows they exist and
   can suggest one.
@@ -68,8 +68,6 @@ whether the model may reach for it on its own.
 | `create-handoff` | ✓ | the current session | `handoffs/` | Compacts the current task, decisions, in-flight changes, and open questions into one file a fresh session can pick up. |
 | `resume-handoff` | ✓ | a `handoff` document | continues work | Reads the handoff, verifies repo, branch, and state, and continues from where the previous session stopped. |
 | `annotate-guidance` | ✓ | the source tree | `.rpiv/guidance/**/architecture.md` | Generates architecture guidance in a shadow tree alongside the source. rpiv-pi injects these automatically — see [architecture.md](./architecture.md). |
-| `annotate-inline` | ✓ | the source tree | `CLAUDE.md` files | Same analysis, written inline next to the code instead of into a shadow tree. |
-| `migrate-to-guidance` | ✓ | existing `CLAUDE.md` files | `.rpiv/guidance/` | Finds every `CLAUDE.md`, transforms internal references, and creates equivalent `architecture.md` files. `--delete-originals` removes the sources. |
 | `changelog` | ✓ | git history + the working tree | `CHANGELOG.md` edits | Regenerates the `[Unreleased]` section of every affected changelog in Keep a Changelog style from Conventional Commit prefixes. Monorepo-aware and idempotent. |
 | `frontend-design` | — | the project's style system | injected guidance | Injects tailored visual design guidance for web frontend work. Auto-adapts: empty scan → 2-question micro-interview; established design system → scan-only injection. |
 

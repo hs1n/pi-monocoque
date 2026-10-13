@@ -31,7 +31,6 @@
 		"extensions/",
 		"skills/",
 		"agents/",
-		"scripts/",
 		"docs/",
 		"!docs/*.png",
 		"!docs/*.jpg",

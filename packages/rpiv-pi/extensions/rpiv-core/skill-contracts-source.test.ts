@@ -219,8 +219,8 @@ describe("bundled skill contracts", () => {
 	// dropped, or fails to parse (a malformed block is silently skipped).
 	const declared = new Map(buildSkillContractsFromFrontmatter(BUNDLED_SKILLS_DIR));
 
-	it("declares a contract for the 31 pipeline + orthogonal skills", () => {
-		expect(declared.size).toBe(31);
+	it("declares a contract for the 29 pipeline + orthogonal skills", () => {
+		expect(declared.size).toBe(29);
 		for (const name of [
 			"discover",
 			"research",
@@ -237,12 +237,10 @@ describe("bundled skill contracts", () => {
 			"implement",
 			"commit",
 			"annotate-guidance",
-			"annotate-inline",
 			"changelog",
 			"create-handoff",
 			"resume-handoff",
 			"frontend-design",
-			"migrate-to-guidance",
 			"pr-triage",
 			"slice",
 			"design-slice",
@@ -316,10 +314,10 @@ describe("bundled skill contracts", () => {
 		//     `revise` stage; no restored workflow re-introduces it;
 		//   - pr-triage: was harvested only by the removed pr-triage workflow.
 		// commit stays listed too: acts({ outcome }) with no reads harvest-skips.
-		// Total: 6 doc/util (annotate-guidance/annotate-inline/changelog/
-		//        create-handoff/migrate-to-guidance/resume-handoff) + 6 pipeline
-		//        skills (discover/explore/research/design/plan/frontend-design) +
-		//        commit + pr-triage + revise = 15.
+		// Total: 4 doc/util (annotate-guidance/changelog/create-handoff/
+		//        resume-handoff) + 6 pipeline skills
+		//        (discover/explore/research/design/plan/frontend-design) +
+		//        commit + pr-triage + revise = 13.
 		const harvested = harvestStageContracts(builtInWorkflows);
 		const notHarvested: string[] = [];
 		for (const [name] of declared) {
@@ -328,7 +326,6 @@ describe("bundled skill contracts", () => {
 		expect(notHarvested.sort()).toEqual(
 			[
 				"annotate-guidance",
-				"annotate-inline",
 				"changelog",
 				"commit",
 				"create-handoff",
@@ -336,7 +333,6 @@ describe("bundled skill contracts", () => {
 				"discover",
 				"explore",
 				"frontend-design",
-				"migrate-to-guidance",
 				"plan",
 				"pr-triage",
 				"research",
@@ -436,11 +432,9 @@ describe("bundled skill contracts", () => {
 			"implement",
 			"commit",
 			"annotate-guidance",
-			"annotate-inline",
 			"changelog",
 			"resume-handoff",
 			"frontend-design",
-			"migrate-to-guidance",
 		];
 		for (const name of sideEffectSkills) {
 			expect(declared.get(name)?.produces?.kind, `${name}: kind`).toBe("side-effect");

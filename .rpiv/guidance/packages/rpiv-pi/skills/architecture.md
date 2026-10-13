@@ -13,7 +13,7 @@ User-invocable AI workflow definitions. Each `SKILL.md` is a structured prompt i
 - **`@hs1n/rpiv-args`**: substitutes `$N`/`$ARGUMENTS`/`$@`/`${@:N[:L]}` placeholders in skill bodies before they reach the agent loop; on the token path it also emits the raw argument string in a `Skill input:`-labeled trailer after the skill block so supplied input is never misread as empty (issue #89)
 
 ## Consumers
-- **Users**: `/skill:<name>` invokes the matching skill. Most pipeline-stage/fanout skills declare `disable-model-invocation: true` — hidden from the model's skill list, they run only on explicit invocation or workflow dispatch; the model-visible set is the utility/annotation skills (annotate-guidance, annotate-inline, changelog, code-review, commit, create-handoff, migrate-to-guidance, pr-triage, resume-handoff). A compact stage-command index injected at session start keeps hidden stages discoverable
+- **Users**: `/skill:<name>` invokes the matching skill. Most pipeline-stage/fanout skills declare `disable-model-invocation: true` — hidden from the model's skill list, they run only on explicit invocation or workflow dispatch; the model-visible set is the utility/annotation skills (annotate-guidance, changelog, code-review, commit, create-handoff, pr-triage, resume-handoff). A compact stage-command index injected at session start keeps hidden stages discoverable
 - **Workflows**: chain wiring is framework-enforced — each skill's `contract:` produces/consumes block drives contract-driven routing, stage-compatibility validation, and outcome derivation; only human-facing trigger prose ("Always requires a [upstream] artifact") remains in `description`
 
 ## Module Structure
@@ -46,7 +46,7 @@ contract:                 # every skill declares one; produces/consumes drive ro
 ---
 ```
 
-`allowed-tools` is LLM-facing prompt context — Pi does not parse the field, but the agent reads its own declared allowlist and follows it by convention. **Skills that need the `Agent` tool either list `Agent` explicitly** (`annotate-guidance`, `annotate-inline`) **or omit the field entirely** to inherit the full tool surface (`code-review`, `frontend-design`).
+`allowed-tools` is LLM-facing prompt context — Pi does not parse the field, but the agent reads its own declared allowlist and follows it by convention. **Skills that need the `Agent` tool either list `Agent` explicitly** (`annotate-guidance`) **or omit the field entirely** to inherit the full tool surface (`code-review`, `frontend-design`).
 
 ## Agent Dispatch Convention
 

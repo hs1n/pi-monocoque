@@ -97,5 +97,6 @@ Skills compose without a workflow. Pick the entry point that matches your intent
 - **Hand off across sessions** — `/skill:create-handoff` → in a new session,
   `/skill:resume-handoff <doc>`.
 - **Onboard a fresh repo** — `/skill:annotate-guidance` once, then use the pipeline
-  normally. Use `annotate-inline` if the project follows the `CLAUDE.md` convention,
-  or `migrate-to-guidance` to move from one to the other.
+  normally. It writes the `.rpiv/guidance/` shadow tree that rpiv-pi injects per
+  directory. Inline `CLAUDE.md` / `AGENTS.md` files are Pi's own convention — the
+  guidance ladder reads them, so a repo that already uses them needs no tooling here.

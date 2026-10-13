@@ -88,7 +88,7 @@ changes. When `git config user.name` is empty, `$USER` is used, then `unknown`.
 
 ## Pipeline pointer
 
-21 of the 30 skills set `disable-model-invocation: true`, which hides them from the
+22 of the 29 skills set `disable-model-invocation: true`, which hides them from the
 model's skill list so it cannot wander into a design pass mid-conversation. To keep them
 discoverable, a roughly 120-token stage index is injected at `session_start` and folded
 into the first real user turn after compaction — hidden by default, visible under
