@@ -50,6 +50,38 @@ Every `packages/*/package.json` shares one `version`, hand-maintained and enforc
 `sync-versions.js`. Nothing is published, so the version is a marker, not a release.
 _Avoid_: semver, independently versioned
 
+### Skill ownership
+
+Two skill sources are installed here — `~/.agents/skills` (Matt Pocock's engineering skills)
+and `packages/rpiv-pi/skills/` — and three names exist in both: `research`, `implement`,
+`code-review`. **Nothing collides today**, because matt's copies of those three are not on
+disk. That absence is load-bearing, not hygiene.
+
+**research**, **implement**, **code-review**:
+**Neither side may be swapped for the other.** User-level skills outrank the installed
+package — `<cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills > ~/.pi/agent/skills >
+installed package (this fork)` (`scripts/fork-own-skill.mjs`) — so restoring
+`~/.agents/skills/research` shadows rpiv-pi's body, while the `contract:` the graphs
+validate against is harvested by a separate provider that finds nothing to replace it with,
+matt's skills declaring none.
+
+All three are dispatched by name from the built-in `/wf` graphs: `implement` is an `acts`
+stage in all four (build, vet, polish, ship), `code-review` a gate stage in polish and vet,
+`research` build's second stage, dispatched as `/skill:research` (`workflows/build.ts`).
+Only the skill-shaped stages carry a contract schema, though — `code-review`'s
+`blockers_count`, which `workflows/shared.ts` sources from the skill rather than
+redeclaring per workflow, is the one number the graph routes on. `research` is
+prompt-dispatched and `implement` is an `acts` loop, so for those two the break is one of
+shape, not of validation.
+_Avoid_: restoring matt's `research` / `implement` / `code-review`, deleting rpiv-pi's, treating the collision as a taste question
+
+**the rest of matt's set** (`grill-with-docs`, `to-spec`, `to-tickets`, `triage`,
+`wayfinder`, `tdd`, `prototype`, `handoff`, `codebase-design`, `domain-modeling`,
+`writing-for-agents`):
+Matt's, and nothing in this repo dispatches them by name. They are the human-driven half of
+the flow, reached by `/skill:<name>` and by the agent's own routing.
+_Avoid_: assuming they are interchangeable with the pipeline stages above
+
 ### Guidance
 
 **guidance**:
