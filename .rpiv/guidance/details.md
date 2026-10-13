@@ -15,7 +15,8 @@ pi-monocoque/
 ├── test/                         — Repo-wide Vitest setup (homedir stub + env hygiene + pi-ai//compat mocks + beforeEach singleton resets)
 ├── scripts/                      — Repo guards (check-no-decision-codes.mjs, check-file-sizes.mjs, check-host-provided-deps.mjs, check-slice-overlap.mjs) + sync-versions.js (lockstep)
 │                                 — fork additions: fork-pi-install.sh (local-path Pi install), fork-license-audit.mjs (dependency license inventory), fork-rename-scope.mjs (scope rename), fork-own-skill.mjs (take over a bundled skill into ~/.agents/skills)
-├── thoughts/shared/              — Pipeline artifacts: questions/, research/, solutions/, designs/, plans/, reviews/ (gitignored)
+├── .rpiv/guidance/               — Committed guidance shadow tree (see "Guidance" above); the only tracked dir under `.rpiv/`
+├── .rpiv/artifacts/ + workflows/ — Gitignored pipeline artifacts (plans/, reviews/, goal/, failures/) and `/wf` run state
 ├── vitest.config.ts              — Single Vitest runner; `include: ['packages/*/**/*.test.ts']`, setupFiles `['./test/setup.ts']`
 ├── tsconfig.base.json            — Single shared TS config; no per-package tsconfig.json
 ├── package.json                  — npm workspaces root + the root `pi` manifest (8 extensions + rpiv-pi/skills) that makes `pi install git:<repo>` work
