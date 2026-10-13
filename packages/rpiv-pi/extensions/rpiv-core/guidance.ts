@@ -89,12 +89,16 @@ interface GuidanceFile {
  *
  * `existsSync(join(dir, name))` is not enough on a case-insensitive filesystem —
  * APFS and NTFS, the defaults on macOS and Windows. There the ladder's `AGENTS.md`
- * candidate matches a neighbouring `agents.md`, and this repo has one:
- * `packages/rpiv-pi/docs/agents.md` is a docs page about the bundled subagents, so
- * touching any file under that directory injected ~4 KB of it labelled as
+ * candidate matched a neighbouring `agents.md`, and this repo had one:
+ * `packages/rpiv-pi/docs/agents.md`, a docs page about the bundled subagents, so
+ * touching any file under that directory injected all 5,005 bytes of it labelled as
  * `AGENTS.md` guidance. Worse than the waste, the ladder stops at the first match,
  * so a real `.rpiv/guidance/<sub>/architecture.md` would have been shadowed by a
  * case-colliding unrelated file.
+ *
+ * That page is `bundled-agents.md` now, so this repo holds no such collision today.
+ * The helper stays anyway: a project bringing its own lowercase `agents.md` is the
+ * case it guards, and the shadowing half of the failure is silent.
  *
  * Comparing against the directory listing is case-exact on every filesystem, so a
  * candidate matches the file it actually names. A missing or unreadable directory is

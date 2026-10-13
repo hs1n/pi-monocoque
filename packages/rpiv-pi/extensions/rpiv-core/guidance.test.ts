@@ -259,9 +259,9 @@ describe("handleToolCallGuidance", () => {
 describe("guidance candidates are case-exact", () => {
 	// The ladder used to test `existsSync(join(dir, "AGENTS.md"))`, which on a
 	// case-insensitive filesystem (APFS, NTFS — the macOS and Windows defaults) matches
-	// a lowercase `agents.md`. This repo has one: `packages/rpiv-pi/docs/agents.md` is a
-	// docs page about the bundled subagents, and touching anything under that directory
-	// injected it labelled as `AGENTS.md` guidance.
+	// a lowercase `agents.md`. This repo had one — `packages/rpiv-pi/docs/agents.md`, a
+	// docs page about the bundled subagents, since renamed to `bundled-agents.md`; the
+	// fixtures below rebuild that shape, so they keep exercising it.
 	//
 	// The two resolveGuidance cases below are true regressions on such a filesystem and
 	// pass vacuously on a case-sensitive one, which is why the helper's own behaviour is

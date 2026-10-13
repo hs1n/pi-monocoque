@@ -122,7 +122,7 @@ no overrides.
   questions, and the lane environment variables.
 - [docs/models-config.md](./docs/models-config.md) — giving Pi a provider, then the
   complete `models.json` schema, cascade, and worked examples.
-- [docs/agents.md](./docs/agents.md) — the 15 bundled subagents and how the on-disk sync
+- [docs/bundled-agents.md](./docs/bundled-agents.md) — the 15 bundled subagents and how the on-disk sync
   decides what to overwrite.
 - [docs/architecture.md](./docs/architecture.md) — what gets registered, guidance and
   git-context injection, sibling coupling, and uninstall.
