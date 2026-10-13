@@ -19,7 +19,8 @@
 		],
 		"skills": [
 			"./packages/rpiv-pi/skills",
-			"./skills/matt-pocock"
+			"./skills/matt-pocock",
+			"./skills/skill-master"
 		]
 	},
 	"scripts": {

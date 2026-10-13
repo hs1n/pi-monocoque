@@ -30,6 +30,12 @@ because that is the licence's only condition. Nothing in them was modified, so u
 copied verbatim again rather than edited in place — see that directory's `README.md` for what was
 deliberately left out, and why leaving it out is load-bearing.
 
+A **third-party Apache-2.0 grant** covers `skills/skill-master/` — a **modified derivative** of
+Anthropic's `skill-creator`, taken from Claude Code's `claude-plugins-official` plugin marketplace
+and retargeted at Pi. Its `LICENSE.txt` travels with it, and its `README.md` states every change,
+which is what Apache-2.0 §4(b) asks of a modified copy. Unlike `skills/matt-pocock/`, this one is
+edited in place and maintained as part of the fork.
+
 Modifications made in this fork are additionally marked in their own commits. They do not
 replace or relicense the upstream portions. Anyone redistributing this work must keep the
 same notices.
