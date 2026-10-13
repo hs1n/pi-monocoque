@@ -22,6 +22,20 @@ injected per session from `.rpiv/guidance/`, and restating them here spends cont
 - **Installing this into Pi → read `INSTALL-FORK.md`.** There is no publish path, so an
   instruction of the form `npm install @hs1n/rpiv-*` resolves nowhere here.
 
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as GitHub issues, driven through `gh`. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context — one root `CONTEXT.md`, decisions under `docs/adr/`. See `docs/agents/domain.md`.
+
+Triage labels are deliberately unconfigured: the `### Triage labels` sub-block and
+`docs/agents/triage-labels.md` are written by Section B of `/setup-matt-pocock-skills`, which
+is worth running when you start triaging incoming issues. Nothing is triaged here today.
+
 ## Checks that will fail your commit
 
 The pre-commit hook runs all three; knowing them up front is cheaper than the round trip.
