@@ -11,6 +11,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **`locales/zh-TW.json`.** Traditional Chinese for the questionnaire chrome, covering all 26 current keys. Both templated hint values (`hint.collapse`, `hint.expand_line`) keep their `{key}` placeholder, which the locale contract test enforces. Key names and symbols stay untranslated on purpose (they are printed as keycaps) while the surrounding verbs follow Taiwan usage (`送出答案`, `備註`, `收合`, `切換題目`).
 
+> Post-merge top-up: upstream 2.13.7 added `notes.saved_label` and `preview.notes_edit_affordance`
+> (a saved note now shows as its own row, and the preview hint changes to "Note saved: press n to
+> edit"); both are translated here, so the map is key-complete against `en.json`.
+
 ### Fixed
 
 - **The locale table in `docs/localization.md` matches the picker again.** It listed a single `zh` row; it now lists `简体中文` and `繁體中文`.
