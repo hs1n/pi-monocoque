@@ -28,13 +28,13 @@ injected per session from `.rpiv/guidance/`, and restating them here spends cont
 
 Issues and specs live as markdown under `.scratch/`, committed rather than ignored. See `docs/agents/issue-tracker.md`.
 
+### Triage labels
+
+Five canonical triage roles, kept at their default strings. See `docs/agents/triage-labels.md`.
+
 ### Domain docs
 
 Single-context — one root `CONTEXT.md`, decisions under `docs/adr/`. See `docs/agents/domain.md`.
-
-Triage labels are deliberately unconfigured: the `### Triage labels` sub-block and
-`docs/agents/triage-labels.md` are written by Section B of `/setup-matt-pocock-skills`, which
-is worth running when you start triaging incoming issues. Nothing is triaged here today.
 
 ## Checks that will fail your commit
 
