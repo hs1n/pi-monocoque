@@ -28,6 +28,7 @@
 		"check:decision-codes": "node scripts/check-no-decision-codes.mjs",
 		"check:file-sizes": "node scripts/check-file-sizes.mjs",
 		"check:host-provided-deps": "node scripts/check-host-provided-deps.mjs",
+		"check:skill-names": "node scripts/check-skill-name-collisions.mjs",
 		"test": "vitest run",
 		"coverage": "vitest run --coverage",
 		"versions:sync": "node scripts/sync-versions.js",
