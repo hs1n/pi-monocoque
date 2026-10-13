@@ -147,6 +147,33 @@ The three ceilings on backward edges: `maxBackwardJumps`, `maxLaps`, `maxIterati
 Fresh per invocation, overridable per run.
 _Avoid_: limit, timeout, retry count
 
+### Tickets
+
+**ticket**:
+One work item, one file: `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in
+dependency order. Written by `to-tickets`; the **spec** they are sliced from is written first by
+`to-spec`. Field spellings are pinned in `docs/agents/issue-tracker.md`, and that file wins over
+a skill's own embedded template.
+_Avoid_: issue (that names a GitHub tracker item, and this repo has no tracker that stores one)
+
+**spec**:
+`.scratch/<feature-slug>/spec.md` — the problem statement a set of tickets is sliced from,
+synthesized by `to-spec` from the conversation rather than from an interview.
+_Avoid_: plan (a plan is an `.rpiv/artifacts/plans/` artifact, a pipeline output, and uncommitted)
+
+**tracker**:
+Where tickets live. Here that is local markdown under `.scratch/`, recorded in
+`docs/agents/issue-tracker.md`. Not GitHub: issues are disabled on this repo, and a committed
+file survives a clone.
+_Avoid_: backlog, queue, GitHub issues
+
+**.scratch/**:
+The ticket artifact root, and deliberately **not** gitignored — a ticket is meant to outlive the
+session and travel with a clone. That is the opposite posture from **.rpiv/artifacts/**, which is
+ignored and local-only. The two roots are easy to confuse and the difference is load-bearing:
+pipeline artifacts are scratch, tickets are durable.
+_Avoid_: treating `.scratch/` as scratch space, adding it to `.gitignore`
+
 ### Conventions
 
 **decision code**:
