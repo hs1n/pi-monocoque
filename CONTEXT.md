@@ -52,18 +52,22 @@ _Avoid_: semver, independently versioned
 
 ### Skill ownership
 
-Two skill sources are installed here — `~/.agents/skills` (Matt Pocock's engineering skills)
-and `packages/rpiv-pi/skills/` — and three names exist in both: `research`, `implement`,
-`code-review`. **Nothing collides today**, because matt's copies of those three are not on
-disk. That absence is load-bearing, not hygiene.
+Two skill sources are installed here — `skills/matt-pocock/` (Matt Pocock's engineering skills,
+vendored into this repo and shipped through the root `pi` manifest) and
+`packages/rpiv-pi/skills/` — and three names exist in both upstream collections: `research`,
+`implement`, `code-review`. **Nothing collides today**, because the vendored set leaves those
+three out. That omission is load-bearing, not hygiene, and it is the first thing to re-check when
+refreshing the vendored copy.
 
 **research**, **implement**, **code-review**:
 **Neither side may be swapped for the other.** User-level skills outrank the installed
 package — `<cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills > ~/.pi/agent/skills >
-installed package (this fork)` (`scripts/fork-own-skill.mjs`) — so restoring
-`~/.agents/skills/research` shadows rpiv-pi's body, while the `contract:` the graphs
-validate against is harvested by a separate provider that finds nothing to replace it with,
-matt's skills declaring none.
+installed package (this fork)` (`scripts/fork-own-skill.mjs`). The vendored set rides at the
+**lowest** rank, as part of the installed package, so it is authoritative only while no copy of
+the same name sits higher. Putting `research`, `implement` or `code-review` into `~/.agents/skills`
+or a project `.agents/skills` shadows rpiv-pi's body, while the `contract:` the graphs validate
+against is harvested by a separate provider that finds nothing to replace it with, matt's skills
+declaring none.
 
 All three are dispatched by name from the built-in `/wf` graphs: `implement` is an `acts`
 stage in all four (build, vet, polish, ship), `code-review` a gate stage in polish and vet,

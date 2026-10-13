@@ -22,6 +22,14 @@ satisfied here by **keeping every upstream copyright notice and license text unm
   `rpiv-site`, `rpiv-voice` and `rpiv-warp`, deleted along with their packages;
   `rpiv-telemetry`, `rpiv-config` and `test-utils` have never carried one.
 
+A **second, unrelated MIT grant** covers `skills/matt-pocock/` — Matt Pocock's engineering
+skills, vendored into this repo from [`mattpocock/skills`](https://github.com/mattpocock/skills)
+so that a clone reproduces the setup instead of depending on an unversioned directory under
+`$HOME`. Those files are neither upstream's nor this fork's; their `LICENSE` travels with them
+because that is the licence's only condition. Nothing in them was modified, so updates should be
+copied verbatim again rather than edited in place — see that directory's `README.md` for what was
+deliberately left out, and why leaving it out is load-bearing.
+
 Modifications made in this fork are additionally marked in their own commits. They do not
 replace or relicense the upstream portions. Anyone redistributing this work must keep the
 same notices.
