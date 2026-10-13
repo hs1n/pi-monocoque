@@ -22,8 +22,15 @@ are what those skills look up._
     └── 02-<slug>.md
 ```
 
-One ticket per file, never a single combined tickets file. A ticket carries these fields with
-these literal spellings, in this order:
+One ticket per file, never a single combined tickets file.
+
+`triage` also reads and writes a repo-root `.out-of-scope/` directory: persistent records of
+rejected requests, one file per rejection, so a duplicate is recognised instead of re-litigated.
+It is **not** gitignored, for the same reason `.scratch/` is not — the record's whole value is
+surviving the session that wrote it. Something closed as `wontfix` because it is *already
+implemented* does not belong there: a false rejection poisons every later dedup check.
+
+A ticket carries these fields with these literal spellings, in this order:
 
 - `# <NN>: <title>` — the heading. `NN` is the ticket's number, zero-padded to two digits and
   agreeing with the filename's prefix.
@@ -80,15 +87,21 @@ meaning in this one.
 
 ## Known gaps
 
-Recorded rather than papered over — each is a place where a reader can be wrong silently.
+Recorded rather than papered over — each is a place where this arrangement can fail silently.
 
 - **No terminal status.** The five roles are triage state and none of them means "done", so a
   finished ticket has no representation. `wayfinder`'s tickets carry `claimed` / `resolved` for
   exactly this reason, but a plain ticket does not. Closing one is a convention today, not a
   field; a sixth role would be an addition to decide deliberately, not a gap to fill in passing.
-- **Readers may expect the other form.** Matt's reader-side descriptions — `triage`'s, and the
-  wayfinding section he ships — speak of plain `Status:` and `Blocked by:` lines, while
-  `to-tickets` writes them bold. A reader matching the plain form finds nothing in a bold-form
-  file, and finding nothing is a legitimate answer, so it will not complain. The bold form is
-  canonical here because it is what the writer emits; a reader this repo leans on should be
-  **verified against it**, not trusted.
+- **Re-running the setup skill would undo the spellings above.** The *readers* are fine, and the
+  earlier suspicion that they hardcode the other form was wrong: `triage` calls its role names
+  canonical but says "the actual label strings used in the issue tracker may differ", and
+  `wayfinder` says where the map, tickets, blocking and frontier queries "physically live is
+  tracker-specific" and sends the agent to this file's Wayfinding section. Both consult *this*
+  file, so the bold form reaches them.
+
+  The hazard is one level up. `/setup-matt-pocock-skills` regenerates `docs/agents/` from seed
+  templates it ships, and its local-markdown seed describes the **plain** form — a `Status:` line,
+  a `Blocked by: NN, NN` line. Re-running that skill would overwrite this file and restore exactly
+  the drift the canonical spelling exists to remove, with nothing to announce it. Edit this file
+  rather than regenerating it, and re-apply the section above if it is ever regenerated.
