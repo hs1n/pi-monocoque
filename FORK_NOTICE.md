@@ -18,7 +18,9 @@ Upstream is MIT licensed. The MIT terms are the only condition on reuse, and the
 satisfied here by **keeping every upstream copyright notice and license text unmodified**:
 
 - `LICENSE` (root)
-- `packages/*/LICENSE` (12 files, each shipped inside the published package `files` list)
+- `packages/*/LICENSE` — **9 files today**, 12 at the fork point. The three that went were
+  `rpiv-site`, `rpiv-voice` and `rpiv-warp`, deleted along with their packages;
+  `rpiv-telemetry`, `rpiv-config` and `test-utils` have never carried one.
 
 Modifications made in this fork are additionally marked in their own commits. They do not
 replace or relicense the upstream portions. Anyone redistributing this work must keep the
@@ -134,7 +136,10 @@ installed tree and summarizes it; run it after `npm install`:
 node scripts/fork-license-audit.mjs .
 ```
 
-As of the fork point (633 deduplicated `name@version` entries):
+Two snapshots matter, because deleting `rpiv-site` and its Astro/Vite tree took most of the
+inventory with it.
+
+**At the fork point** — 633 deduplicated `name@version` entries:
 
 | License | Count |
 | --- | ---: |
@@ -149,24 +154,22 @@ As of the fork point (633 deduplicated `name@version` entries):
 | MPL-2.0 | 2 |
 | 0BSD / OFL-1.1 / LGPL-3.0-or-later / Python-2.0 / UNKNOWN | 1 each |
 
-Four entries are worth knowing about, and **none of them ship in the twelve published
-packages** — they are all build-time or private-package dependencies:
+**Today** — 248 entries: MIT 168 · Apache-2.0 39 · BSD-3-Clause 18 · ISC 15 ·
+MIT OR Apache-2.0 2 · MPL-2.0 2 · BlueOak-1.0.0 2 · 0BSD 1 · Unlicense 1.
 
-- `lightningcss`, `lightningcss-darwin-arm64` — MPL-2.0 (Astro/Vite build tooling).
-  File-level copyleft; nothing is modified or redistributed, so no obligation is triggered.
-- `@img/sharp-libvips-darwin-arm64` — LGPL-3.0-or-later (optional binary behind `sharp`,
-  a devDependency of the private site package). Dynamically linked, unmodified. Distributing
-  a built site artefact that bundles it would mean shipping the LGPL text and offering the
-  library source; the npm packages are unaffected.
-- `zod-to-ts` — no `license` field at all, reached transitively through `astro`. Absent a
-  license, no permission is granted by default. It is build-time only, so nothing is
-  distributed — but do not add it to a published package without resolving this.
-- `@fontsource/jetbrains-mono` — OFL-1.1. The built site serves JetBrains Mono webfonts to
-  the browser, so anyone hosting a built `rpiv-site` must ship the font's OFL license text
-  alongside it. Not a concern for the extensions.
+Flagged (copyleft / restrictive / unknown) is **down to 2**: `lightningcss@1.33.0` and
+`lightningcss-darwin-arm64@1.33.0`, both MPL-2.0, both reached through `vitest → vite`.
+File-level copyleft; nothing is modified or redistributed, so no obligation is triggered.
+
+Three entries the fork-point audit called out are gone with the packages that carried them.
+`@img/sharp-libvips-darwin-arm64` (LGPL-3.0-or-later), `zod-to-ts` (no `license` field at
+all, reached transitively through `astro`) and `@fontsource/jetbrains-mono` (OFL-1.1) were
+all `rpiv-site` dependencies, so the LGPL question and the missing-license question no
+longer apply to this tree. They would return with a `git revert` of that deletion.
 
 Re-run the script after dependency changes; treat a new copyleft or `UNKNOWN` entry in a
-package's `dependencies` as a blocker before publishing.
+package's `dependencies` as a blocker before publishing — while remembering that nothing
+here has a publish path at all.
 
 ## Support and warranty
 
