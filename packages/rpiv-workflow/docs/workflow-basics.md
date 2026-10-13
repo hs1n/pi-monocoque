@@ -5,6 +5,7 @@ A workflow chains Pi skills into a typed multi-stage graph with audited JSONL st
 ## Table of Contents
 
 - [Running workflows](#running-workflows)
+- [Choosing between `/wf` and the skill](#choosing-between-wf-and-the-skill)
 - [When `/wf` refuses](#when-wf-refuses)
 - [File structure](#file-structure)
 - [Where files resolve](#where-files-resolve)
@@ -51,6 +52,29 @@ Slugs must match `/^[a-zA-Z_][a-zA-Z0-9_-]{0,63}$/`. A slug already in use is re
 The `@` sigil on the first token resumes a past run. `<ref>` is a run-id, a run name assigned with `--name`, or a path to a `.jsonl` trail. A leading space after `@` is tolerated; trailing tokens are ignored. `--name` has no meaning on a resume — it is dropped with a warning.
 
 Resume folds the JSONL trail back into run state and re-enters at the pending step. Completed fan-out units replay from their journaled output instead of re-running.
+
+## Choosing between `/wf` and the skill
+
+Every stage runs in its own detached child session, which reloads the extension and is
+injected with the project's guidance, so a run pays a per-stage floor before any work begins
+and then pays the stage's own skill on top. Measured on one `/wf vet` over a one-file docs
+commit: 28 minutes to clear two stages — `goal`, a script stage with no model, and the
+`code-review` skill. The review was effectively the whole cost.
+
+What `/wf` adds over invoking the skill is the **runner**: detached execution, gates, judged
+loops, a resumable trail. That overhead earns itself when you want something the skill cannot
+do alone — `vet` and `polish` re-enter planning and implementation on a failing
+`code-review` verdict rather than handing the finding back to you. If you do not expect
+findings, you are buying a repair loop you will not use. For a small or low-risk diff, invoke
+the skill directly instead: `/skill:code-review --file <paths>` scopes the review without
+spawning a run at all.
+
+Cost scales with the stage, not with the run. Run caps bound the loop — `--max-jumps` and
+`--max-laps` limit re-entries (see [Run caps](#run-caps)) — so lowering them does not make any
+single review cheaper. To make the expensive stage itself cheaper, override its model or
+effort: `/rpiv-models` records a `skills["code-review"]` entry, and the cascade applies it to
+both the `/skill:<name>` form and the workflow-dispatched form
+(`packages/rpiv-pi/docs/models-config.md`).
 
 ## When `/wf` refuses
 
