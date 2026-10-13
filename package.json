@@ -18,7 +18,8 @@
 			"./packages/rpiv-workflow/extension.ts"
 		],
 		"skills": [
-			"./packages/rpiv-pi/skills"
+			"./packages/rpiv-pi/skills",
+			"./skills/matt-pocock"
 		]
 	},
 	"scripts": {
