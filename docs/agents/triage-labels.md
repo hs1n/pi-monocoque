@@ -25,10 +25,19 @@ vocabulary to reconcile with.
 _Follows the triage-label convention of [`mattpocock/skills`](https://github.com/mattpocock/skills)
 (MIT), restated in this repo's own words._
 
-## Not covered here
+## The category half is real, and we do not carry it
 
-`/triage` also classifies each item as one of two **category** roles — `bug` (something is
-broken) and `enhancement` (new feature or improvement). The convention defines no local
-representation for a category, so nothing writes one today; a `Category:` line would be a
-deliberate addition rather than a gap being filled. Worth deciding when the first external
-report actually arrives.
+`/triage` asks for **two** axes, not one: "Every triaged issue should carry exactly one category
+role and one state role", where the category is `bug` (something is broken) or `enhancement` (new
+feature or improvement). The five strings above are the *state* axis. The category axis has no
+representation here, so this repo's tickets carry one role where the skill asks for two.
+
+That is a deliberate gap rather than an oversight, but it is not cost-free, and the cost is concrete
+rather than cosmetic — the category decides what happens on a rejection. `/triage` closes a rejected
+`bug` with a polite explanation, and sends a rejected `enhancement` to `.out-of-scope/`, the
+directory [`issue-tracker.md`](./issue-tracker.md) documents. With no category recorded, that routing
+cannot be applied correctly to anything this repo rejects.
+
+A `Category:` line beside `**Status:**` would close both holes. That is an addition to decide
+deliberately rather than a gap to fill in passing — but worth deciding *before* the first external
+report rather than after, because the moment it matters is the moment a rejection has to be routed.
