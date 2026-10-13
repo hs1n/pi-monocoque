@@ -75,11 +75,29 @@ let capturedUiContext: ExtensionUIContext | undefined;
  */
 let capturedModel: CapturedModel | undefined;
 
+/**
+ * Whether Pi trusts THIS project's local resources, captured at `session_start`.
+ *
+ * Ctx-only on purpose: a session-only decision such as `--approve` never lands
+ * in the on-disk trust store, so a filesystem read would report "no decision"
+ * for a run Pi is in fact dispatching project skills from. The skill-contract
+ * provider has no ctx at flush time, so the fact is captured here instead.
+ * `undefined` = not captured yet — callers must treat that as untrusted, which
+ * matches Pi's own `ask` default.
+ */
+let capturedProjectTrust: boolean | undefined;
+
 /** Test reset — wired into test/setup.ts beforeEach. */
 export function __resetSessionCaptureState(): void {
 	capturedModelRegistry = undefined;
 	capturedUiContext = undefined;
 	capturedModel = undefined;
+	capturedProjectTrust = undefined;
+}
+
+/** The captured project-trust fact, or `undefined` when no real session fired. */
+export function getCapturedProjectTrust(): boolean | undefined {
+	return capturedProjectTrust;
 }
 
 // ---------------------------------------------------------------------------
@@ -93,8 +111,22 @@ export function registerSessionCapture(pi: ExtensionAPI): void {
 		"session_start",
 		async (
 			_event: unknown,
-			ctx: { modelRegistry?: ModelRegistry; model?: CapturedModel; ui?: ExtensionUIContext },
+			ctx: {
+				modelRegistry?: ModelRegistry;
+				model?: CapturedModel;
+				ui?: ExtensionUIContext;
+				isProjectTrusted?: () => boolean;
+			},
 		) => {
+			// Project trust is a ctx-only fact (see `capturedProjectTrust`), and it
+			// describes the PROJECT rather than the foreground — so it is captured
+			// BEFORE the lane-relay skip below, which guards foreground state only.
+			// A stale ctx throws; leave it undefined rather than keeping a stale value.
+			try {
+				capturedProjectTrust = ctx.isProjectTrusted?.();
+			} catch {
+				capturedProjectTrust = undefined;
+			}
 			// A detached child re-loads rpiv-core and re-fires this hook with
 			// its bound relay ui. Skip it — capturing the relay would re-point the
 			// launcher's captured foreground UI at a child (corrupting every later /wf,

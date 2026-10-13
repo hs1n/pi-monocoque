@@ -6,7 +6,7 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, sep } from "node:path";
+import { join, resolve, sep } from "node:path";
 import {
 	__resetSkillContracts,
 	buildEffectiveContracts,
@@ -19,7 +19,9 @@ import { defineWorkflow, produces } from "@hs1n/rpiv-workflow/registration";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { builtInWorkflows } from "./built-in-workflows.js";
 import { BUNDLED_SKILLS_DIR } from "./paths.js";
+import { __resetSessionCaptureState, getCapturedProjectTrust } from "./session-capture.js";
 import {
+	agentsSkillDirs,
 	artifactKindComparator,
 	buildSkillContractsFromFrontmatter,
 	buildUserSkillContracts,
@@ -569,7 +571,7 @@ Body here`;
 
 	it("returns contracts for skills in the global user skills dir (<agentDir>/skills)", () => {
 		writeSkill(userSkillsDir(), "my-custom-review", CONTRACT_SKILL);
-		const result = buildUserSkillContracts();
+		const result = buildUserSkillContracts(process.cwd(), true);
 		expect(result).toHaveLength(1);
 		expect(result[0]![0]).toBe("my-custom-review");
 		expect(result[0]![1]).toEqual({
@@ -581,7 +583,7 @@ Body here`;
 	it("returns contracts for project-local skills (<cwd>/.pi/skills)", () => {
 		projectDir = mkdtempSync(join(tmpdir(), "rpiv-user-skill-proj-"));
 		writeSkill(join(projectDir, ".pi", "skills"), "proj-review", CONTRACT_SKILL);
-		const result = buildUserSkillContracts(projectDir);
+		const result = buildUserSkillContracts(projectDir, true);
 		expect(result.map(([name]) => name)).toContain("proj-review");
 	});
 
@@ -594,12 +596,12 @@ description: Plain skill
 ---
 Body here`,
 		);
-		expect(buildUserSkillContracts()).toEqual([]);
+		expect(buildUserSkillContracts(process.cwd(), true)).toEqual([]);
 	});
 
 	it("returns [] when no user skill dirs exist", () => {
 		projectDir = mkdtempSync(join(tmpdir(), "rpiv-user-skill-empty-"));
-		expect(buildUserSkillContracts(projectDir)).toEqual([]);
+		expect(buildUserSkillContracts(projectDir, true)).toEqual([]);
 	});
 
 	// `.agents/skills` is a location Pi DISPATCHES from but the `loadSkills` helper
@@ -609,13 +611,13 @@ Body here`,
 	it("returns contracts for user skills in ~/.agents/skills", () => {
 		projectDir = mkdtempSync(join(tmpdir(), "rpiv-user-skill-agents-home-"));
 		writeSkill(agentsSkillsDir(), "agents-home-review", CONTRACT_SKILL);
-		expect(buildUserSkillContracts(projectDir).map(([name]) => name)).toContain("agents-home-review");
+		expect(buildUserSkillContracts(projectDir, true).map(([name]) => name)).toContain("agents-home-review");
 	});
 
 	it("returns contracts for project skills in <cwd>/.agents/skills", () => {
 		projectDir = mkdtempSync(join(tmpdir(), "rpiv-user-skill-agents-proj-"));
 		writeSkill(join(projectDir, ".agents", "skills"), "agents-proj-review", CONTRACT_SKILL);
-		expect(buildUserSkillContracts(projectDir).map(([name]) => name)).toContain("agents-proj-review");
+		expect(buildUserSkillContracts(projectDir, true).map(([name]) => name)).toContain("agents-proj-review");
 	});
 
 	it("walks ancestor .agents/skills up to the git repo root and no further", () => {
@@ -629,7 +631,7 @@ Body here`,
 		writeSkill(join(projectDir, ".agents", "skills"), "above-repo-root", CONTRACT_SKILL);
 		const nested = join(repoRoot, "packages", "deep");
 		mkdirSync(nested, { recursive: true });
-		const names = buildUserSkillContracts(nested).map(([name]) => name);
+		const names = buildUserSkillContracts(nested, true).map(([name]) => name);
 		expect(names).toContain("at-repo-root");
 		expect(names).not.toContain("above-repo-root");
 	});
@@ -645,7 +647,7 @@ Body here`,
 			"shared-review",
 			CONTRACT_SKILL.replace("artifactKind: review", "artifactKind: plan"),
 		);
-		const found = new Map(buildUserSkillContracts(inner));
+		const found = new Map(buildUserSkillContracts(inner, true));
 		expect(found.get("shared-review")?.produces?.meta).toEqual({ artifactKind: "plan" });
 	});
 });
@@ -702,7 +704,7 @@ describe("end-to-end: user-skill contract \u2192 effective contract map", () => 
 
 	it("a stage dispatching a user-installed skill gets its contract in the effective map", async () => {
 		tmpDir = mkdtempSync(join(tmpdir(), "rpiv-e2e-user-skill-"));
-		// Project-local skill location — buildUserSkillContracts(tmpDir) reads <cwd>/.pi/skills.
+		// Project-local skill location — buildUserSkillContracts(tmpDir, true) reads <cwd>/.pi/skills.
 		const skillDir = join(tmpDir, ".pi", "skills", "my-custom-review");
 		mkdirSync(skillDir, { recursive: true });
 		writeFileSync(
@@ -720,7 +722,7 @@ Body`,
 		// Simulate what the loader does: register the user-skill contract provider, then flush
 		const { registerSkillContractsProvider, registerSkillContracts } = await import("@hs1n/rpiv-workflow/startup");
 		registerSkillContractsProvider(() => {
-			registerSkillContracts(buildUserSkillContracts(tmpDir), "user-skills");
+			registerSkillContracts(buildUserSkillContracts(tmpDir, true), "user-skills");
 		});
 		await flushSkillContractProviders();
 
@@ -762,5 +764,74 @@ describe("owner collision: user-skills vs rpiv-pi", () => {
 		expect(collisions[0]).toContain("code-review");
 		expect(collisions[0]).toContain("user-skills");
 		expect(collisions[0]).toContain("rpiv-pi");
+	});
+});
+
+describe("project-trust gate on harvesting", () => {
+	// Pi gates DISPATCH from a project's `.agents/skills` (and `.pi/skills`) on
+	// project trust, but the harvester read both unconditionally — so an untrusted
+	// clone could put a divergent contract in the registry for a name Pi resolves
+	// to the bundled skill instead. The gate makes harvest follow dispatch.
+	const agentsSkillsDir = () => join(process.env.HOME!, ".agents", "skills");
+	const CONTRACT_SKILL = `---
+description: Gate probe
+contract:
+  produces:
+    kind: produces
+    meta:
+      artifactKind: review
+---
+Body`;
+
+	const writeSkill = (baseDir: string, name: string, content: string) => {
+		mkdirSync(join(baseDir, name), { recursive: true });
+		writeFileSync(join(baseDir, name, "SKILL.md"), content);
+	};
+
+	afterEach(() => {
+		rmSync(agentsSkillsDir(), { recursive: true, force: true });
+	});
+
+	it("an untrusted project contributes ONLY the always-trusted user dir", () => {
+		const projectDir = mkdtempSync(join(tmpdir(), "rpiv-gate-"));
+		try {
+			expect(agentsSkillDirs(join(projectDir, "deep"), false)).toEqual([resolve(agentsSkillsDir())]);
+		} finally {
+			rmSync(projectDir, { recursive: true, force: true });
+		}
+	});
+
+	it("an untrusted project's skills are not harvested, but ~/.agents/skills still is", () => {
+		const projectDir = mkdtempSync(join(tmpdir(), "rpiv-gate-"));
+		try {
+			// Both project locations Pi would gate on trust…
+			writeSkill(join(projectDir, ".agents", "skills"), "proj-agents", CONTRACT_SKILL);
+			writeSkill(join(projectDir, ".pi", "skills"), "proj-pi", CONTRACT_SKILL);
+			// …and the always-trusted user one.
+			writeSkill(agentsSkillsDir(), "user-agents", CONTRACT_SKILL);
+
+			const untrusted = buildUserSkillContracts(projectDir, false).map(([name]) => name);
+			expect(untrusted).toEqual(["user-agents"]);
+
+			const trusted = buildUserSkillContracts(projectDir, true).map(([name]) => name);
+			expect(trusted).toEqual(expect.arrayContaining(["user-agents", "proj-agents", "proj-pi"]));
+		} finally {
+			rmSync(projectDir, { recursive: true, force: true });
+		}
+	});
+
+	it("defaults to UNTRUSTED when no session captured trust (Pi's own `ask` default)", () => {
+		// Cleared explicitly: an earlier case in this file may have fired
+		// `session_start`, and the point here is the behaviour GIVEN no capture —
+		// the fail-closed direction, matching Pi refusing to dispatch project resources.
+		__resetSessionCaptureState();
+		expect(getCapturedProjectTrust()).toBeUndefined();
+		const projectDir = mkdtempSync(join(tmpdir(), "rpiv-gate-"));
+		try {
+			writeSkill(join(projectDir, ".agents", "skills"), "proj-agents", CONTRACT_SKILL);
+			expect(buildUserSkillContracts(projectDir).map(([name]) => name)).not.toContain("proj-agents");
+		} finally {
+			rmSync(projectDir, { recursive: true, force: true });
+		}
 	});
 });

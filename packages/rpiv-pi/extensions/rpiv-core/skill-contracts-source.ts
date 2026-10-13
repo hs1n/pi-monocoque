@@ -17,6 +17,7 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { getAgentDir, loadSkills, loadSkillsFromDir, parseFrontmatter } from "@earendil-works/pi-coding-agent";
 import type { ConsumesSpec, ProducesSpec, SchemaCompatResult, SkillContract } from "@hs1n/rpiv-workflow/registration";
 import { BUNDLED_SKILLS_DIR } from "./paths.js";
+import { getCapturedProjectTrust } from "./session-capture.js";
 import { isModuleNotFound } from "./utils.js";
 
 const JSON_SCHEMA_ROOT_KEYWORDS = new Set([
@@ -197,10 +198,17 @@ function findGitRepoRoot(start: string): string | null {
  * is nearest-first so that, when the same name is declared twice in the user
  * set, the more specific declaration is the one Pi's loader keeps.
  */
-export function agentsSkillDirs(cwd: string): string[] {
+export function agentsSkillDirs(cwd: string, trustedProject: boolean): string[] {
+	const userDir = resolve(homedir(), ".agents", "skills");
+	// `~/.agents/skills` is the one entry Pi treats as an always-trusted USER
+	// resource, so it survives an untrusted project. The project directories do
+	// not: Pi only dispatches from them when the project is trusted, and
+	// harvesting a contract for a skill Pi will not dispatch is worse than not
+	// having one — the registry would hold a divergent contract for a name that
+	// resolves somewhere else.
+	if (!trustedProject) return [userDir];
 	const start = resolve(cwd);
 	const root = findGitRepoRoot(start);
-	const userDir = resolve(homedir(), ".agents", "skills");
 	const dirs: string[] = [];
 	let dir = start;
 	for (;;) {
@@ -233,19 +241,36 @@ export function agentsSkillDirs(cwd: string): string[] {
  * exactly as rpiv-pi does for its bundled skills. Bundled rpiv-pi skills
  * are excluded by path (already covered by the `"rpiv-pi"` owner).
  */
-export function buildUserSkillContracts(cwd: string = process.cwd()): Array<[string, SkillContract]> {
+export function buildUserSkillContracts(
+	cwd: string = process.cwd(),
+	trustedProject: boolean = getCapturedProjectTrust() === true,
+): Array<[string, SkillContract]> {
 	let skills: ReadonlyArray<{ name: string; filePath: string }>;
 	try {
 		skills = loadSkills({
 			cwd,
 			agentDir: getAgentDir(),
-			skillPaths: agentsSkillDirs(cwd),
+			skillPaths: agentsSkillDirs(cwd, trustedProject),
 			includeDefaults: true,
 		}).skills;
 	} catch {
 		return [];
 	}
-	return contractEntriesFrom(skills.filter((s) => !isBundledSkillPath(s.filePath)));
+	// Pi gates `<cwd>/.pi/skills` on project trust as well, but `loadSkills` reads
+	// it unconditionally — so those results are dropped here for the same reason
+	// the project `.agents/skills` walk is skipped above. ".pi" is Pi's
+	// CONFIG_DIR_NAME; hard-coded rather than imported to keep this module's Pi
+	// surface to the four symbols it already uses.
+	const projectPiSkills = join(resolve(cwd), ".pi", "skills");
+	const isProjectPiSkill = (filePath: string): boolean => {
+		const rel = relative(projectPiSkills, filePath);
+		return rel !== "" && !rel.startsWith("..") && !isAbsolute(rel);
+	};
+	return contractEntriesFrom(
+		skills
+			.filter((s) => !isBundledSkillPath(s.filePath))
+			.filter((s) => trustedProject || !isProjectPiSkill(s.filePath)),
+	);
 }
 
 /**
