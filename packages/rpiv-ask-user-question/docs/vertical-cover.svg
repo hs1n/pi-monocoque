@@ -137,7 +137,7 @@
 
   <line x1="40" y1="1144" x2="500" y2="1144" class="rule" stroke-width="1"/>
   <text class="mono muted" x="40" y="1168" font-size="9" letter-spacing="1.6">
-    <tspan class="accent">&#9654;</tspan>  pi install github.com/hs1n/pi-monocoque
+    <tspan class="accent">&#9654;</tspan>  pi install git:github.com/hs1n/pi-monocoque
   </text>
   <text class="mono muted" x="500" y="1168" font-size="9" letter-spacing="2" text-anchor="end">CLARIFY</text>
 </svg>
