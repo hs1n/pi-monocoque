@@ -26,7 +26,7 @@ injected per session from `.rpiv/guidance/`, and restating them here spends cont
 
 ### Issue tracker
 
-Issues and specs live as GitHub issues, driven through `gh`. See `docs/agents/issue-tracker.md`.
+Issues and specs live as markdown under `.scratch/`, committed rather than ignored. See `docs/agents/issue-tracker.md`.
 
 ### Domain docs
 
