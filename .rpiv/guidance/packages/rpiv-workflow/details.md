@@ -56,9 +56,12 @@ skill-contract.ts, validate-workflow.ts (thin orchestrator over validate/), vali
    validation-bounds.ts, json-schema.ts, schema-compat.ts, typebox-adapter.ts
       — Contract registry + static/runtime validation + schema interop; every issue carries a `code` +
         `params` (assert/filter on codes, never message text)
-loop.ts, loop-kinds.ts, loop-parallel.ts, loop-waves.ts
+loop.ts, loop-kinds.ts, loop-parallel.ts, loop-waves.ts, session-fields.ts
       — THE unit-loop driver, per-kind strategy table, bounded-parallel dependency-ordered fanout
-        dispatch (retryHaltedUnits re-dispatch with per-attempt snapshots), Kahn topological wave levels
+        dispatch (retryHaltedUnits re-dispatch with per-attempt snapshots), Kahn topological wave levels;
+        session-fields.ts is the ONE site for the fields every StageSessionContext derives from the run
+        (shared by runner/run-stage.ts's single-stage builder and loop-kinds.ts's unit builder — it sits
+        below both so the cycle guard sees no back-edge)
 events.ts, triggers.ts, routing.ts, audit.ts/audit-ctx.ts/audit-rows.ts, handle.ts, chain-state.ts,
    built-ins.ts, stage-errors.ts, layers.ts, messages.ts, docs-protocol.ts, internal-utils.ts, types.ts,
    death-scene.ts, failure-memos.ts, worktree-digest.ts

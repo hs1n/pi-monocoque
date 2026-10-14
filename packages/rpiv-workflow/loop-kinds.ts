@@ -24,17 +24,17 @@
  */
 
 import type { AssessLoop, IterateLoop, LoopDef, StageDef, Unit, UnitRole } from "./api.js";
-import { decorateStage, runIdentityOf } from "./audit.js";
+import { decorateStage } from "./audit.js";
 // Fanout completion is INDEX-ADDRESSED (place-by-unitIndex), the
 // shared authority for the live parallel fold AND the resume fold so the two
 // reconstruct byte-identical declared-order state regardless of
 // completion/resume order. iterate/assess keep advanceCursor (sequential).
 import { placeFanoutOutput, resolveStagePrompt } from "./chain-state.js";
-import { failureMemoSuffix } from "./failure-memos.js";
 import { type Artifact, handleToString } from "./handle.js";
 import { isPanel, type Judge, type PanelJudge, panelMembers, resolveJudgePrompt } from "./judge.js";
 import { MSG_LOOP_CURSOR_CORRUPT } from "./messages.js";
 import { finalizeOutput, isFailedOutput, type Output, type OutputMeta } from "./output.js";
+import { runDerivedSessionFields } from "./session-fields.js";
 import { invariantPreflight } from "./stage-errors.js";
 import type { RunContext, RunState, StageSessionContext, UnitRef, WorkflowHostContext } from "./types.js";
 
@@ -540,24 +540,14 @@ export function buildUnitSession(
 	attemptOrdinal?: number,
 ): StageSessionContext {
 	return {
-		cwd: run.cwd,
-		runId: run.runId,
-		state: run.state,
-		prompt: u.prompt + failureMemoSuffix(run.state),
+		...runDerivedSessionFields(run, { prompt: u.prompt, stage: e.name, skill: u.skill }),
 		stageName: decorateStage(e.name, u.tag), // DISPLAY only — machine identity is `unit`
-		skill: u.skill,
-		lifecycle: run.lifecycle,
-		runIdentity: runIdentityOf(run),
 		stage: u.def,
-		skillContracts: run.skillContracts,
 		stageIndex: e.stageIdx,
 		snapshot,
+		signal,
 		branchOffset: undefined,
 		unit: { parent: e.name, role: u.role, index, id: u.id, label: u.label },
-		model: run.resolveModel?.({ workflow: run.workflow.name, stage: e.name, skill: u.skill }),
-		signal,
-		readSessionBranch: run.readSessionBranch,
-		worktreeDigest: run.worktreeDigest,
 		collectAll: shouldCollectAll(e.loop),
 		laneUnitIndex: laneIndexFor(e.loop, index),
 		// The v3 trail contract's attempt ordinal (present on every fanout unit

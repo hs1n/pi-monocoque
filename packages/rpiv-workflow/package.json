@@ -49,6 +49,7 @@
 		"death-scene.ts",
 		"execution-host.ts",
 		"failure-memos.ts",
+		"session-fields.ts",
 		"loop-constructors.ts",
 		"loops/",
 		"extension.ts",

@@ -21,10 +21,9 @@
  */
 
 import type { StageDef, Unit } from "../api.js";
-import { auditCtxFor, failedArgs, notifyPartialArtifacts, recordFatalFailure, runIdentityOf } from "../audit.js";
+import { auditCtxFor, failedArgs, notifyPartialArtifacts, recordFatalFailure } from "../audit.js";
 import { currentPrimaryArtifact, resolveStagePrompt, stageEntryArgs } from "../chain-state.js";
 import { lifecycleCtxFor, skillStageRef } from "../events.js";
-import { failureMemoSuffix } from "../failure-memos.js";
 import { formatError } from "../internal-utils.js";
 import { announceLoopStart, runLoop } from "../loop.js";
 import { freezesEntryArgsOf } from "../loop-constructors.js";
@@ -39,6 +38,7 @@ import {
 	MSG_RESUME_SESSION_FALLBACK,
 	MSG_SNAPSHOT_FAILED,
 } from "../messages.js";
+import { runDerivedSessionFields } from "../session-fields.js";
 import {
 	continueStageSession,
 	executeStageSession,
@@ -194,22 +194,12 @@ function buildSingleStageSession(
 	branchOffset: number | undefined,
 ): StageSessionContext {
 	return {
-		cwd: run.cwd,
-		runId: run.runId,
-		state: run.state,
-		prompt: prep.prompt + failureMemoSuffix(run.state),
+		...runDerivedSessionFields(run, { prompt: prep.prompt, stage: stage.name, skill: stage.skill }),
 		stageName: stage.name,
-		skill: stage.skill,
-		lifecycle: run.lifecycle,
-		runIdentity: runIdentityOf(run),
 		stage: stage.def,
-		skillContracts: run.skillContracts,
 		stageIndex: idx,
 		snapshot: prep.snapshot,
-		model: run.resolveModel?.({ workflow: run.workflow.name, stage: stage.name, skill: stage.skill }),
 		signal: run.signal,
-		readSessionBranch: run.readSessionBranch,
-		worktreeDigest: run.worktreeDigest,
 		branchOffset,
 		onFailure: (freshCtx) => notifyPartialArtifacts(freshCtx, run.cwd, run.runId),
 		onSuccess: (freshCtx) => advance(freshCtx, stage.name, idx, run),
