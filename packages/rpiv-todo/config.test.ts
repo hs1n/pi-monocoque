@@ -6,7 +6,6 @@ import {
 	DEFAULT_COLLAPSE_KEY,
 	DEFAULT_MAX_WIDGET_LINES,
 	getMaxWidgetLines,
-	isValidCollapseKeySpec,
 	loadConfig,
 	resolveCollapseKey,
 } from "./config.js";
@@ -119,39 +118,5 @@ describe("resolveCollapseKey", () => {
 		expect(resolveCollapseKey()).toBe(COLLAPSE_KEY_OFF);
 		writeConfigFile(JSON.stringify({ collapseKey: "alt+o" }));
 		expect(resolveCollapseKey()).toBe("alt+o");
-	});
-});
-
-describe("isValidCollapseKeySpec", () => {
-	it("accepts valid specs", () => {
-		expect(isValidCollapseKeySpec("ctrl+shift+t")).toBe(true);
-		expect(isValidCollapseKeySpec("alt+o")).toBe(true);
-		expect(isValidCollapseKeySpec("escape")).toBe(true);
-		expect(isValidCollapseKeySpec("f5")).toBe(true);
-		expect(isValidCollapseKeySpec("ctrl+]")).toBe(true);
-	});
-
-	it("rejects empty spec", () => {
-		expect(isValidCollapseKeySpec("")).toBe(false);
-	});
-
-	it("rejects leading, trailing, and double '+'", () => {
-		expect(isValidCollapseKeySpec("+")).toBe(false);
-		expect(isValidCollapseKeySpec("+t")).toBe(false);
-		expect(isValidCollapseKeySpec("ctrl+")).toBe(false);
-		expect(isValidCollapseKeySpec("ctrl++t")).toBe(false);
-	});
-
-	it("rejects unknown modifiers", () => {
-		expect(isValidCollapseKeySpec("win+t")).toBe(false);
-	});
-
-	it("rejects duplicate modifiers", () => {
-		expect(isValidCollapseKeySpec("ctrl+ctrl+t")).toBe(false);
-	});
-
-	it("rejects typo bases (multi-char non-special)", () => {
-		// 'ctr' is 3 chars and not a named special key → a typo for 'ctrl'.
-		expect(isValidCollapseKeySpec("ctr+t")).toBe(false);
 	});
 });

@@ -7,6 +7,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- **The `collapseKey` grammar, its display casing, the resolution ladder and the `off` sentinel move to `@hs1n/rpiv-config` (`keyspec.ts`).** This package had its own copy of all four and now keeps only what is genuinely its own: the default (`ctrl+]`) and the wiring that applies it. `config.ts` drops from 100 to 41 lines; `COLLAPSE_KEY_OFF` and `formatKeySpecForDisplay` are re-exported, so the four view/state modules that import them from `../config.js` are untouched.
+- **`collapseKey` is a `string` at runtime again.** The ladder now applies the typeof guard itself, so a hand-edited config holding a number or an object falls back to the default instead of throwing on `.trim()`. The old code relied on the field's static type to guarantee a string, which a config file does not.
+
 ### Added
 
 - **`locales/zh-TW.json`.** Traditional Chinese for the questionnaire chrome, covering all 26 current keys. Both templated hint values (`hint.collapse`, `hint.expand_line`) keep their `{key}` placeholder, which the locale contract test enforces. Key names and symbols stay untranslated on purpose (they are printed as keycaps) while the surrounding verbs follow Taiwan usage (`送出答案`, `備註`, `收合`, `切換題目`).

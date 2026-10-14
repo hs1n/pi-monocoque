@@ -7,6 +7,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- **The `collapseKey` grammar, its display casing, the resolution ladder and the `off` sentinel move to `@hs1n/rpiv-config` (`keyspec.ts`).** This package had its own copy of all four — the second of two, byte-identical but for the `export` keyword its own test needed — and now keeps only what is genuinely its own: the default (`ctrl+shift+t`) and the wiring that applies it. `config.ts` drops from 101 to 56 lines. No behaviour change; `isValidCollapseKeySpec` is no longer exported from here (its only consumer was the test that moved with it), and `COLLAPSE_KEY_OFF`/`CollapseKeySpec` are re-exported so every existing import site is unchanged.
+
 ### Added
 
 - **`locales/zh-TW.json`.** Traditional Chinese for the overlay and `/todos` chrome, covering the full current key set (13) — `registerLocalesFromDir` picks the file up with no code change, since it iterates the SDK's `SUPPORTED_LOCALES`. Terminology follows Taiwan usage (`待辦事項`, `待處理`, `已收合`, `互動模式`) rather than a character-by-character conversion of the Simplified map, and the `{key}` placeholder in `overlay.expandHint` is preserved so the runtime substitution still fires.

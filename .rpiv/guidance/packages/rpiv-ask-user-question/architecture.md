@@ -10,7 +10,7 @@ Single-tool extension exposing `ask_user_question` — a TUI option selector wit
 - **`@earendil-works/pi-coding-agent`** (peer): theme, markdown, dynamic border
 - **`@earendil-works/pi-tui`** (peer): containers, multiline editor, key matching, width-correct text helpers
 - **`@hs1n/rpiv-i18n`** (optional peer): live-locale strings via `state/i18n-bridge.ts`; English-fallback shim when absent
-- **`@hs1n/rpiv-config`**: `loadJsonConfigWithLegacyFallback` — honors `XDG_CONFIG_HOME` with a one-way legacy `~/.config` fallback; also `GuidanceFields`/`validateGuidanceFields` for the `guidance` config overrides
+- **`@hs1n/rpiv-config`**: `loadJsonConfigWithLegacyFallback` — honors `XDG_CONFIG_HOME` with a one-way legacy `~/.config` fallback; also `GuidanceFields`/`validateGuidanceFields` for the `guidance` config overrides, and `keyspec.ts` (`resolveCollapseKeySpec`, `formatKeySpecForDisplay`, `COLLAPSE_KEY_OFF`) for the collapse shortcut — the grammar, its display casing and the resolution ladder are shared with `rpiv-todo`, so this package supplies only its `ctrl+]` default
 - **`typebox`** (`peerDependencies: "*"`, host-provided): schema types. Pi supplies and aliases `typebox` at load time, so a `dependencies` entry is never needed and triggers the host's duplicate-module warning. The #79 diagnosis that peers were not resolvable was retracted by its reporter (v2.12.0, #282)
 
 ## Module Structure

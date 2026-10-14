@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+### Added
+- **`keyspec.ts`: pi-tui's KeyId grammar, and the ladder a key field goes through.** `isValidCollapseKeySpec(spec)` validates strictly enough that a typo cannot reach the host as a bare keypress, `formatKeySpecForDisplay(spec)` renders the same grammar for UI copy, `resolveCollapseKeySpec(raw, fallback)` runs the trim/lowercase → off-sentinel → grammar → fallback ladder (checking the sentinel first, since `"off"` is deliberately not a valid KeyId, and applying the typeof guard itself so a hand-edited config cannot throw), and `COLLAPSE_KEY_OFF` is the sentinel. `rpiv-todo` and `rpiv-ask-user-question` each implemented this separately — 40 shared lines apiece, gasping the same warning that a loose check makes `ctr+]` swallow every bare `]` for the session — and now keep only their own default (`ctrl+shift+t` / `ctrl+]`). The display table sits beside the grammar table because it is a function of it: `pageup`/`pagedown` are cased by hand, and the two lists can no longer drift into separate files.
+
 ## [2.13.8] - 2026-10-12
 
 ## [2.13.7] - 2026-10-12
