@@ -20,14 +20,16 @@
  * production state. Reach for it sparingly; prefer making the
  * production module itself idempotent across `beforeEach` resets.
  *
- * KNOWN DEBT (deliberately deferred): most of these exist because the
- * built-in/contract registries are process-global singletons (a deliberate
- * choice — siblings register across package-instance boundaries via
- * `Symbol.for` slots). Making them instantiable and threading an instance
- * through `loadWorkflows` would let tests construct fresh registries and
- * shrink this file toward zero; it's an API-design change that must be
- * coordinated with rpiv-pi's internal-subpath regression test, so it ships
- * in a follow-up minor, not the pre-release window.
+ * These exist because the registries are process-global, and that is NOT a debt
+ * to pay off. The four registry slots are WRITTEN by rpiv-pi at load time, through
+ * its own module instance, so no instance threaded through `loadWorkflows` could
+ * ever receive them — the `Symbol.for` slot is load-bearing and the reset exports
+ * below stay. The other two are not global-state problems at all: `strikeBudgets`
+ * is a WeakMap keyed by session identity (already self-cleaning), and
+ * `overlayCache` is an mtime-validated process-level cache.
+ *
+ * See `docs/adr/0004-cross-package-registries-stay-global.md` for the verification.
+ * Do not re-propose instancing these without reading it.
  */
 
 export { recordStage } from "./audit.js";
