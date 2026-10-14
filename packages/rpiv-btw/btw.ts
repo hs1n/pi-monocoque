@@ -19,7 +19,7 @@ import {
 	type ExtensionContext,
 	type SessionEntry,
 } from "@earendil-works/pi-coding-agent";
-import { loadIsContextOverflow, resolveSideCall, stripToolDeclarations } from "@hs1n/rpiv-sidecall";
+import { loadIsContextOverflow, resolveSideCall, stripToolDeclarations } from "@hs1n/rpiv-side-call";
 import { type CappedHistory, capHistory, type FitBranchResult, fitBranch } from "./btw-budget.js";
 import { assistantMessageText, type BtwTurn, userMessageText } from "./btw-messages.js";
 import { showBtwOverlay } from "./btw-ui.js";
@@ -89,7 +89,7 @@ interface BtwState {
  * and providers resolve the request's tools from them, so `tools: []` alone
  * would leave /btw able to stop on `toolUse` with no answer (#295). The prompt
  * text stays. The stripping is shared with the advisor's side call, which needs
- * the same guarantee, and lives in rpiv-sidecall.
+ * the same guarantee, and lives in rpiv-side-call.
  */
 export function branchToContextMessages(branch: SessionEntry[]): Message[] {
 	return stripToolDeclarations(convertToLlm(buildSessionContext(branch).messages));

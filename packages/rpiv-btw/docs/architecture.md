@@ -112,7 +112,7 @@ Hints are joined with `" · "` and truncated to the panel width.
 
 pi-ai resolves at runtime against the *host's* copy (all three pi peers are
 declared `"*"`), and pi moved the global dispatch API to a `/compat` entrypoint
-in 0.80.1. `@hs1n/rpiv-sidecall` therefore resolves `completeSimple` lazily:
+in 0.80.1. `@hs1n/rpiv-side-call` therefore resolves `completeSimple` lazily:
 
 1. `import("@earendil-works/pi-ai/compat")` — pi >= 0.80.1.
 2. On a **module-resolution** failure only, fall back to
@@ -152,7 +152,7 @@ rest render inside the overlay in the error style.
 
 ## Boundaries
 
-- **One runtime dependency, and it is not a sibling.** `@hs1n/rpiv-sidecall`
+- **One runtime dependency, and it is not a sibling.** `@hs1n/rpiv-side-call`
   supplies the host-tolerant side-call surface; no `devDependencies`, and the
   three `@earendil-works` peers are peer-pinned `"*"`. A library package is how
   the family shares behaviour without an extension-to-extension import — see

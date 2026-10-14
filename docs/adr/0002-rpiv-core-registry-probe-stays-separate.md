@@ -16,7 +16,7 @@ a module whose only other host dependency is `pi-ai`.
 
 ## Consequences
 
-When the side-call surface becomes a library package of its own (`rpiv-sidecall`, per the
+When the side-call surface becomes a library package of its own (`rpiv-side-call`, per the
 architecture review that produced this record), rpiv-core's copy stays where it is. The three
 files stay in sync by hand; their cross-references should point at each other as *related work*
 rather than implying a merge. If a future host moves the slot or exposes the runtime publicly,

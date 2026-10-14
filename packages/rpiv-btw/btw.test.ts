@@ -32,14 +32,14 @@ vi.mock("@earendil-works/pi-ai/compat", async (importOriginal) => {
 // `runtime` slot on ctx.modelRegistry. That global path imports pi-ai's /compat,
 // which this file mocks to the shared completeSimple spy (above), so existing
 // mockResolvedValueOnce chains keep working.
-vi.mock("@hs1n/rpiv-sidecall", async (importOriginal) => {
-	const actual = await importOriginal<typeof import("@hs1n/rpiv-sidecall")>();
+vi.mock("@hs1n/rpiv-side-call", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("@hs1n/rpiv-side-call")>();
 	return { ...actual, loadIsContextOverflow: vi.fn() };
 });
 
 import type { AssistantMessage, UserMessage } from "@earendil-works/pi-ai";
 import { completeSimple } from "@earendil-works/pi-ai/compat";
-import { loadIsContextOverflow } from "@hs1n/rpiv-sidecall";
+import { loadIsContextOverflow } from "@hs1n/rpiv-side-call";
 import {
 	assistantMessageText,
 	BTW_STATE_KEY,

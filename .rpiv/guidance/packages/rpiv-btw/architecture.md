@@ -8,9 +8,9 @@ Slash-command-only Pi extension. Spawns a one-off side call to the same primary 
 
 ## Dependencies
 - **`@earendil-works/pi-coding-agent`** (peer): `ExtensionAPI`/`ExtensionContext`, branch-to-LLM converter (`convertToLlm`), `SessionEntry`/`Theme` types
-- **`@earendil-works/pi-ai`** (peer): the legacy global `completeSimple` fallback and the overflow detector `isContextOverflow` (both resolved lazily against the host's copy — never a static import), plus message types; the PRIMARY side-call entry is the host's `ModelRuntime.completeSimple` facade read structurally off `ctx.modelRegistry`, with `tools: []` passed on either path. Both live behind `@hs1n/rpiv-sidecall`.
+- **`@earendil-works/pi-ai`** (peer): the legacy global `completeSimple` fallback and the overflow detector `isContextOverflow` (both resolved lazily against the host's copy — never a static import), plus message types; the PRIMARY side-call entry is the host's `ModelRuntime.completeSimple` facade read structurally off `ctx.modelRegistry`, with `tools: []` passed on either path. Both live behind `@hs1n/rpiv-side-call`.
 - **`@earendil-works/pi-tui`** (peer): overlay/component types (`OverlayOptions`, `Component`, `TUI`), key-matching (`matchesKey`), ANSI-safe width/wrap helpers
-- **`@hs1n/rpiv-sidecall`** (dependency): `resolveSideCall` (host path + the callable the side call dispatches through), `loadIsContextOverflow` (the retry gate) and `stripToolDeclarations`. A library package, not a sibling — see `docs/adr/0001-shared-family-behaviour-lives-in-library-packages.md`
+- **`@hs1n/rpiv-side-call`** (dependency): `resolveSideCall` (host path + the callable the side call dispatches through), `loadIsContextOverflow` (the retry gate) and `stripToolDeclarations`. A library package, not a sibling — see `docs/adr/0001-shared-family-behaviour-lives-in-library-packages.md`
 
 ## Consumers
 - **Pi extension host**: loads via `pi.extensions: ["./index.ts"]` — the sole consumer
@@ -19,7 +19,7 @@ Slash-command-only Pi extension. Spawns a one-off side call to the same primary 
 ```
 .                — Flat package. Logic + state in one source module (btw.ts); overlay controller in another (btw-ui.ts);
                    the BtwTurn record + text extractors in a cycle-break leaf (btw-messages.ts); context budgeting in
-                   btw-budget.ts; the host-version-tolerant side-call surface comes from the shared `@hs1n/rpiv-sidecall`;
+                   btw-budget.ts; the host-version-tolerant side-call surface comes from the shared `@hs1n/rpiv-side-call`;
                    composer (index.ts) wires command registrar + lifecycle hooks.
 prompts/         — System-prompt asset shipped via `files`. Loaded once at module init.
 ```
@@ -47,13 +47,13 @@ The cached branch clone is dropped on `session_compact` and `session_tree`. With
 - **Single-retry rule** — exactly one overflow retry halves `keepBudget`; the rebuild re-slices the cached snapshot (never re-reads the session). Legacy hosts where `isContextOverflow` is absent degrade gracefully with no retry, and never crash.
 
 ## Version-Tolerant `completeSimple` Resolution
-`resolveSideCall(ctx.modelRegistry)` in `@hs1n/rpiv-sidecall` reports which path this host takes. A `facade` host keeps its canonical `ModelRuntime` behind the extension `ModelRegistry`'s runtime-private `runtime` slot and applies credential-derived request fields internally (OAuth tokens, GitHub Copilot's OAuth-specific `baseUrl`), so that path passes only `{ signal }` (NEVER explicit `apiKey`/`headers`, which would bypass Pi's credential resolution) and a missing literal API key is not fatal. A `global` host has no runtime slot: the dispatch reports `mode: "global"` and its `completeSimple()` thunk awaits the legacy global entrypoint — never a static import, because pi-ai resolves against the HOST's copy (peer `"*"`). The thunk is lazy on purpose: the probe must answer synchronously (the missing-key guard runs before the try), while the import must run only when there is no facade and only inside the caller's own error boundary. The global path tries `@earendil-works/pi-ai/compat` first (Pi >= 0.80.1 moved the global dispatch API there), falling back to the package root ONLY on module-resolution failures (`ERR_PACKAGE_PATH_NOT_EXPORTED` / `ERR_MODULE_NOT_FOUND` / `MODULE_NOT_FOUND`, walking the error `cause` chain); any other `/compat` error rethrows so real init failures surface instead of being masked. `/compat` is temporary — when pi's ModelManager migration deletes it, `@hs1n/rpiv-sidecall` is the single place to migrate.
+`resolveSideCall(ctx.modelRegistry)` in `@hs1n/rpiv-side-call` reports which path this host takes. A `facade` host keeps its canonical `ModelRuntime` behind the extension `ModelRegistry`'s runtime-private `runtime` slot and applies credential-derived request fields internally (OAuth tokens, GitHub Copilot's OAuth-specific `baseUrl`), so that path passes only `{ signal }` (NEVER explicit `apiKey`/`headers`, which would bypass Pi's credential resolution) and a missing literal API key is not fatal. A `global` host has no runtime slot: the dispatch reports `mode: "global"` and its `completeSimple()` thunk awaits the legacy global entrypoint — never a static import, because pi-ai resolves against the HOST's copy (peer `"*"`). The thunk is lazy on purpose: the probe must answer synchronously (the missing-key guard runs before the try), while the import must run only when there is no facade and only inside the caller's own error boundary. The global path tries `@earendil-works/pi-ai/compat` first (Pi >= 0.80.1 moved the global dispatch API there), falling back to the package root ONLY on module-resolution failures (`ERR_PACKAGE_PATH_NOT_EXPORTED` / `ERR_MODULE_NOT_FOUND` / `MODULE_NOT_FOUND`, walking the error `cause` chain); any other `/compat` error rethrows so real init failures surface instead of being masked. `/compat` is temporary — when pi's ModelManager migration deletes it, `@hs1n/rpiv-side-call` is the single place to migrate.
 
 ## Architectural Boundaries
 - **NO disk persistence** — `globalThis` only; lost on Pi exit by design
 - **NO `ctx.signal` reuse** — own `AbortController` so Esc cancels only this command, not the main session
 - **NO tool registration** — slash command + lifecycle hooks only
-- **NO runtime imports of sibling packages** — the family's siblings never import each other at runtime. Shared behaviour goes into a **library package** instead (`@hs1n/rpiv-sidecall` here, `@hs1n/rpiv-config` before it): a library package is not a sibling, declares no `pi` field, and is reachable from every sibling without creating an extension-to-extension edge
+- **NO runtime imports of sibling packages** — the family's siblings never import each other at runtime. Shared behaviour goes into a **library package** instead (`@hs1n/rpiv-side-call` here, `@hs1n/rpiv-config` before it): a library package is not a sibling, declares no `pi` field, and is reachable from every sibling without creating an extension-to-extension edge
 - **System prompt is frozen** — dynamic context appended via a hint helper; never mutate the static prefix (cache parity)
 
 <important if="you are customizing the BTW overlay">

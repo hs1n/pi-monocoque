@@ -43,7 +43,7 @@
 		"LICENSE"
 	],
 	"dependencies": {
-		"@hs1n/rpiv-sidecall": "^2.13.8"
+		"@hs1n/rpiv-side-call": "^2.13.8"
 	},
 	"pi": {
 		"image": "https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-btw/docs/cover.png",

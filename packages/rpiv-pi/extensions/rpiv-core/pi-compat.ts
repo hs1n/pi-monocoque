@@ -16,7 +16,7 @@
  * hands the SAME runtime to the child — Pi's own idiom, where every session a
  * services bundle creates shares `services.modelRuntime`. Older hosts (≤ 0.80.7)
  * have no slot and still honour `modelRegistry`, so the registry is passed
- * through verbatim. `@hs1n/rpiv-sidecall`'s `resolveSideCall` is related work,
+ * through verbatim. `@hs1n/rpiv-side-call`'s `resolveSideCall` is related work,
  * deliberately NOT merged (docs/adr/0002): that resolves a side call's callable
  * via `completeSimple`, this selects a child session's model services via
  * `streamSimple`. If a future host moves the slot, this is the place to migrate.

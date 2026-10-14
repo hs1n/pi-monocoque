@@ -20,7 +20,7 @@ vi.mock("@earendil-works/pi-ai", async (importOriginal) => {
 });
 
 // `completeSimple` lives on the /compat entrypoint since pi 0.80; production
-// code resolves it through rpiv-sidecall's global path, which prefers /compat, so the
+// code resolves it through rpiv-side-call's global path, which prefers /compat, so the
 // stub must be registered there for the shim to pick it up.
 vi.mock("@earendil-works/pi-ai/compat", async (importOriginal) => {
 	const actual = await importOriginal<typeof import("@earendil-works/pi-ai/compat")>();

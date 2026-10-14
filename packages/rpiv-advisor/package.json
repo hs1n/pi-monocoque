@@ -48,7 +48,7 @@
 	},
 	"dependencies": {
 		"@hs1n/rpiv-config": "^2.13.8",
-		"@hs1n/rpiv-sidecall": "^2.13.8"
+		"@hs1n/rpiv-side-call": "^2.13.8"
 	},
 	"peerDependencies": {
 		"@earendil-works/pi-ai": "*",

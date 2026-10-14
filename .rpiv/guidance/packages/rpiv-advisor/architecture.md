@@ -8,8 +8,8 @@ Single-tool extension implementing the advisor-strategy pattern: registers an `a
 
 ## Dependencies
 - **`@earendil-works/pi-coding-agent`** (peer): `ExtensionAPI`, branch-to-LLM converter, dynamic border
-- **`@earendil-works/pi-ai`** (peer): `Model`/`Api`/`ThinkingLevel` types plus a static value import of `getSupportedThinkingLevels` (`advisor/command.ts` effort picker); only `completeSimple` is resolved at runtime, by the shared `@hs1n/rpiv-sidecall`
-- **`@hs1n/rpiv-sidecall`** (dependency): `resolveSideCall` (host path + callable for the side call) and `stripToolDeclarations` (re-exported by `advisor/context.ts` so the barrel's surface is unchanged)
+- **`@earendil-works/pi-ai`** (peer): `Model`/`Api`/`ThinkingLevel` types plus a static value import of `getSupportedThinkingLevels` (`advisor/command.ts` effort picker); only `completeSimple` is resolved at runtime, by the shared `@hs1n/rpiv-side-call`
+- **`@hs1n/rpiv-side-call`** (dependency): `resolveSideCall` (host path + callable for the side call) and `stripToolDeclarations` (re-exported by `advisor/context.ts` so the barrel's surface is unchanged)
 - **`@earendil-works/pi-tui`** (peer): containers, select list, layout primitives
 - **`@hs1n/rpiv-config`** (dependency): `validateGuidanceFields` (persisted prompt overrides), `modelKey`/`parseModelKey` (config codec + blocklist canonicalization)
 - **`typebox`** (`peerDependencies: "*"`, host-provided): empty parameter schema. Pi supplies and aliases `typebox` at load time, so it is never a `dependencies` entry — an installed copy would be a second live instance (v2.12.0, #282)
@@ -81,7 +81,7 @@ const response = await completeSimple(advisor, { systemPrompt: ADVISOR_SYSTEM_PR
 ## Architectural Boundaries
 - **NO main-transcript writes** — the advisor reply is returned as the tool result; never appended via `sendMessage`
 - **NO tools for the advisor** — the system prompt forbids tool calls; `completeSimple` is single-shot
-- **NO static `completeSimple` import** — pi >= 0.80.1 exports it from `@earendil-works/pi-ai/compat`, <= 0.79.x from the root; resolution lives in `@hs1n/rpiv-sidecall`, which resolves against the HOST's copy (peer pinned `"*"`) and is the single migration point when `/compat` is deleted. Its root fallback fires only on resolution failures (`ERR_PACKAGE_PATH_NOT_EXPORTED`/`ERR_MODULE_NOT_FOUND`/`MODULE_NOT_FOUND`, walked through the `cause` chain) so genuine `/compat` init errors surface instead of being masked
+- **NO static `completeSimple` import** — pi >= 0.80.1 exports it from `@earendil-works/pi-ai/compat`, <= 0.79.x from the root; resolution lives in `@hs1n/rpiv-side-call`, which resolves against the HOST's copy (peer pinned `"*"`) and is the single migration point when `/compat` is deleted. Its root fallback fires only on resolution failures (`ERR_PACKAGE_PATH_NOT_EXPORTED`/`ERR_MODULE_NOT_FOUND`/`MODULE_NOT_FOUND`, walked through the `cause` chain) so genuine `/compat` init errors surface instead of being masked
 - **Sentinel values for selector choices** — collision-proof versus `provider:modelId` keys
 - **Config file mode 0o600** — best-effort `chmod`; never throws on filesystems that lack chmod
 

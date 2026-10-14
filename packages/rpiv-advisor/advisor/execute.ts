@@ -15,7 +15,7 @@ import {
 	type ExtensionAPI,
 	type ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
-import { resolveSideCall } from "@hs1n/rpiv-sidecall";
+import { resolveSideCall } from "@hs1n/rpiv-side-call";
 import { ensureUserTailForAdvisor, stripInflightAdvisorCall, stripToolDeclarations } from "./context.js";
 import { getInventoryMessage } from "./inventory.js";
 import {

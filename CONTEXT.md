@@ -55,9 +55,9 @@ _Avoid_: semver, independently versioned
 **side call**:
 A one-off model call an extension makes outside the main transcript — its own prompt, no
 tools, nothing written back. `rpiv-advisor` and `rpiv-btw` are the two surfaces that make
-one; `rpiv-sidecall` is the shared module that resolves how to make one across host
+one; `rpiv-side-call` is the shared module that resolves how to make one across host
 versions.
-_Avoid_: sub-call, secondary request, side conversation (`/btw`'s overlay is its UI, not the call)
+_Avoid_: sidecall, sub-call, secondary request, side conversation (`/btw`'s overlay is its UI, not the call)
 
 ### Skill ownership
 

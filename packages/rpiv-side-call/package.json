@@ -1,5 +1,5 @@
 {
-	"name": "@hs1n/rpiv-sidecall",
+	"name": "@hs1n/rpiv-side-call",
 	"version": "2.13.8",
 	"description": "Shared host-version-tolerant side-call surface for pi-monocoque sibling packages",
 	"keywords": [
@@ -13,9 +13,9 @@
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/hs1n/pi-monocoque.git",
-		"directory": "packages/rpiv-sidecall"
+		"directory": "packages/rpiv-side-call"
 	},
-	"homepage": "https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-sidecall#readme",
+	"homepage": "https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-side-call#readme",
 	"bugs": {
 		"url": "https://github.com/hs1n/pi-monocoque/issues"
 	},

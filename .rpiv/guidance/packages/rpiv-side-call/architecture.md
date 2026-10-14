@@ -1,4 +1,4 @@
-# rpiv-sidecall
+# rpiv-side-call
 
 ## Monorepo Context
 Library (not published) in `pi-monocoque`. Lockstep version with the rest of the `@hs1n/rpiv-*` family — never bump independently. NOT a Pi extension — no `pi` field, no `siblings.ts` entry, no line in the root `pi` manifest, not auto-suggested by `/rpiv-setup`. Consumers declare it in `dependencies` explicitly. The family's siblings may not import each other at runtime; a library package is the sanctioned way to share behaviour, and this is the third one (see `docs/adr/0001-shared-family-behaviour-lives-in-library-packages.md`).

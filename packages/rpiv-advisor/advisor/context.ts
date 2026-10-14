@@ -47,6 +47,6 @@ export function ensureUserTailForAdvisor(messages: Message[]): Message[] {
 // with no text (#295). Drop the deltas, keep the prompt text; the inventory
 // message already tells the advisor what the executor's tools are. The
 // stripping itself is shared with the family's other side call (`/btw`), which
-// needs the same guarantee, so it lives in rpiv-sidecall and is re-exported
+// needs the same guarantee, so it lives in rpiv-side-call and is re-exported
 // here: this module stays the branch-message surface published by the barrel.
-export { stripToolDeclarations } from "@hs1n/rpiv-sidecall";
+export { stripToolDeclarations } from "@hs1n/rpiv-side-call";
