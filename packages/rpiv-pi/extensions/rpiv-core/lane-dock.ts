@@ -26,6 +26,7 @@ import {
 	SPIN_INTERVAL_MS,
 	SPINNER_FRAMES,
 } from "./lane-list.js";
+import { buildLaneSnapshot, registryLaneReader } from "./lane-snapshot.js";
 import { type LaneEntry, laneNeedsInput, listLanes, listLanesForDisplay } from "./run-lane-registry.js";
 
 const WIDGET_KEY = "rpiv-lanes";
@@ -166,12 +167,12 @@ export class LaneDock {
 	}
 
 	private renderWidget(theme: Theme, width: number): string[] {
-		const rows = listLanesForDisplay();
-		if (rows.length === 0) return [];
+		const snapshot = buildLaneSnapshot(registryLaneReader);
+		if (snapshot.rows.length === 0) return [];
 		const { laneCap } = computeLaneLayout(this.getTerminalRows());
 		// The lane block itself comes from the SHARED renderer — byte-for-byte the browser's rows.
 		// The dock is a read-only ambient glance: never active, no selection cursor (active:false).
-		const list = renderLaneList(theme, width, { active: false, selection: 0, frame: this.frame, laneCap });
+		const list = renderLaneList(theme, width, snapshot, { active: false, selection: 0, frame: this.frame, laneCap });
 		// Ambient discoverability footer (dim), indented one space — preceded by a blank (rhythm) and
 		// followed by the bottom rule. Both always dim: no active-state accent term survives.
 		const footer = truncateToWidth(` ${theme.fg("dim", DEFAULT_FOOTER_TEXT)}`, width, "…");

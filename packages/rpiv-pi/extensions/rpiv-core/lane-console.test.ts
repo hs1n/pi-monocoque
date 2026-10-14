@@ -14,6 +14,7 @@ import { createMockPi, makeAssistantMessage, makeUserMessage } from "@hs1n/rpiv-
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { cappedTui, LaneConsole, showLaneConsole } from "./lane-console.js";
 import { renderLaneList } from "./lane-list.js";
+import { buildLaneSnapshot, registryLaneReader } from "./lane-snapshot.js";
 import type { ViewerMessage } from "./lane-transcript.js";
 import {
 	__resetRunLaneRegistry,
@@ -196,9 +197,12 @@ describe("LaneConsole — live output + bottom-pinned lane block", () => {
 	it("the bottom lane row is byte-for-byte the ambient dock row plus the ❯ cursor (static lanes)", () => {
 		liveUnit(() => [assistantEntry("ctx line")]);
 		// The ambient dock row (active=false) and the console's selected row differ ONLY by the gutter.
-		const ambientRow = renderLaneList(identityTheme, 80, { active: false, selection: 0, frame: 0, laneCap: 11 }).find(
-			(l) => l.includes("ship"),
-		);
+		const ambientRow = renderLaneList(identityTheme, 80, buildLaneSnapshot(registryLaneReader), {
+			active: false,
+			selection: 0,
+			frame: 0,
+			laneCap: 11,
+		}).find((l) => l.includes("ship"));
 		const panel = new LaneConsole("run-1", SINGLE_UNIT_KEY, makeTui(), identityTheme, {} as never, vi.fn(), vi.fn());
 		const consoleRow = panel.render(80).find((l) => l.includes("ship"));
 		expect(ambientRow).toBeDefined();

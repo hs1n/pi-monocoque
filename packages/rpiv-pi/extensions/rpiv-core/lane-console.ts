@@ -63,6 +63,7 @@ import {
 	SPIN_INTERVAL_MS,
 	SPINNER_FRAMES,
 } from "./lane-list.js";
+import { buildLaneSnapshot, registryLaneReader } from "./lane-snapshot.js";
 import { LaneTranscriptView } from "./lane-transcript-view.js";
 import {
 	type DisplayRow,
@@ -350,7 +351,10 @@ export class LaneConsole implements Component {
 	render(width: number): string[] {
 		const realRows = (this.tui.terminal as { rows?: number }).rows ?? FALLBACK_ROWS;
 		const maxRows = Math.max(MIN_SURFACE_ROWS, Math.floor(realRows * MAX_HEIGHT_RATIO));
-		const rows = listLanesForDisplay();
+		// ONE registry read for this whole render — the rows, the selection clamp, the lane block,
+		// the recap and the stage breakdown all read this value, so they cannot disagree.
+		const snapshot = buildLaneSnapshot(registryLaneReader);
+		const rows = snapshot.rows;
 		// Defensive clamp — the row set can shrink between a sync() and this render().
 		const selection = rows.length > 0 ? Math.min(this.selection, rows.length - 1) : 0;
 		const target = resolveRow(rows[selection]);
@@ -360,15 +364,22 @@ export class LaneConsole implements Component {
 		// block is identical (the browser spends its extra height on live output, not a taller list)
 		// — this is what keeps the lane view static across the step-in.
 		const { laneCap } = computeLaneLayout(realRows);
-		const laneList = renderLaneList(this.theme, width, { active: true, selection, frame: this.frame, laneCap });
+		const laneList = renderLaneList(this.theme, width, snapshot, {
+			active: true,
+			selection,
+			frame: this.frame,
+			laneCap,
+		});
 		// Recap summary (auto-shows — no toggle): ONE trail-derived end-of-run line for the
 		// selected lane (newest artifact · +N more · ⚠ reason). Empty when the lane is missing,
 		// carries no recap (a running / reactivated lane renders byte-identical), or the recap
 		// adds nothing beyond the lane chip. Spliced AFTER the lane list and BEFORE the optional
 		// stage block; ≤1 line, absorbed by the transcript flex region.
-		const recapBlock = target ? renderRecap(this.theme, width, target.runId) : [];
+		const recapBlock = target ? renderRecap(this.theme, width, snapshot.recapFor(target.runId)) : [];
 		const stageBlock =
-			target && this.stageBreakdownExpanded ? renderStageBreakdown(this.theme, width, target.runId) : [];
+			target && this.stageBreakdownExpanded
+				? renderStageBreakdown(this.theme, width, snapshot.stageLinesFor(target.runId))
+				: [];
 		const rule = this.theme.fg("accent", "─".repeat(Math.max(0, width)));
 		const laneBlock = [
 			...laneList,

@@ -6,29 +6,25 @@
  * per-surface differences are the `❯` selection cursor (already reserved in the gutter) and
  * the footer, which each surface owns.
  *
- * Everything here is a pure function of `(theme, width, registry snapshot)` plus an injected
- * spinner `frame` (each surface drives its own repaint timer). The registry is read live at
- * render time — never a stale snapshot.
+ * Every renderer here is a pure function of `(theme, width, LaneSnapshot)` plus an injected
+ * spinner `frame` (each surface drives its own repaint timer). The registry is read by
+ * `lane-snapshot.ts` once per render — live, never cached — and nothing below reads it.
  */
 
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
+import type { RunRecap } from "@hs1n/rpiv-workflow";
 import { shortFailureReason } from "./lane-failure.js";
-import { addLaneUsage, formatTokens, type LaneUsage } from "./lane-usage.js";
-import {
-	type DisplayRow,
-	getLane,
-	type LaneEntry,
-	type LaneProgress,
-	type LaneStatus,
-	laneNeedsInput,
-	listLanes,
-	listLanesForDisplay,
-	type UnitLane,
-	unitNeedsInput,
-	unitUsage,
-} from "./run-lane-registry.js";
-import { getSubagentUsageForRun, getSubagentUsageForStage } from "./subagent-usage.js";
+import type {
+	LaneRowSnapshot,
+	LaneSnapshot,
+	LaneSnapshotRow,
+	LaneSnapshotTotals,
+	LaneStageLine,
+	UnitRowSnapshot,
+} from "./lane-snapshot.js";
+import { formatTokens, type LaneUsage } from "./lane-usage.js";
+import type { LaneEntry, LaneProgress, LaneStatus } from "./run-lane-types.js";
 
 /** Per-row CAP on the lane region (the scroll-follow window + its +N above/below summaries).
  *  computeLaneLayout bounds laneCap at MAX_WIDGET_LINES - 1, so the list never grows unbounded. */
@@ -137,64 +133,9 @@ function formatUsageTally(usage: LaneUsage | undefined): string {
 	return segments.join(" ");
 }
 
-/** Run-level token aggregate over a lane's units — sums the four token dimensions across every
- *  unit's EFFECTIVE usage (teardown snapshot else live child), recomputes total, accumulates
- *  scalar cost, omits percent. Returns undefined when NO unit carries usage. */
-function sumLaneUsage(units: Iterable<UnitLane>): LaneUsage | undefined {
-	let input = 0;
-	let output = 0;
-	let cacheRead = 0;
-	let cacheWrite = 0;
-	let cost = 0;
-	let hasCost = false;
-	let any = false;
-	for (const unit of units) {
-		const u = unitUsage(unit);
-		if (!u) continue;
-		any = true;
-		input += u.input;
-		output += u.output;
-		cacheRead += u.cacheRead;
-		cacheWrite += u.cacheWrite;
-		if (u.cost !== undefined) {
-			cost += u.cost;
-			hasCost = true;
-		}
-	}
-	if (!any) return undefined;
-	const result: LaneUsage = { input, output, cacheRead, cacheWrite, total: input + output + cacheRead + cacheWrite };
-	if (hasCost) result.cost = cost;
-	return result;
-}
-
-/** The single definition of "a lane's tokens" — the run-so-far total, unified at read
- *  time from the three disjoint token sources:
- *    1. folded prior-stage orchestrator tokens (`lane.stageUsage` — `foldStageUsage`
- *       moves a stage's tokens here BEFORE `clearUnitLanes` empties `units`, so the two
- *       never overlap);
- *    2. the CURRENT stage's live/retained orchestrator units (`sumLaneUsage(units)`);
- *    3. the run's recorded subagent contribution (`getSubagentUsageForRun`).
- *  Shared by the per-row tally (`renderLaneRow`) and the run grand total (`sumRunUsage`
- *  → `renderHeading`) so the heading and the rows can never disagree — and both agree
- *  with the sum of `renderStageBreakdown`'s per-stage lines, which read the same three
- *  sources stage-by-stage. Returns undefined when no source carries usage. */
-function laneUsageTotal(lane: LaneEntry): LaneUsage | undefined {
-	let folded: LaneUsage | undefined;
-	for (const usage of lane.stageUsage.values()) folded = addLaneUsage(folded, usage);
-	return addLaneUsage(addLaneUsage(folded, sumLaneUsage(lane.units.values())), getSubagentUsageForRun(lane.runId));
-}
-
-/** Run-level token aggregate across every lane — folds each lane's `laneUsageTotal`
- *  (orchestrator units + subagent contribution) through `addLaneUsage`: 4-way sum,
- *  recomputed `total`, `cost` accumulated when any side carries it, `percent` dropped.
- *  Returns undefined when no lane carries usage. */
-function sumRunUsage(lanes: Iterable<LaneEntry>): LaneUsage | undefined {
-	let acc: LaneUsage | undefined;
-	for (const lane of lanes) {
-		acc = addLaneUsage(acc, laneUsageTotal(lane));
-	}
-	return acc;
-}
+// The token fold that used to live here — the per-lane total, the per-unit sum and the run
+// grand total — now happens once in `lane-snapshot.ts`, so the row tally, the heading total and
+// the per-stage lines all read one result instead of folding the same three sources twice.
 
 /** The compact CAP + lane-region budget, computed from the terminal size. `totalRows` is
  *  min(MAX_DOCK_ROWS, terminal.rows); `laneCap` is the lane region, bounded by MAX_WIDGET_LINES
@@ -215,7 +156,7 @@ export function computeLaneLayout(termRows: number): { totalRows: number; laneCa
  *  selection is always inside the window; it opens at a lane boundary and folds whole lane+unit
  *  groups atomically. */
 export function computeViewport(
-	rows: DisplayRow[],
+	rows: readonly { readonly kind: "lane" | "unit" }[],
 	selection: number,
 	laneCap: number,
 ): { start: number; window: number; above: number; below: number } {
@@ -245,14 +186,14 @@ export function computeViewport(
  */
 function renderUnitRow(
 	theme: Theme,
-	lane: LaneEntry,
-	unit: UnitLane,
+	row: UnitRowSnapshot,
 	labelWidth: number,
 	selected: boolean,
 	frame: number,
 ): string {
+	const { unit } = row;
 	const gutter = selected ? theme.fg("accent", theme.bold(CURSOR_SELECTED)) : CURSOR_UNSELECTED;
-	const needs = unitNeedsInput(lane.runId, unit.index);
+	const needs = row.needsInput;
 	let glyph: string;
 	let glyphColor: ThemeColor;
 	if (needs) {
@@ -274,7 +215,7 @@ function renderUnitRow(
 	const indent = "  ";
 	const label = unit.label ?? `unit ${unit.index}`;
 	const labelCell = labelWidth > 0 ? padCol(theme, selected ? "accent" : "text", label, labelWidth, selected) : label;
-	const usageTally = formatUsageTally(unitUsage(unit));
+	const usageTally = formatUsageTally(row.usage);
 	const tail = needs
 		? theme.fg("warning", "needs input")
 		: theme.fg("muted", unit.status === "running" ? "live" : unit.status) +
@@ -321,14 +262,15 @@ function renderProgressRow(
  *  [stage progress / status word]. needs-input wins the glyph + trailing label. */
 function renderLaneRow(
 	theme: Theme,
-	lane: LaneEntry,
+	row: LaneRowSnapshot,
 	width: number,
 	labelWidth: number,
 	selected: boolean,
 	frame: number,
 ): string {
+	const { lane } = row;
 	const gutter = selected ? theme.fg("accent", theme.bold(CURSOR_SELECTED)) : CURSOR_UNSELECTED;
-	const needs = laneNeedsInput(lane.runId);
+	const needs = row.needsInput;
 	const progress = lane.progress;
 	const running = lane.status === "running";
 
@@ -361,8 +303,7 @@ function renderLaneRow(
 
 	if (needs) return `${prefix}${theme.fg("warning", "needs input")}`;
 	const reason = shortFailureReason(lane.error ?? (progress?.phase === "error" ? progress.reason : undefined));
-	if (progress)
-		return renderProgressRow(theme, prefix, progress, width, reason, laneUsageTotal(lane), lane.lastArtifact);
+	if (progress) return renderProgressRow(theme, prefix, progress, width, reason, row.usage, lane.lastArtifact);
 	const label = running ? "streaming…" : lane.status;
 	const tail = reason ? `${theme.fg("muted", label)}${theme.fg("warning", ` — ${reason}`)}` : theme.fg("muted", label);
 	return `${prefix}${tail}`;
@@ -370,23 +311,20 @@ function renderLaneRow(
 
 /** The title chip (`  ● [ N runs need input · 4m ]` / `  [ Runs (2 active) ]`) — identical on
  *  both surfaces. A STATIC ● (warning) flags needs-input urgency outside the selectedBg chip. */
-function renderHeading(theme: Theme, width: number): string {
-	const allLanes = listLanes();
-	const needsInputLanes = allLanes.filter((l) => laneNeedsInput(l.runId));
-	const anyNeedsInput = needsInputLanes.length > 0;
-	const activeCount = allLanes.filter((l) => l.status === "running").length;
+function renderHeading(theme: Theme, width: number, totals: LaneSnapshotTotals): string {
+	const anyNeedsInput = totals.needsInput > 0;
 	let headText: string;
 	if (anyNeedsInput) {
 		const now = Date.now();
-		const oldest = needsInputLanes.reduce((min, l) => Math.min(min, l.needsInputSince ?? now), now);
-		const verb = needsInputLanes.length === 1 ? "run needs" : "runs need";
-		headText = `${needsInputLanes.length} ${verb} input · ${formatAge(now - oldest)}`;
+		const oldest = Math.min(totals.oldestNeedsInputSince ?? now, now);
+		const verb = totals.needsInput === 1 ? "run needs" : "runs need";
+		headText = `${totals.needsInput} ${verb} input · ${formatAge(now - oldest)}`;
 	} else {
-		headText = activeCount > 0 ? `Runs (${activeCount} active)` : `Runs (${allLanes.length})`;
+		headText = totals.active > 0 ? `Runs (${totals.active} active)` : `Runs (${totals.lanes})`;
 	}
 	const titleIcon = anyNeedsInput ? `${theme.fg("warning", "●")} ` : "";
 	const chip = theme.bg("selectedBg", ` ${headText} `);
-	const tally = formatUsageTally(sumRunUsage(allLanes));
+	const tally = formatUsageTally(totals.usage);
 	const tallyStr = tally ? theme.fg("muted", `  ${tally}`) : "";
 	return truncateToWidth(`  ${titleIcon}${chip}${tallyStr}`, width, "…");
 }
@@ -396,38 +334,44 @@ function renderHeading(theme: Theme, width: number): string {
  * surface frames those itself). The `❯` cursor is drawn only on `active && i === selection`, so
  * an ambient render (active=false) and a stepped-in render (active=true) produce IDENTICAL rows
  * apart from the gutter glyph — the invariant that keeps the lane view static across step-in.
- * `frame` is the caller's spinner tick; `laneCap` comes from computeLaneLayout.
+ * `frame` is the caller's spinner tick; `laneCap` comes from computeLaneLayout. `snapshot` is
+ * the value the caller built for THIS render — the renderer neither caches nor re-reads it.
  */
 export function renderLaneList(
 	theme: Theme,
 	width: number,
+	snapshot: LaneSnapshot,
 	opts: { active: boolean; selection: number; frame: number; laneCap: number },
 ): string[] {
-	const rows = listLanesForDisplay();
+	const rows = snapshot.rows;
 	if (rows.length === 0) return [];
 	const { active, selection, frame, laneCap } = opts;
-	const allLanes = listLanes();
 	const truncate = (line: string): string => truncateToWidth(line, width, "…");
-	const lines: string[] = ["", renderHeading(theme, width), ""];
+	const lines: string[] = ["", renderHeading(theme, width, snapshot.totals), ""];
 
-	// Content-aware label-column width — the MAX descriptor / unit-label width among the visible
-	// lanes, clamped to MAX_LABEL_WIDTH and the available row width, so the progress region stays
+	// Content-aware label-column width — the MAX descriptor / unit-label width among every lane,
+	// clamped to MAX_LABEL_WIDTH and the available row width, so the progress region stays
 	// column-aligned and a unit label never truncates to the (short) runId descriptor.
 	const labelWidth = Math.min(
 		MAX_LABEL_WIDTH,
-		allLanes.reduce((m, l) => {
-			let w = Math.max(m, visibleWidth(laneDescriptor(l)));
-			for (const u of l.units.values()) w = Math.max(w, visibleWidth(u.label ?? `unit ${u.index}`));
+		rows.reduce((m, row) => {
+			let w = Math.max(m, visibleWidth(laneDescriptor(row.lane)));
+			// Every unit of every lane — including the single-stage slot that never gets a sub-row.
+			// The measure is deliberately byte-for-byte the pre-snapshot one, so the descriptor
+			// column cannot shift under an unchanged lane set.
+			if (row.kind === "lane") {
+				for (const u of row.lane.units.values()) w = Math.max(w, visibleWidth(u.label ?? `unit ${u.index}`));
+			}
 			return w;
 		}, 0),
 		Math.max(0, width - LABEL_LEADING - PROGRESS_MIN_WIDTH),
 	);
 	const sel = (i: number): boolean => active && i === selection;
-	const renderAt = (row: DisplayRow, i: number): string =>
+	const renderAt = (row: LaneSnapshotRow, i: number): string =>
 		truncate(
 			row.kind === "lane"
-				? renderLaneRow(theme, row.lane, width, labelWidth, sel(i), frame)
-				: renderUnitRow(theme, row.lane, row.unit, labelWidth, sel(i), frame),
+				? renderLaneRow(theme, row, width, labelWidth, sel(i), frame)
+				: renderUnitRow(theme, row, labelWidth, sel(i), frame),
 		);
 
 	const vp = computeViewport(rows, selection, laneCap);
@@ -452,8 +396,8 @@ export function renderLiveOutputBorder(theme: Theme, width: number): string {
 
 /**
  * Render the end-of-run summary (the post-mortem recap) for ONE lane (console-only —
- * the ambient dock never calls this, mirroring `renderStageBreakdown`). Reads the lane
- * LIVE; a missing/evicted lane or a lane with no `recap` yields []. Auto-shows in the
+ * the ambient dock never calls this, mirroring `renderStageBreakdown`). Takes the recap the
+ * snapshot resolved (`LaneSnapshot.recapFor`); a lane with no `recap` yields []. Auto-shows in the
  * console's laneBlock (no toggle — distinct from the `s`-gated `renderStageBreakdown`),
  * and ≤1 line by construction so the console's constant-height invariant holds. Its
  * outcome can legitimately diverge from the lane chip (the accepted
@@ -463,8 +407,7 @@ export function renderLiveOutputBorder(theme: Theme, width: number): string {
  * honest pass-through floors' deferral notes, visible without claiming a line
  * of their own.
  */
-export function renderRecap(theme: Theme, width: number, runId: string): string[] {
-	const recap = getLane(runId)?.recap;
+export function renderRecap(theme: Theme, width: number, recap: RunRecap | undefined): string[] {
 	if (!recap) return [];
 	const parts: string[] = [];
 	const n = recap.artifacts.length;
@@ -488,34 +431,25 @@ export function renderRecap(theme: Theme, width: number, runId: string): string[
 
 /**
  * Render the per-stage token breakdown for ONE lane (console-only — the ambient dock
- * never calls this, so its capped region is unchanged). Reads the lane LIVE; a missing
- * or evicted lane yields []. Stages appear in execution order: stageUsage insertion
- * order (folded prior stages), then the current stage name if not already present.
+ * never calls this, so its capped region is unchanged). Takes the lines the snapshot resolved
+ * (`LaneSnapshot.stageLinesFor`); a missing or evicted lane yields []. Stages arrive in
+ * execution order: stageUsage insertion order (folded prior stages), then the current stage
+ * name if not already present.
  *
- * Each stage's unified usage folds three sources through addLaneUsage (the token-source
- * partitioning invariant — orchestrator + subagent are unified ONLY here, never in storage):
+ * Each line's usage already folds three sources through addLaneUsage (the token-source
+ * partitioning invariant — orchestrator + subagent are unified at read time only, never in storage):
  *   1. the folded stageUsage bucket (prior stages' tokens, retained across clearUnitLanes);
  *   2. the CURRENT stage's live units (added at read time, since no fold fires for a running
- *      stage — sumLaneUsage(lane.units.values()) when this stage is the active one, else
- *      undefined for a completed stage whose units were already folded + cleared);
+ *      stage, and undefined for a completed stage whose units were already folded + cleared);
  *   3. the stage's subagent contribution (getSubagentUsageForStage).
  * A stage with zero net usage (empty tally) is omitted; returns [] when no stage carries
  * usage. Each rendered line reuses the SAME formatUsageTally idiom the lane row uses.
  */
-export function renderStageBreakdown(theme: Theme, width: number, runId: string): string[] {
-	const lane = getLane(runId);
-	if (!lane) return [];
-	const currentName = lane.progress?.stageName;
-	// Execution order: folded stages in insertion order, then the current stage if new.
-	const stageNames: string[] = [...lane.stageUsage.keys()];
-	if (currentName && !stageNames.includes(currentName)) stageNames.push(currentName);
+export function renderStageBreakdown(theme: Theme, width: number, stageLines: readonly LaneStageLine[]): string[] {
 	const lines: string[] = [];
-	for (const name of stageNames) {
-		const folded = lane.stageUsage.get(name);
-		const live = name === currentName ? sumLaneUsage(lane.units.values()) : undefined;
-		const total = addLaneUsage(addLaneUsage(folded, live), getSubagentUsageForStage(runId, name));
-		const tally = formatUsageTally(total);
-		if (tally) lines.push(truncateToWidth(`  ${theme.fg("muted", `${name} ${tally}`)}`, width, "…"));
+	for (const line of stageLines) {
+		const tally = formatUsageTally(line.usage);
+		if (tally) lines.push(truncateToWidth(`  ${theme.fg("muted", `${line.name} ${tally}`)}`, width, "…"));
 	}
 	return lines;
 }
