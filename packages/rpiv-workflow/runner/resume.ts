@@ -103,6 +103,28 @@ export type ReconstructResult =
 	  }
 	| { ok: false; reason: "no-rows" | "stage-gone" | "malformed-row" | "version-mismatch"; detail: string };
 
+/**
+ * A reconstructed run's trail: the rows the strict reader accepted, plus the position of every
+ * routing-decision row that preceded one — `stopBefore.get(i)` means a stop separator sat before
+ * `rows[i]`. The position belongs to the trail and not to the reader's caller because the fold uses
+ * it to close a loop generation BEFORE the row after a routed stop folds (the replay contract).
+ */
+export interface ResumeTrail {
+	readonly rows: WorkflowStage[];
+	readonly stopBefore: Map<number, RoutingDecision>;
+}
+
+/** Everything the fold needs beyond the trail and the workflow — values only, no filesystem. */
+export interface ResumeContext {
+	/** Working directory the run's artifact paths resolve against. */
+	readonly cwd: string;
+	/** The header's runId — the rebuilt `failedOutput` sentinel's `meta.runId`, byte-identical to
+	 *  the live `outputMetaFor`'s. `RunState` carries no id. */
+	readonly runId: string;
+	/** The header's original `/wf` input, fed to `freshRunState`. */
+	readonly input: string;
+}
+
 export async function reconstructState(
 	cwd: string,
 	workflow: Workflow,
@@ -121,13 +143,32 @@ export async function reconstructState(
 	// skipped row would replay a hole and route onward past it.
 	const read = readAllStagesForResume(cwd, header.runId);
 	if (!read.ok) return { ok: false, reason: "malformed-row", detail: read.detail };
-	const rows = read.rows;
-	if (rows.length === 0) return { ok: false, reason: "no-rows", detail: header.runId };
+	if (read.rows.length === 0) return { ok: false, reason: "no-rows", detail: header.runId };
+	return foldTrail(read, { cwd, runId: header.runId, input: header.input }, workflow);
+}
 
+/**
+ * The fold: replay a trail under the CURRENT row shapes and rebuild the run's state.
+ *
+ * Values in, values out — `trail` and `ctx` carry no handles and this function reads no file, so a
+ * caller can hand it literals to ask what ONE set of rows means instead of writing a JSONL file and
+ * reading it back. It is async only because the loop-kind strategies' guard hooks are awaited
+ * (`guarded`/`guardExpectation`); it has no I/O of its own.
+ *
+ * The three refusals that stayed in `reconstructState` are questions about the header and the file
+ * (wrong schema version, unreadable row, nothing to fold); the refusal below is a question about
+ * the rows themselves (`stage-gone`).
+ */
+export async function foldTrail(
+	trail: ResumeTrail,
+	ctx: ResumeContext,
+	workflow: Workflow,
+): Promise<ReconstructResult> {
+	const rows = trail.rows;
 	const acc: FoldAcc = {
-		cwd,
-		runId: header.runId,
-		state: freshRunState(header.input),
+		cwd: ctx.cwd,
+		runId: ctx.runId,
+		state: freshRunState(ctx.input),
 		visited: new Set<string>(),
 		lastStageNumber: 0,
 		chainIndex: -1,
@@ -147,7 +188,7 @@ export async function reconstructState(
 		// CONTRACT). This also stops a gate-stop halt row from masquerading as a
 		// mid-flight abort marker below, and splits the halted generation from
 		// the fresh one a stop-resume re-dispatch appends for the same parent.
-		if (read.stopBefore.has(i)) closeGeneration(acc);
+		if (trail.stopBefore.has(i)) closeGeneration(acc);
 		if (isUnitRow(row)) {
 			const refusal = await foldUnitRow(acc, workflow, row);
 			if (refusal) return refusal;
@@ -174,7 +215,7 @@ export async function reconstructState(
 	// stage by construction — both are written from `currentName`; the equality
 	// check is the shape guard against a foreign interleaving).
 	const last = rows[rows.length - 1]!;
-	const stopAtLast = read.stopBefore.get(rows.length - 1);
+	const stopAtLast = trail.stopBefore.get(rows.length - 1);
 	const gateStop = last.status === "failed" && stopAtLast?.fromStage === last.stage ? stopAtLast : undefined;
 
 	return {
