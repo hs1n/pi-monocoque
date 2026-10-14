@@ -131,7 +131,6 @@ import {
 } from "./run-lane-registry.js";
 import {
 	AMBIENT_OBSERVER_MANIFEST_FLAG,
-	CHILD_AMBIENT_EXTENSION_DENYLIST,
 	FanoutDepthExceededError,
 	isAmbientChildExtension,
 	MAX_FANOUT_DEPTH,
@@ -609,17 +608,31 @@ describe("concurrency + observer relay", () => {
 describe("child extension filtering (A)", () => {
 	const ext = (path: string) => ({ path, resolvedPath: path });
 
-	it("denylists rpiv-warp by path; tool/skill extensions pass", () => {
-		expect(CHILD_AMBIENT_EXTENSION_DENYLIST).toContain("rpiv-warp");
-		expect(isAmbientChildExtension(ext("/repo/packages/rpiv-warp/index.ts"))).toBe(true);
-		expect(isAmbientChildExtension(ext("/x/node_modules/@hs1n/rpiv-warp/index.ts"))).toBe(true);
+	// The only thing that makes an extension ambient now is its own manifest declaring the marker.
+	let markerTmp: string | undefined;
+	afterEach(() => {
+		if (markerTmp) rmSync(markerTmp, { recursive: true, force: true });
+		markerTmp = undefined;
+	});
+	const declaredExt = (name = "some-ambient-observer") => {
+		markerTmp = mkdtempSync(join(tmpdir(), "rpiv-ambient-"));
+		writeFileSync(join(markerTmp, "package.json"), JSON.stringify({ name, pi: { ambientObserver: true } }));
+		return ext(join(markerTmp, "index.ts"));
+	};
+
+	it("filters by DECLARATION only — a name in the path is not evidence", () => {
+		// The transitional name denylist (its one entry being the deleted rpiv-warp) is gone: an
+		// extension that resolves no manifest declaring the marker is kept, whatever it is called.
+		expect(isAmbientChildExtension(ext("/repo/packages/rpiv-warp/index.ts"))).toBe(false);
+		expect(isAmbientChildExtension(ext("/x/node_modules/@hs1n/rpiv-warp/index.ts"))).toBe(false);
 		expect(isAmbientChildExtension(ext("/repo/packages/rpiv-ask-user-question/index.ts"))).toBe(false);
 		expect(isAmbientChildExtension(ext("/repo/packages/rpiv-web-tools/index.ts"))).toBe(false);
+		expect(isAmbientChildExtension(declaredExt())).toBe(true);
 	});
 
-	it("withoutAmbientExtensions drops warp, keeps the rest, and preserves the shared runtime/errors", () => {
+	it("withoutAmbientExtensions drops the declared observer, keeps the rest, and preserves the shared runtime/errors", () => {
 		const base = {
-			extensions: [ext("/p/rpiv-warp/index.ts"), ext("/p/rpiv-web-tools/index.ts"), ext("/p/rpiv-todo/index.ts")],
+			extensions: [declaredExt(), ext("/p/rpiv-web-tools/index.ts"), ext("/p/rpiv-todo/index.ts")],
 			errors: [{ path: "x", error: "e" }],
 			runtime: { sentinel: true },
 		} as unknown as Parameters<typeof withoutAmbientExtensions>[0];
@@ -644,10 +657,7 @@ describe("child extension filtering (A)", () => {
 			extensions: Array<{ path: string }>;
 		};
 		const out = override({
-			extensions: [
-				{ path: "rpiv-warp/i.ts", resolvedPath: "rpiv-warp/i.ts" },
-				{ path: "rpiv-todo/i.ts", resolvedPath: "rpiv-todo/i.ts" },
-			],
+			extensions: [declaredExt(), { path: "rpiv-todo/i.ts", resolvedPath: "rpiv-todo/i.ts" }],
 			errors: [],
 			runtime: {},
 		});
@@ -787,7 +797,7 @@ describe("spawnChild — nested fan-out depth guard", () => {
 // ---------------------------------------------------------------------------
 // Self-declared ambient-observer manifest marker. A sibling opts itself
 // out of child loading via `pi.ambientObserver:true` in its package.json, read
-// pre-factory from resolvedPath. The name denylist is a transitional backstop.
+// pre-factory from resolvedPath. That declaration is the whole interface now — nothing matches by name.
 // ---------------------------------------------------------------------------
 
 describe("ambient-observer manifest marker", () => {
@@ -812,24 +822,15 @@ describe("ambient-observer manifest marker", () => {
 			JSON.stringify({ name: "rpiv-totally-fine", pi: { ambientObserver: true } }),
 		);
 		const resolvedPath = join(tmp, "index.ts");
-		// Marked → filtered, even though the name is NOT on the denylist.
-		expect(isAmbientChildExtension({ path: resolvedPath, resolvedPath })).toBe(true);
+		// Marked → filtered, even though the name says nothing about it.
+		expect(isAmbientChildExtension({ resolvedPath })).toBe(true);
 	});
 
-	it("falls back to the name denylist for a marker-less extension", () => {
-		// Synthetic paths resolve no real package.json → marker false → denylist decides.
-		expect(
-			isAmbientChildExtension({
-				path: "/repo/packages/rpiv-warp/index.ts",
-				resolvedPath: "/repo/packages/rpiv-warp/index.ts",
-			}),
-		).toBe(true);
-		expect(
-			isAmbientChildExtension({
-				path: "/repo/packages/rpiv-todo/index.ts",
-				resolvedPath: "/repo/packages/rpiv-todo/index.ts",
-			}),
-		).toBe(false);
+	it("a marker-less extension is never ambient, whatever its name", () => {
+		// Synthetic paths resolve no real package.json → marker false → kept. This is what replaced the
+		// transitional name denylist: the deleted rpiv-warp's path is no longer special.
+		expect(isAmbientChildExtension({ resolvedPath: "/repo/packages/rpiv-warp/index.ts" })).toBe(false);
+		expect(isAmbientChildExtension({ resolvedPath: "/repo/packages/rpiv-todo/index.ts" })).toBe(false);
 	});
 
 	it("rpiv-pi's own package.json is NOT marked as an ambient observer", () => {

@@ -73,21 +73,24 @@ import { recordSubagentCompletion } from "./subagent-usage.js";
  * handlers + side effects (timers, intervals, OSC/terminal writers, spinners)
  * but expose NO tools or commands a stage skill invokes. A detached child has
  * no terminal of its own, so loading one per child is pure cost AND a hazard —
- * `rpiv-warp` arms a 300ms idle timer on `agent_end` that calls
- * `buildIdlePromptPayload(ctx)` reading `ctx.cwd`; once the child is disposed
- * the orphaned timer fires against the invalidated runner → uncaught stale-ctx
- * crash.
+ * the instance that motivated this was `rpiv-warp` (since deleted): it armed a
+ * 300ms idle timer on `agent_end` calling `buildIdlePromptPayload(ctx)` for
+ * `ctx.cwd`, so once the child was disposed the orphaned timer fired against the
+ * invalidated runner → uncaught stale-ctx crash.
  *
  * An extension opts ITSELF out of child loading by declaring
  * `"pi": { "ambientObserver": true }` in its `package.json` — a self-declared
- * capability marker read pre-factory (see `isAmbientChildExtension`). This list
- * is a TRANSITIONAL backstop matched by package dir anywhere in the extension's
- * path, for siblings that have not yet adopted the marker; drop a name once its
- * package ships the manifest flag. `session_shutdown`-on-teardown (B) is the
- * general safety net for anything missed by both.
+ * capability marker read pre-factory (see `isAmbientChildExtension`). That
+ * declaration is the only scalable form of this: rpiv-pi spawns a child per
+ * workflow stage and cannot enumerate third-party launcher-only observers, so it
+ * has to come from the extension itself. `session_shutdown`-on-teardown (B) is
+ * the general safety net for anything that does not declare it.
+ *
+ * A name denylist used to sit beside the marker as a transitional backstop. Its
+ * one entry named the deleted `rpiv-warp`, so it could never become valid again,
+ * and matching a package by name in a path is exactly what the marker replaced —
+ * the list is gone and the marker is the whole interface now.
  */
-export const CHILD_AMBIENT_EXTENSION_DENYLIST: readonly string[] = ["rpiv-warp"];
-
 /** The `pi` manifest flag a sibling sets to opt itself out of child loading. */
 export const AMBIENT_OBSERVER_MANIFEST_FLAG = "ambientObserver";
 
@@ -131,14 +134,13 @@ export function readPiManifestFlag(resolvedPath: string, flag: string): boolean 
 }
 
 /**
- * True when an extension is a launcher-only ambient observer. Prefers the
- * sibling's self-declared `pi.ambientObserver` manifest marker (read pre-factory
- * from its `resolvedPath`); falls back to the transitional name denylist.
+ * True when an extension is a launcher-only ambient observer: it declared
+ * `pi.ambientObserver` in the manifest owning its `resolvedPath` (read pre-factory,
+ * fail-soft). Name and path are deliberately NOT consulted — the extension is the
+ * only party that knows, and a package name in a path is not evidence.
  */
-export function isAmbientChildExtension(ext: Pick<Extension, "path" | "resolvedPath">): boolean {
-	if (readPiManifestFlag(ext.resolvedPath ?? "", AMBIENT_OBSERVER_MANIFEST_FLAG)) return true;
-	const haystack = `${ext.path ?? ""}\n${ext.resolvedPath ?? ""}`;
-	return CHILD_AMBIENT_EXTENSION_DENYLIST.some((name) => haystack.includes(name));
+export function isAmbientChildExtension(ext: Pick<Extension, "resolvedPath">): boolean {
+	return readPiManifestFlag(ext.resolvedPath ?? "", AMBIENT_OBSERVER_MANIFEST_FLAG);
 }
 
 /**
