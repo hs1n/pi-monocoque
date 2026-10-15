@@ -1,6 +1,6 @@
 # Audit reference
 
-Read during **Sort** (the evidence table) and **Sustain** (the report template).
+Read during **Sort** (the evidence table) and when presenting the run (the report template).
 
 ## Red-tag evidence table
 
@@ -52,7 +52,5 @@ Record the location in the report. A quarantine nobody can find is a delete with
 | format on commit | `biome.json` + pre-commit hook |
 
 ## 5. Sustain
-- Checklist: `docs/5S.md`
-- Trigger: `npm run 5s` in CI
-- Last re-run: <date> — reproduced
+- Re-run: <date> — reproduced
 ```

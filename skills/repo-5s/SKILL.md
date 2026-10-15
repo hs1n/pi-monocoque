@@ -1,6 +1,7 @@
 ---
 name: repo-5s
 description: Tidy a repository with the 5S method — Sort, Set in order, Shine, Standardize, Sustain. Use when the user wants to clean up or declutter a repo, find and remove dead files or code, reorganize the directory tree, quiet lint and format noise, write repo-wide conventions, or set up a recurring hygiene audit — even if they never say "5S".
+disable-model-invocation: true
 ---
 
 # Repo 5S
@@ -79,13 +80,9 @@ Completion: every convention the passes leaned on has exactly one home in config
 
 ## 5. Sustain (shitsuke)
 
-Leave a repeatable audit, so the next run costs a command instead of the whole method.
+5S Sustain is discipline, not a document: the five passes become a habit someone re-runs, and the repo returns to a good state without a reminder. Re-run the passes on the cadence the user names — same checks, same evidence rules — and confirm two things: the red-tag list has no unresolved items, and the repo's checks still pass.
 
-1. Write the audit checklist — the red-tag rules that applied, the exact check commands, the quarantine policy — into the repo at the path the user chooses (default `docs/5S.md`), using the template in [`references/audit.md`](references/audit.md).
-2. Tie it to a trigger: a `scripts/` entry, a CI job, a pre-commit hook, or a recurring review. Pick the lightest trigger the user will actually keep.
-3. Re-run the checklist once from clean to prove it reproduces the audit.
-
-Completion: the checklist is committed, re-running it reproduces the audit, and its trigger is named.
+Completion: a second run is clean, or its findings carry fresh red tags. Persist nothing; the audit lives in the conversation, not the repo.
 
 ## Scope
 
@@ -95,4 +92,4 @@ Run all five passes for a full audit. When the user names one ("just the dead fi
 
 ## Report
 
-Write each run to the audit file: a section per pass, the red-tag table with evidence and disposition, the placement map, and the sustain checklist. Delete nothing on the strength of a report the user has not read.
+Present each run in the conversation: a section per pass, the red-tag table with evidence and disposition, and the placement map. The red-tag area is the only thing the run touches in the working tree. Delete nothing on the strength of a report the user has not read.
