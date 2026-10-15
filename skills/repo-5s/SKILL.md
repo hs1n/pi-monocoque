@@ -19,6 +19,8 @@ Every pass gathers evidence, writes it down, then acts. Split the actions by rev
 
 Deleting is the last resort, not the first move. A suspected-unnecessary item gets a **red tag** — a written entry that parks it for a decision — so the repo keeps the item until someone confirms the tag.
 
+Every decision you hand to the user carries a **recommendation**: the disposition you would pick and a one-line reason, written beside the evidence that produced it. The user confirms or overrules; they do not redo the analysis. A decision returned without a recommendation is an unfinished pass.
+
 ## 1. Sort (seiri)
 
 Remove what the repo does not need, so what remains is worth organizing.
@@ -36,7 +38,7 @@ Sources of red tags:
 
 When the user wants an item out of the tree but recoverable, **quarantine** it instead of deleting: move it to a `red-tag/` directory and say where. A quarantined item is still a red tag; it reappears in the report until confirmed.
 
-Completion: every tracked file is classified **keep** or carries a red tag, and each red tag has evidence and a proposed disposition (delete / quarantine / keep with reason).
+Completion: every tracked file is classified **keep** or carries a red tag, and each red tag has evidence plus a recommended disposition (delete / quarantine / keep) and its reason.
 
 ## 2. Set in order (seiton)
 
@@ -92,4 +94,4 @@ Run all five passes for a full audit. When the user names one ("just the dead fi
 
 ## Report
 
-Present each run in the conversation: a section per pass, the red-tag table with evidence and disposition, and the placement map. The red-tag area is the only thing the run touches in the working tree. Delete nothing on the strength of a report the user has not read.
+Present each run in the conversation: a section per pass, the red-tag table with evidence and a recommended disposition, and the placement map. Every item waiting on a decision carries its recommendation in the same row, so the user reads one line and answers. The red-tag area is the only thing the run touches in the working tree. Delete nothing on the strength of a report the user has not read.

@@ -32,9 +32,9 @@ Record the location in the report. A quarantine nobody can find is a delete with
 - Keep: <n> files · Red-tagged: <n> · Applied fixes: <n> · Checks: <pass/fail>
 
 ## 1. Sort
-| Path | Evidence | Disposition |
+| Path | Evidence | Recommendation |
 |---|---|---|
-| `src/old.ts` | no references; last change 2023-04 | delete |
+| `src/old.ts` | no references; last change 2023-04 | delete — superseded by `src/new.ts` |
 
 ## 2. Set in order
 | Current | Target | Status |
