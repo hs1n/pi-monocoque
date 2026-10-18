@@ -6,7 +6,9 @@ directory under `$HOME`. Shipped through the root `pi` manifest's `pi.skills`, s
 `pi install git:github.com/hs1n/pi-monocoque` brings them back.
 
 **License: MIT, © 2026 Matt Pocock** — see [`LICENSE`](./LICENSE), which travels with these copies
-because the licence requires it. Nothing here is this fork's work.
+because the licence requires it. Nothing here is this fork's work, with one exception:
+`grilling/SKILL.md` carries a fork-added paragraph — see
+[Fork-modified: `grilling`](#fork-modified-grilling).
 
 ## What is and isn't here
 
@@ -23,6 +25,14 @@ Six of upstream's `engineering/` skills are deliberately **absent**:
 
 None of the 22 declares a `contract:` block, so they are invisible to rpiv's contract harvesting
 (`buildUserSkillContracts`) and cannot perturb contract-driven routing.
+
+## Fork-modified: `grilling`
+
+One file in this set is not verbatim. `grilling/SKILL.md` carries an added paragraph that mirrors
+the design tree into Pi's `todo` tool — each decision a task, prerequisites as `blockedBy`, the
+frontier as the unblocked pending set. That paragraph is **this fork's** change, not Matt Pocock's,
+and it is MIT-covered like the rest. Every other file here is unmodified. `FORK_NOTICE.md` records
+the divergence and `PROVENANCE.json` carries the drift marker.
 
 ## Provenance
 
@@ -41,7 +51,8 @@ for.
 ## Updating — and the thing that will undo this
 
 To update: copy from upstream again, re-apply the exclusions above, re-check that no vendored name
-collides with `packages/rpiv-pi/skills/`, and regenerate `PROVENANCE.json`.
+collides with `packages/rpiv-pi/skills/`, and regenerate `PROVENANCE.json`. Then re-apply the
+`grilling/SKILL.md` edit below — a verbatim re-copy drops it silently.
 
 **Do not re-run the installer that put these in `~/.agents/skills`.** It is lock-driven, and its lock
 still carries all 25 names, so it will restore `code-review`, `implement` and `research` into a

@@ -63,11 +63,11 @@ _Avoid_: sidecall, sub-call, secondary request, side conversation (`/btw`'s over
 
 Three skill sources are installed here — `skills/matt-pocock/` (Matt Pocock's engineering skills,
 vendored into this repo and shipped through the root `pi` manifest), `skills/skill-master/` (a
-Pi-native fork of Anthropic's `skill-creator`, also shipped through the manifest, and the only one
-edited rather than vendored verbatim), and `packages/rpiv-pi/skills/` — and three names exist in
-the matt-pocock and rpiv-pi sets: `research`, `implement`, `code-review`. **Nothing collides today**,
-because the vendored set leaves those
-three out. That omission is load-bearing, not hygiene, and it is the first thing to re-check when
+Pi-native fork of Anthropic's `skill-creator`, also shipped through the manifest, and edited rather
+than vendored verbatim — as is one file of the matt-pocock set, `grilling/SKILL.md`), and
+`packages/rpiv-pi/skills/` — and three names exist in the matt-pocock and rpiv-pi sets: `research`,
+`implement`, `code-review`. **Nothing collides today**, because the vendored set leaves those three
+out. That omission is load-bearing, not hygiene, and it is the first thing to re-check when
 refreshing the vendored copy.
 
 **research**, **implement**, **code-review**:

@@ -7,6 +7,8 @@ Interview the user relentlessly until you reach a shared understanding. Map this
 
 Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question and give your recommended answer. Then wait for the user's answers before the next round.
 
+Mirror the tree in Pi's `todo` tool, so the whole design tree — not just the round being asked — stays visible and nothing is silently assumed. Every decision is a task: `create` it as soon as the tree grows it, with `blockedBy` naming the ids of the decisions it hangs off, and mark it `completed` the moment the user's answer settles it. The frontier is then exactly the pending tasks whose blockers are all `completed` — recompute it from the tool, not from memory. If the host has no `todo` tool, keep the tree in your reply instead.
+
 Format a round like so:
 
 ```

@@ -26,9 +26,11 @@ A **second, unrelated MIT grant** covers `skills/matt-pocock/` — Matt Pocock's
 skills, vendored into this repo from [`mattpocock/skills`](https://github.com/mattpocock/skills)
 so that a clone reproduces the setup instead of depending on an unversioned directory under
 `$HOME`. Those files are neither upstream's nor this fork's; their `LICENSE` travels with them
-because that is the licence's only condition. Nothing in them was modified, so updates should be
-copied verbatim again rather than edited in place — see that directory's `README.md` for what was
-deliberately left out, and why leaving it out is load-bearing.
+because that is the licence's only condition. One file in that set **is** modified:
+`grilling/SKILL.md` gained this fork's paragraph mirroring its design tree into Pi's `todo` tool,
+so an update should re-copy the other 21 verbatim and re-apply that single edit rather than copying
+the whole set blindly — see that directory's `README.md` for what was deliberately left out, why
+leaving it out is load-bearing, and the drift record.
 
 A **third-party Apache-2.0 grant** covers `skills/skill-master/` — a **modified derivative** of
 Anthropic's `skill-creator`, taken from Claude Code's `claude-plugins-official` plugin marketplace
@@ -100,6 +102,12 @@ than behavioral changes:
   `简体中文`. Upstream's own `zh.json` maps are untouched — note that they are three keys
   behind `en.json` in `rpiv-ask-user-question` (`review.global_hint`, `review.note_label`,
   `notes.global_header`), which fall back to English.
+- **`grilling` is the one vendored Matt Pocock skill this fork edits.** Its design tree is
+  mirrored into Pi's `todo` tool — each decision a task, prerequisites as `blockedBy`, the
+  frontier as the unblocked pending set — so the whole tree stays visible in the todo overlay for
+  the session. It is MIT-covered like the rest of that set;
+  `skills/matt-pocock/README.md` and `PROVENANCE.json` record the drift, so a verbatim re-copy
+  does not silently drop it.
 
 Anything added later on top of this list is documented in the commit history.
 

@@ -35,6 +35,9 @@
     "research",
     "retro"
   ],
+  "forkModified": {
+    "grilling": "SKILL.md carries a fork-added paragraph that mirrors the design tree into Pi's todo tool (see FORK_NOTICE.md). The entry below still records the upstream skillFolderHash, so a mismatch there is expected, not drift."
+  },
   "entries": {
     "ask-matt": {
       "skillPath": "skills/engineering/ask-matt/SKILL.md",
