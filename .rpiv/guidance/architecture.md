@@ -4,120 +4,99 @@ Monorepo for the `@hs1n/rpiv-*` Pi plugins. Lockstep versions, single install,
 no publish pipeline. Targets Pi Agent CLI
 (`@earendil-works/pi-coding-agent`), not Claude Code.
 
-> **This is a standalone fork of upstream, not upstream itself.** It is
-> `hs1n/pi-monocoque`, forked from `juicesharp/rpiv-mono` and **frozen at that project's
-> v2.13.8** (`2d88b79c`, 2026-10-12): the `upstream` remote was removed after the final
-> sync, so there is no merge path and none is planned. Everything below this banner is
-> upstream's framing and is accurate about the code; these are the deltas an agent working
-> here must not get wrong:
+> **This is a standalone fork, not upstream.** `hs1n/pi-monocoque`, forked from
+> `juicesharp/rpiv-mono` and **frozen at that project's v2.13.8** (`2d88b79c`, 2026-10-12).
+> The `upstream` remote was removed after the final sync: no merge path, none planned.
+> Provenance, the MIT obligations that travel with it, and which names belong to upstream
+> (`rpiv`, `juicesharp`, the `@juicesharp` scope — not ours): `FORK_NOTICE.md`.
 >
-> - **Provenance and obligations** — `FORK_NOTICE.md`. MIT requires upstream's
->   copyright notices to stay; `LICENSE` and every `packages/*/LICENSE` are unmodified.
->   `README.md` is this fork's own front door; upstream's README and roadmap are kept
->   verbatim under `docs/upstream/` and state the *upstream* author's views.
->   `rpiv`, `rpiv-pi`, `juicesharp`, `rpiv-pi.com`, and the npm scope
->   `@juicesharp` identify upstream — that scope is not ours.
-> - **Installing into Pi — `pi install git:github.com/hs1n/pi-monocoque` is the primary
->   path.** Pi's git source clones the repo and treats the clone root as the package
->   root with no subdirectory support, so the **root `pi` manifest** in `package.json`
->   is what makes that work: it lists all eight extensions and `packages/rpiv-pi/skills`.
->   Pi then runs `npm install --omit=dev` in the clone, which is why the root `prepare`
->   is `husky || true` (husky is a devDependency and would otherwise fail the install).
->   For a live checkout (`/reload` picks up edits) use `pi install <checkout path>` — same
->   manifest, no clone — or `scripts/fork-pi-install.sh` for the per-package form. See
->   `INSTALL-FORK.md`.
-> - **`/rpiv-setup` installs from this checkout, not a registry.** There is no publish path
->   here, so a sibling's `npm:@hs1n/rpiv-*` name resolves nowhere; `resolveInstallSpec()`
->   (`siblings.ts`) maps each registered sibling to its local package directory when that
->   directory exists beside rpiv-pi, and leaves third-party entries
->   (`@tintinweb/pi-subagents`) on npm. `scripts/fork-pi-install.sh` installs the same set
->   non-interactively.
-> - **The workspace scope is `@hs1n`, and nothing is published to npm.** Every package
->   here is named `@hs1n/rpiv-*` so it cannot collide with upstream's `@juicesharp`
->   scope, which is not ours. There is **no publish path at all** — the release script
->   was deleted with the npm distribution route; the repo is distributed as a Pi source
->   (see the install bullet above). Versions are hand-maintained lockstep: bump them and
->   run `npm run versions:sync`.
-> - **Remotes**: `origin` is SSH (`git@github.com:hs1n/pi-monocoque.git`) and needs the
->   key configured in `~/.ssh/config`. There is no `upstream` remote — to consult upstream
->   later, `git remote add upstream https://github.com/juicesharp/rpiv-mono.git` (HTTPS,
->   public read-only) and cherry-pick a commit rather than merging a branch.
+> **Nothing is published to npm.** The repo installs into Pi as a Pi source —
+> `pi install git:github.com/hs1n/pi-monocoque` — and Pi treats a cloned repo's ROOT as the
+> package root with no subdirectory support, which is why the root `package.json` carries
+> its own `pi` manifest (that field list IS the install). A live checkout is
+> `pi install <checkout path>`; the per-package form is `scripts/fork-pi-install.sh`.
+> `origin` is SSH (`git@github.com:hs1n/pi-monocoque.git`); to consult upstream, add it over
+> HTTPS and cherry-pick a commit — never merge a branch. Install mechanics and the
+> local-path `/rpiv-setup` resolution live in `INSTALL-FORK.md`.
 
-The layout tree, per-package responsibilities, and the private/opt-in roster are in
-`details.md` beside this file — NOT auto-injected. Read it when you need to know
-where something lives.
+The layout tree, per-package responsibilities, the private/opt-in roster, the new-sibling
+checklist, and the full command runbook are in the sibling **`details.md`**, `scripts/`,
+and `test/` guidance — NOT auto-injected. Read them when you need the map rather than the
+rules.
 
 ## Layout and build model
-- **Build model**: `noEmit: true` everywhere. Packages ship raw `.ts` (Pi loads `.ts` directly via the `pi` manifest). No `dist/`, no per-package tsconfig.json — one shared `tsconfig.base.json`. The repo root carries its own `pi` manifest (8 extensions + `packages/rpiv-pi/skills`) so `pi install git:<repo>` or a root local-path install loads the whole set.
-- **Plugin discovery**: each extension package's `package.json` carries a `pi` field — `pi.extensions: ["./index.ts"]` (`["./extension.ts"]` for rpiv-workflow; `["./extensions"]` for rpiv-pi) and optionally `pi.skills: ["./skills"]`; non-extension packages (rpiv-config, rpiv-side-call, test-utils) have no `pi` field. Pi loads the default-exported function with an `ExtensionAPI` instance.
-- **Sibling registry**: `packages/rpiv-pi/extensions/rpiv-core/siblings.ts` is the single source of truth. Adding an entry here propagates to `/rpiv-setup`, missing-plugin warnings, and presence detection (regex over `~/.pi/agent/settings.json` ∪ the source paths of loaded tools / extension commands, plus an optional per-sibling `marker` for a sibling that registers neither — #216). The registry is architectural, not just family bookkeeping: it covers registered extensions generally — including pinned third-party runtime deps the family needs installed (the `@tintinweb/pi-subagents` Agent dispatcher, registered with a fork-detection regex; its unscoped legacy name rides `LEGACY_SIBLINGS` and is pruned on upgrade). A parallel `LEGACY_SIBLINGS` registry drives prune-on-upgrade for superseded packages. **No runtime imports of siblings** — Phase 1 zero-cross-imports contract.
-- **Opt-in extensions**: a sibling becomes opt-in by being **absent from `siblings.ts`** (and from `rpiv-pi/package.json` `peerDependencies`) **and absent from the root `pi` manifest**. It still rides lockstep + shared CI infrastructure via the `packages/*` glob, but `/rpiv-setup` won't suggest it and a git install won't load it — `scripts/fork-pi-install.sh --with <name>` installs it by local path. `rpiv-btw` is the one remaining opt-in sibling. **This fork deleted `rpiv-voice`, `rpiv-warp`, `rpiv-telemetry`, and `rpiv-site`** — see `FORK_NOTICE.md`; anything still naming them (a stray `--with` flag, a doc table) is stale.
-- **Test runner**: Vitest at repo root; one runner with `include: ['packages/*/**/*.test.ts']` discovers every test file; `test/setup.ts` runs once per worker before any test file imports. Coverage excludes `**/index.ts` and `packages/test-utils/**`. No per-package vitest configs.
+- **Build model**: `noEmit: true` everywhere — packages ship raw `.ts`, which Pi loads directly via the `pi` manifest. No `dist/`, one shared `tsconfig.base.json`, no per-package tsconfig.
+- **Plugin discovery**: an extension package's `package.json` carries a `pi` field (`pi.extensions`, optionally `pi.skills`); Pi loads the default-exported function with an `ExtensionAPI`. The root manifest lists all eight extensions plus `packages/rpiv-pi/skills` — a new extension package is invisible to a git/root install until it is added there, and `root-pi-manifest.test.ts` fails the build if you forget.
+- **Sibling registry**: `packages/rpiv-pi/extensions/rpiv-core/siblings.ts` is the single source of truth for `/rpiv-setup`, missing-plugin warnings, and presence detection (settings ∪ loaded source paths, plus an optional `marker`). **No runtime imports of siblings** — the zero-cross-imports contract; `LEGACY_SIBLINGS` drives prune-on-upgrade.
+- **Opt-in extensions**: opt-in means **absent from `siblings.ts` AND from the root `pi` manifest** — it still rides lockstep + CI via the `packages/*` glob, but nothing installs or suggests it. `rpiv-btw` is the only one. This fork deleted `rpiv-voice`, `rpiv-warp`, `rpiv-telemetry`, `rpiv-site` — anything still naming them is stale.
+- **Test runner**: one Vitest at repo root (`include: ['packages/*/**/*.test.ts']`), `test/setup.ts` runs once per worker before any test file imports. Test authoring contract: `.rpiv/guidance/test/architecture.md`.
 
 ## Commands
 
-| Command | Description |
+Guard-by-guard runbook, exit contracts, and every fork-only script:
+`.rpiv/guidance/scripts/architecture.md` § Commands. The rows below are the ones whose
+*shape* matters while editing.
+
+| Command | Why this form |
 |---|---|
-| `npm install` | One install at root; workspace symlinks under `node_modules/` |
-| `npm run check` | Host-provided-dep guard, then Biome (`--write --error-on-warnings`) + `tsc --noEmit -p tsconfig.base.json` |
-| `npm run check:host-provided-deps` | Read-only guard — no host-provided package (`typebox`, `@earendil-works/pi-*`) in any install-time dependency field (peer-pinned `"*"` instead), and no `typebox` import specifier outside the host's alias table |
-| `npm run check:file-sizes` | Read-only size-growth ratchet over the guarded source tree (`scripts/file-size-baseline.json`); `--update-baseline` regenerates it |
-| `npx tsc --noEmit -p tsconfig.base.json` | **Read-only whole-tree typecheck** (no formatter side effects) — the check write-scoped probes (elaborate/implement lanes) run when they must not rewrite files outside their own set |
-| `npm run check:files -- <paths...>` | Path-scoped Biome (`--write --error-on-warnings`) — rewrites ONLY the paths it is given; **the path-scoped auto-fix lint form** a phase's `#### Automated Verification:` uses to stay write-scoped to its own `files:` set |
-| `npm test` / `npm run coverage` | Vitest at root (single runner) / with V8 coverage |
-| `npm run versions:sync` | Verify lockstep + rewrite intra-monorepo deps to `^<version>` (no publish path — see `.rpiv/guidance/scripts/architecture.md`) |
-| `pi install git:github.com/hs1n/pi-monocoque` | Install this repo into Pi as a Pi source; `pi install <checkout path>` does the same from a live checkout |
-| `bash scripts/fork-pi-install.sh [-l] [--with btw]` | **Fork-only.** Install this fork's packages into Pi by local path — the only supported install path here. See `INSTALL-FORK.md` |
-| `node scripts/fork-license-audit.mjs .` | **Fork-only.** Dependency license inventory + copyleft/unknown flagging (Node built-ins only, no npx) |
-| `node scripts/fork-rename-scope.mjs <@scope>` | **Fork-only.** Rewrite the npm scope across the repo (idempotent, `--report` / `--dry-run`) |
-| `node scripts/fork-own-skill.mjs <skill> [--list] [--check] [--remove <skill>]` | **Fork-only.** Copy a bundled skill into `~/.agents/skills` so it shadows the package one, carrying its `_shared/` deps |
+| `npm run check` | guards → Biome `--write` → `tsc --noEmit`, whole tree. The pre-commit gate |
+| `npx tsc --noEmit -p tsconfig.base.json` | Read-only typecheck, no formatter side effects — for probes that must not rewrite files |
+| `npm run check:files -- <paths...>` | Path-scoped Biome auto-fix; rewrites ONLY the paths given — a phase's `#### Automated Verification:` stays write-scoped |
+| `npm run check:file-sizes` | Size-growth ratchet over `packages/rpiv-pi`; `--update-baseline` to bless growth deliberately |
+| `npm test` / `npm run coverage` | Vitest at root / with V8 coverage (the pre-push gate) |
+| `npm run versions:sync` / `versions:check` | Root `version` → all 12 packages + intra-monorepo ranges (writes) / verify only (CI) |
+| `pi install git:github.com/hs1n/pi-monocoque` | Install as a Pi source; `pi install <checkout path>` for a live tree |
 
 Husky hooks (local-only):
-- `pre-commit` — runs `npm run check:decision-codes` (fail-fast contamination guard) then `npm run check:file-sizes` (fail-fast size-growth ratchet), then `npm run check` (format + typecheck); restages files biome may have rewritten
-- `pre-push` — runs `npm run coverage` (full test + coverage thresholds gate) with a cleared `coverage/.tmp`, and retries once if it fails: the v8 provider merges one temp file per test file and a worker recycled under load can leave one missing (`ENOENT coverage/.tmp/coverage-<n>.json`), which aborts an unrelated push. A real failure fails both attempts.
+- `pre-commit` — `check:decision-codes` → `check:file-sizes` → `check:skill-names` (fail-fast) → `npm run check`; restages files biome may have rewritten
+- `pre-push` — `npm run coverage` with a cleared `coverage/.tmp`, retried once: the v8 provider merges one temp file per test file and a worker recycled under load can leave one missing (`ENOENT coverage/.tmp/coverage-<n>.json`), which would abort an unrelated push. A real failure fails both attempts.
 
 ## Conventions
 
-- **Lockstep versions**: every `packages/*/package.json` shares one `version`. Enforced by `sync-versions.js` (exit 1 on drift). Versions are hand-maintained — nothing publishes them. **Naming**: directory `rpiv-<feature>` ↔ npm name `@hs1n/rpiv-<feature>` (the npm name is module identity and import specifier, not a registry entry).
+- **Lockstep versions, one source of truth**: the root `package.json` `version` is authoritative; `npm run versions:sync` writes it into every `packages/*` manifest and rewrites intra-monorepo ranges to `^<version>` (`versions:check` in CI). Bump ONE file, never a package. **Naming**: directory `rpiv-<feature>` ↔ npm name `@hs1n/rpiv-<feature>` — module identity and import specifier, not a registry entry.
 - **Sibling deps as `peerDependencies: "*"`** — `rpiv-pi` peer-pins every registered sibling and `pi-*` runtime; bundlers never include them.
-- **Host-provided packages as `peerDependencies: "*"`, never `dependencies`** — Pi ships `typebox` and the `@earendil-works/pi-{ai,agent-core,coding-agent,tui}` trio (plus the legacy `@mariozechner/*` spellings) itself and aliases the bare specifier to its own copy at load time. An installed copy bypasses that alias and puts two live copies of the same module in one process (schemas built by one, validated by the other) — Pi warns about every such manifest at startup. Enforced by `scripts/check-host-provided-deps.mjs` (`npm run check:host-provided-deps`, the first stage of `npm run check`) across the root manifest and all `packages/*`. `devDependencies` are exempt (root dev-time pins resolve for `tsc`/Vitest only) and `jiti` is **not** host-provided — the extension loader does not alias it, so it stays a real `dependencies` entry. The same script also scans `packages/**/*.ts` for `typebox` import specifiers and rejects any subpath outside the host's six aliases (`typebox`, `typebox/compile`, `typebox/value` + the `@sinclair/typebox` spellings) — the manifest half alone would only move an unaliased import from a warning to `ERR_MODULE_NOT_FOUND`.
-- **`files` arrays** explicitly list `.ts` source + asset directories (e.g., `prompts/`); `.rpiv/` is never shipped; directory entries need a `!**/*.test.ts` negation (as in rpiv-pi/rpiv-web-tools/rpiv-workflow/rpiv-advisor) to keep co-located tests out of the tarball; dev-only fixture trees are excluded the same way (rpiv-pi's `built-ins/__fixtures__/`).
-- **`type: "module"` everywhere** with Node16 resolution; relative imports use `.js` extensions from `.ts` source. Test files co-locate as `*.test.ts` next to production sources.
-- **No decision-code citations in committed `.ts`** — comments state the contract in place, never cite parenthesized plan/phase codes; enforced by `scripts/check-no-decision-codes.mjs` (`npm run check:decision-codes`, the first pre-commit stage).
+- **Host-provided packages are always `peerDependencies: "*"`, never `dependencies`** — Pi ships `typebox` and the `@earendil-works/pi-{ai,agent-core,coding-agent,tui}` trio and aliases the bare specifier; an installed copy puts two live copies of one module in a process. Also import only the specifiers the host aliases (`typebox`, `typebox/value`, `typebox/compile`). Rationale, the alias table, and the `jiti` exception: `scripts/architecture.md` § Host-Provided Dependency Guard.
+- **Whoever imports declares** — a manifest may not claim a package its own sources never import; enforced by `check:unused-deps`.
+- **`files` arrays** list `.ts` source + asset directories explicitly; `.rpiv/` is never shipped; directory entries need a `!**/*.test.ts` negation; dev-only fixture trees are excluded the same way.
+- **`type: "module"` everywhere**, Node16 resolution, relative imports carry `.js` from `.ts` source; tests co-locate as `*.test.ts`.
+- **No decision-code citations in committed `.ts`** — state the contract in place, never cite parenthesized plan/phase codes (`check:decision-codes`).
 
-<important if="you are bumping versions or the Pi host pin">
-## Versioning
-- **There is no release pipeline and nothing is published.** The repo is distributed as a Pi source (`pi install git:github.com/hs1n/pi-monocoque`) or from a local checkout; CI runs check + coverage only.
-- Versions are hand-maintained lockstep: edit them, then `npm run versions:sync` (fails if packages drifted, rewrites intra-monorepo deps to `^<version>`). CHANGELOGs are historical — add entries under `[Unreleased]` by hand.
-- The `@earendil-works/pi-*` devDependencies are pinned **exact** and mirrored in root `overrides`; bumping them means `npm install` + `npm run check` + `npx vitest run` + a real load against that host version. Details: `.rpiv/guidance/scripts/architecture.md`
-</important>
+## Skill ownership
 
-<important if="you are adding a new sibling Pi extension package">
-## Adding a Sibling Package (cross-layer checklist)
-1. Create `packages/rpiv-<name>/` with `package.json` matching the lockstep version, `pi.extensions: ["./index.ts"]`, and the relevant `peerDependencies` (`pi-coding-agent`, `pi-tui`/`pi-ai` as needed; `"typebox": "*"` whenever the source imports `typebox` — host-provided packages are always peer-pinned `"*"`, never `dependencies`; and import only `typebox`, `typebox/value`, or `typebox/compile`, the specifiers the host aliases)
-2. Populate the `files` array with all shipped `.ts` source + any asset directory (e.g. `prompts/`, `locales/`)
-3. Add the sibling to `siblings.ts` — see `.rpiv/guidance/packages/rpiv-pi/extensions/rpiv-core/architecture.md`
-4. Pin in `packages/rpiv-pi/package.json` `peerDependencies` as `"*"`
-5. Author `.rpiv/guidance/packages/rpiv-<name>/architecture.md` for the new layer
-6. Add `"test": "vitest run"` to the package `scripts` (Vitest's root `include` glob picks the new file up automatically — no per-package config)
-7. Run `npm run versions:sync` to wire intra-monorepo deps
-8. Add a `CHANGELOG.md` containing `## [Unreleased]` (hand-maintained history)
-9. Add the package's extension entry to the root `package.json` `pi.extensions` list, or a git/root install will not load it
-9. If the package owns module-level singleton state, export a reset function and wire it into `test/setup.ts` `beforeEach` (also clear any `globalThis[Symbol.for(...)]` cache the package owns)
-10. If the package consumes UI strings, declare `@hs1n/rpiv-i18n` in `peerDependencies` + `peerDependenciesMeta.optional: true` and call `registerStrings(<pkg-name>, byLocale)` at extension load — see `.rpiv/guidance/packages/rpiv-i18n/architecture.md`
-</important>
+Three skill sources ship here, and which one answers is not interchangeable:
 
-<important if="you are writing or modifying tests in any package">
-## Test Authoring Contract
-- **Location**: co-locate `*.test.ts` next to production sources. Vitest's root `include` glob (`packages/*/**/*.test.ts`) discovers them automatically.
-- **Repo-wide setup** (`test/setup.ts`, runs once per worker before any test file imports):
-  - `process.env.HOME` + `USERPROFILE` point to a fresh `mkdtempSync` tmpdir — production modules cache `homedir()` at module-load, so this MUST happen before any package import. One sanctioned exception exists today: setup statically imports `configPath` from `@hs1n/rpiv-config` (ESM-hoisted above the HOME assignment) — safe only because rpiv-config resolves paths lazily; every other production import in setup is dynamic inside `beforeEach`
-  - `@earendil-works/pi-ai` is partially mocked via `importOriginal()` (stubs `getSupportedThinkingLevels`; keeps `StringEnum` intact for module-load consumers); `completeSimple` is stubbed on the separate `@earendil-works/pi-ai/compat` mock, because production resolves it through `@hs1n/rpiv-side-call`'s global path, which prefers `/compat`.
-  - `beforeEach` enforces four reset rules: (1) every package with module-level singleton state exports a reset function and is invoked from `beforeEach`; (2) every `globalThis[Symbol.for(...)]` cache that intentionally survives `vi.resetModules()` is cleared; (3) every config file a package persists under `~/.config/rpiv-<name>/` (or `~/.pi/`) is `rmSync`-ed so filesystem-driven detection starts from a clean state — new code resolves these paths via `@hs1n/rpiv-config`'s XDG-aware `configPath()` (honors `XDG_CONFIG_HOME`, one-way legacy fallback via `loadJsonConfigWithLegacyFallback()`); (4) env hygiene — `PI_CODING_AGENT_DIR`, `XDG_CONFIG_HOME`, and `WEB_SEARCH_PROVIDER` are deleted (at module load AND per test) and the XDG pi agent dir (`~/.config/pi/agent`) is `rmSync`-ed.
-- **Fixtures**: import factories from `@hs1n/rpiv-test-utils` — see `.rpiv/guidance/packages/test-utils/architecture.md`.
-- **When adding a package with module-level singleton state**: export a reset (`__resetState` for fresh state, or named reset like `invalidateSkillIndex`) AND wire it into `test/setup.ts` `beforeEach` in the same change.
-- **Pre-commit vs pre-push**: tests do NOT run on commit (only Biome + `tsc --noEmit`). Full coverage gates push, with one retry — see the `pre-push` line above for why. `git push` runs that gate even when there is nothing to push, so a no-op push costs the same ~90 s.
-</important>
+- `packages/rpiv-pi/skills/` — **ours**. 29 skills; the RPIV pipeline stages carry `contract:` blocks that the `/wf` graphs validate against.
+- `skills/matt-pocock/` — Matt Pocock's set, **vendored verbatim** (MIT, `LICENSE` travels with it). It rides at the **lowest** precedence, inside the installed package.
+- `skills/skill-master/` — a Pi-native fork of Anthropic's `skill-creator`, the only one edited rather than vendored.
+
+**Three names collide upstream and the vendored set deliberately omits them: `research`,
+`implement`, `code-review`.** The omission is load-bearing, not tidiness — all three are
+dispatched BY NAME from the built-in `/wf` graphs, so a copy at any higher precedence
+(`<cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills > ~/.pi/agent/skills`) shadows
+our body while the graph keeps routing to that name, and the `contract:` is no longer
+harvested. `npm run check:skill-names` guards the repo; `session_start` warns when a copy
+outside the package shadows a bundled skill. **Never restore those three on the matt side,
+and never delete ours.**
+
+**Only 17 of the 52 installed skills are model-invocable** — 7 rpiv utilities
+(`commit`, `code-review`, `changelog`, `create-handoff`, `resume-handoff`, `pr-triage`,
+`annotate-guidance`), 9 matt skills, and `skill-master`. The other 35 carry
+`disable-model-invocation: true` and are reachable only through `/skill:<name>`; the pipeline
+index injected at session start is their only map. That split is intentional: **the RPIV
+pipeline is developer-driven, matt's set is reached by the agent's own routing** — treat the
+second as deliberate, not as drift, and never propose a pipeline stage on your own.
+
+**Where the two meet.** The routing rule, so neither set has to guess:
+
+- A *feature or change request* ("add X", "refactor Y", "make this testable") belongs to the pipeline — name the stage and let the developer run it. Do not run `implement`'s loop yourself.
+- A *bug report or failure* ("it throws", "this is slow", "diagnose this") belongs to `diagnosing-bugs`: it is the only diagnosis discipline installed here and no rpiv stage covers it. Use it, then return the fix to the pipeline.
+- `tdd` is a *technique inside* a change, not an alternative to one — use it while implementing, never as the plan.
+- Vocabulary skills (`codebase-design`, `domain-modeling`, `writing-for-agents`) apply within any work, from either side.
+
+The repo's own `CONTEXT.md`, `docs/adr/`, `docs/agents/` and `.scratch/` are outputs of that
+methodology — keep them current rather than reading them as upstream residue.
+
+Full entries, including what is off-limits to swap: `CONTEXT.md` § Skill ownership.
 
 <important if="you are touching tool registration, schemas, or session hooks anywhere in the monorepo">
 ## Cross-Package Pi Conventions

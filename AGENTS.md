@@ -14,7 +14,10 @@ injected per session from `.rpiv/guidance/`, and restating them here spends cont
   `stage` vs a plan's `### Phase`, `guidance` vs `details`, `thoughts/`. It is deliberately
   not auto-injected, so nothing else will hand it to you.
 - **Running a command, or unsure where something lives → read `.rpiv/guidance/architecture.md`.**
-  It carries the command runbook, the layout, and the conventions. rpiv-core injects it at
+  It carries the conventions and the rows whose *shape* matters; the guard-by-guard command
+  table is `.rpiv/guidance/scripts/architecture.md`, the layout tree and the new-package
+  checklist are `.rpiv/guidance/details.md`, and the test contract is
+  `.rpiv/guidance/test/architecture.md`. rpiv-core injects it at
   session start when loaded; reading it from disk is the fallback for when it was not. Each
   package and subsystem has a neighbouring `architecture.md` under `.rpiv/guidance/`, plus a
   `details.md` beside it that is deliberately NOT injected — read those when you need the
@@ -38,7 +41,7 @@ Single-context — one root `CONTEXT.md`, decisions under `docs/adr/`. See `docs
 
 ## Checks that will fail your commit
 
-The pre-commit hook runs all three; knowing them up front is cheaper than the round trip.
+The pre-commit hook runs all four; knowing them up front is cheaper than the round trip.
 
 - `npm run check:decision-codes` — no parenthesized decision-code citation such as `(c2r3)`
   in a committed `.ts`. State the contract in the comment instead.
@@ -47,3 +50,5 @@ The pre-commit hook runs all three; knowing them up front is cheaper than the ro
   `"*"`, because an installed copy puts two live copies of one module in a single process.
 - `npm run check:file-sizes` — `packages/rpiv-pi` sits on a size-growth ratchet. Split the
   file rather than raising the baseline as a reflex.
+- `npm run check:unused-deps` — whoever imports declares. A manifest may not claim a package
+  its own sources never import (registered siblings and host-provided names are exempt).

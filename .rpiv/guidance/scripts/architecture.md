@@ -1,41 +1,49 @@
 # scripts/ (repo guards and versioning)
 
 ## Responsibility
-Repo guards for the pi-monocoque workspace, plus the lockstep version helper. **There is no
-release pipeline and no npm publish path** — this fork installs into Pi as a Pi source
-(`pi install git:github.com/hs1n/pi-monocoque`), or from a local checkout, never as a
-registry package. `sync-versions.js` enforces the lockstep invariant and rewrites
-intra-monorepo `dependencies`/`devDependencies` to `^<lockstep-version>`; it is the only
-script that writes files. `check-slice-overlap.mjs` is a standalone proof harness that
-validates `packages/rpiv-pi/skills/_shared/slice-overlap.mjs` against an independent
-broader oracle. `check-no-decision-codes.mjs` is a standing prevention check that keeps
-design-doc decision-codes out of committed `.ts`. `check-file-sizes.mjs` is a size-growth
-ratchet over `packages/rpiv-pi` (committed per-file baseline + class caps for new files)
-that keeps the authoring tier's split files from silently regrowing.
-`check-host-provided-deps.mjs` keeps host-provided packages (Pi supplies `typebox` and the
-`@earendil-works/pi-*` trio itself) out of every install-time dependency field,
-peer-pinned to `"*"` where they are declared, and out of import specifiers the host's
-alias table does not cover. `check-skill-name-collisions.mjs` keeps the vendored Matt Pocock
-skill set (`skills/matt-pocock/`) from sharing a name with `packages/rpiv-pi/skills/`, because
-the built-in `/wf` graphs dispatch three of those names and a duplicate anywhere above the
-installed package shadows the package's body while the graph keeps routing by that name.
+Repo guards for the pi-monocoque workspace, plus the lockstep version writer. **There is no
+release pipeline and no npm publish path** — this fork installs into Pi as a Pi source, or
+from a local checkout, never as a registry package. `sync-versions.js` writes the lockstep
+invariant: the root `package.json` `version` is the truth, and every `packages/*` version
+plus every intra-monorepo `dependencies`/`devDependencies` range (`^<version>`) is derived
+from it — the only script that writes files (`--check` is its read-only twin).
+
+Every other script is a **guard**: it reads, reports, and exits. One of them
+(`check-slice-overlap.mjs`) is a proof harness rather than a gate. What each guard refuses,
+why, and the mechanics behind the refusal are in **`details.md`** beside this file — read it
+before changing a guard's behaviour, not to learn its name.
 
 ## Dependencies
-Node built-ins only — plus one cross-tree workspace import: `check-slice-overlap.mjs` imports `partition` from `packages/rpiv-pi/skills/_shared/slice-overlap.mjs`. Shells out to `git` and `npm`. Reads `packages/rpiv-pi/package.json` as the canonical version oracle. Zero third-party packages.
+Node built-ins only — plus one cross-tree workspace import: `check-slice-overlap.mjs` imports `partition` from `packages/rpiv-pi/skills/_shared/slice-overlap.mjs`. `check-slice-overlap.mjs` shells out to `git`; nothing else shells out. Reads the **root** `package.json` as the canonical version oracle. Zero third-party packages.
 
 ## Consumers
-- **Developers**: `npm run versions:sync` after a deliberate version bump (hand-maintained; see the versioning block below)
-- **CI** (`.github/workflows/ci.yml`): runs `npm run check:decision-codes` + `npm run check:file-sizes` + `npm run check:skill-names` + `npm run check` + `npm run coverage` on push/PR (Node 22/24)
-- **Husky hooks**: `pre-commit` runs `npm run check:decision-codes` then `npm run check:file-sizes` then `npm run check:skill-names` (all fail-fast guards), then `npm run check`; `pre-push` (`npm run coverage`) gates a push on green tests + coverage thresholds
+- **Developers**: bump the root `package.json` `version`, then `npm run versions:sync`
+- **CI** (`.github/workflows/ci.yml`): `check:decision-codes` + `check:file-sizes` + `check:skill-names` + `versions:check` + `check` + `coverage` on push/PR (Node 22/24)
+- **Husky hooks**: `pre-commit` runs `check:decision-codes` → `check:file-sizes` → `check:skill-names` → `check`; `pre-push` runs `coverage`
+
+## Commands
+
+| Command | Script | Exit contract |
+|---|---|---|
+| `npm run check:decision-codes` | `check-no-decision-codes.mjs` | 0 clean; 1 per parenthesized citation in scoped `.ts` |
+| `npm run check:file-sizes` | `check-file-sizes.mjs` | 0 within ratchet; 1 per violation. `--update-baseline` regenerates |
+| `npm run check:host-provided-deps` | `check-host-provided-deps.mjs` | 0 clean; 1 per manifest field / unaliased import specifier |
+| `npm run check:unused-deps` | `check-unused-deps.mjs` | 0 clean; 1 per declaration no source imports |
+| `npm run check:skill-names` | `check-skill-name-collisions.mjs` | 0 clean; 1 per name present in both skill sets |
+| `npm run versions:sync` / `versions:check` | `sync-versions.js` | sync writes and exits 0; `--check` exits 1 listing every mismatch |
+| `npm run check` | — | chains unused-deps ← host-provided-deps → Biome `--write` → `tsc --noEmit` |
+| `node scripts/check-slice-overlap.mjs` | standalone | 0 proven; 1 on under-selection. Not wired into any hook |
+| `node scripts/fork-*.mjs` / `bash scripts/fork-pi-install.sh` | fork-only tooling | see `INSTALL-FORK.md` |
 
 ## Module Structure
 ```
-sync-versions.js       — Lockstep invariant + intra-monorepo dep rewrite (idempotent)
+sync-versions.js       — Lockstep writer: root version → every package version + intra-monorepo dep range (idempotent; `--check` verifies without writing)
 check-slice-overlap.mjs — Safety proof for packages/rpiv-pi/skills/_shared/slice-overlap.mjs; flags under-selection only
 check-no-decision-codes.mjs — Pre-commit guard: no parenthesized decision-code citations in scoped *.ts
 check-file-sizes.mjs  — Size-growth ratchet: baselined files bounded to +max(10%, 50 lines), new files to class caps (1,000 source / 3,000 test)
 file-size-baseline.json — Committed ratchet state: repo-root-relative posix path → line count, generated by --update-baseline (never hand-edited except to lower)
 check-host-provided-deps.mjs — Pre-commit guard: no host-provided package in `dependencies`/`optionalDependencies`; host-provided peers must be `"*"`; no unaliased `typebox` import specifier
+check-unused-deps.mjs — Pre-commit guard: every `dependencies`/`peerDependencies`/`optionalDependencies` entry is imported by the declaring package (siblings and host-provided exempt)
 check-skill-name-collisions.mjs — Pre-commit guard: no skill name shared between `skills/matt-pocock/` and `packages/rpiv-pi/skills/`
 fork-rename-scope.mjs  — Fork-only: retarget the npm scope/repo URLs/author metadata (idempotent; --report / --dry-run)
 fork-license-audit.mjs — Fork-only: dependency license inventory + copyleft/unknown flagging
@@ -43,83 +51,24 @@ fork-own-skill.mjs     — Fork-only: copy a bundled skill into ~/.agents/skills
 fork-pi-install.sh     — Fork-only: install this checkout's packages into Pi by local path
 ```
 
-## Fresh-Resolution Hazard (why root devDependencies are pinned EXACT)
-The old release path deleted `package-lock.json` + `node_modules` and reinstalled ("lockfile
-honesty"), so on release day caret specs re-resolved to whatever npm served — that broke
-the v2.0.0 release twice: biome `^2.5.0` → 2.5.5 (new lint errors failed pre-commit) and pi
-`^0.80.5` → 0.80.10 (`modelRegistry` → `modelRuntime` rename broke tsc). That path is gone,
-but the pins stay: the root `devDependencies` are pinned **exact** (biome, tsc, vitest,
-coverage, pi-*, typebox, husky) so a fresh `npm install` in a git clone resolves the same
-toolchain the tests and `tsc` were verified against. Bump them deliberately in a normal
-commit; a Pi host bump is a real change (see the versioning block below).
-
-## Lockstep Invariant Enforcement
-`sync-versions.js` is **all-or-nothing**: if any two workspace packages have drifted to different versions, it fails before writing anything. `peerDependencies` are deliberately **untouched** — the zero-cross-imports contract requires they stay `"*"`.
-
-## Diff-Aware Write (Idempotent)
-The dep-rewrite step is **idempotent**: it only writes a `package.json` when at least one intra-monorepo dep would change, and writes tab-indented JSON + trailing newline to match the repo's existing `package.json` convention, so re-running on a synced repo produces zero file changes.
-
-## Wrapped Shell-out Runner
-Every shell command runs through a single wrapper that **echoes the command and fail-fasts** (`process.exit(1)`) on non-zero exit unless explicitly opted out. Top-level code never throws — failures terminate via the wrapper so partial state is rare and easy to diagnose. `sync-versions.js` is the last script that shells out; the guards are pure Node.
-
-## CHANGELOGs (historical only)
-`packages/*/CHANGELOG.md` keep the upstream release history plus this fork's `[Unreleased]`
-entries at the top. **Nothing promotes or reinstate them any more** — the release pipeline
-that did is deleted. Add entries by hand under `[Unreleased]` when a change is worth
-recording; there is no dated-release ceremony to satisfy.
-
-## Decision-Code Contamination Guard
-`check-no-decision-codes.mjs` walks `packages/rpiv-workflow`, `packages/rpiv-pi/extensions/rpiv-core`, and `packages/rpiv-advisor` (`*.ts` only, `node_modules` skipped) and exits 1 on any **parenthesized, case-sensitive** decision-code citation — `(C#|T#|D#|G#|FR#|A#|M#|L#-#|review I#|Slice N|Phase X|Problem N|Decision N|concern-X)`. Review-citation codes (`L#-#`, `review I#`) are additionally flagged anywhere *inside* a parenthesized run, so an article prefix (`(the pre-L4-01 behavior)`) cannot shelter them. The invariant: design-doc decision-codes live in `.rpiv/artifacts/`, never in committed `.ts`. The parens + uppercase gate and `*.ts`-only scope are deliberate — they self-filter plan fixtures in test data and legit `.md` uses, so there is **no allowlist to maintain**. Wired as `npm run check:decision-codes` (root `package.json`), the first pre-commit step, and a CI step before `npm run check`.
-
-## File-Size Ratchet Guard
-`check-file-sizes.mjs` bounds source-file growth in `packages/rpiv-pi` (the authoring tier): every walked `.ts`/`.js`/`.mjs` file is either **baselined** — allowed to grow at most `max(+10%, +50 lines)` per regeneration cycle — or **unregistered** — allowed only under its class cap (`NEW_FILE_CAP_SOURCE = 1000` lines, `NEW_FILE_CAP_TEST = 3000` for basenames matching `\.test.[cm]?[jt]s$`). A committed ratchet beats fixed thresholds because every raise is a visible baseline diff riding the same commit as the growth it blesses; the knobs are top-of-file constants in the script (single tune point). `node_modules` and `__fixtures__` directories are skipped anywhere in the walk; declaration twins (`.d.ts`/`.d.mts`) are excluded by suffix. Tests ARE counted — the largest regrowth path observed in this repo was a 9,591-line test monolith — they just get the higher cap. Line counting is newline-normalized `split("\n")` (drop one trailing empty element), matching `wc -l` for newline-terminated files.
-
-**Baseline contract** — `file-size-baseline.json` is generated state shaped `{ "files": { "<repo-root-relative posix path>": <line count> } }`, keys sorted, tab-indented + trailing newline (the `sync-versions.js` JSON write convention). Never hand-edit except to LOWER an entry (tightening the ratchet). `--update-baseline` regenerates from disk and prunes deleted paths; a regen MUST ride the same commit as the growth it registers (same-commit visibility rule) so the diff stays reviewable.
-
-**Three invocation points**: the root `npm run check:file-sizes` script (the single handle both hooks and CI invoke), the Husky `pre-commit` hook (second fail-fast guard — after decision-codes, before `npm run check`), and CI (`.github/workflows/ci.yml` — between `check:decision-codes` and `check`, cheap guard ahead of the expensive pass). Exit 0 = within ratchet, with a non-fatal `new files under cap — run --update-baseline to ratchet them in` notice for unregistered-but-under-cap files; exit 1 = per-file `path: N lines > baseline M + allowance A` violations plus the remediation hint (`Split the file, or bump deliberately: ... --update-baseline in the same commit.`).
-
-## Host-Provided Dependency Guard
-`check-host-provided-deps.mjs` walks the root manifest plus every `packages/*/package.json` (filesystem-driven `readdirSync("packages")`, so a new package is covered on arrival) and exits 1 on any host-provided name in `dependencies` or `optionalDependencies`, or in `peerDependencies` under a range other than `"*"`. Its `HOST_PROVIDED` set is a verbatim copy of the host's own `HOST_PROVIDED_EXTENSION_PACKAGES` (pi `dist/core/resource-loader.js`, including the legacy `@mariozechner/*` spellings and `@sinclair/typebox` next to `typebox`) — parity with the loader is the point: the host warns about this exact shape at startup, and an installed copy reachable by an unaliased path puts duplicate `typebox` / `pi-tui` instances in one process. Since v2.12.0 no manifest can drift back (`typebox` is peer-pinned `"*"` across the eight packages that import it); the guard exists so the next package added does not reintroduce the shape. `devDependencies` are exempt by design — the root pins the host-provided trio and `typebox` exact so `tsc` and Vitest resolve the host's surface (see "Fresh-Resolution Hazard"), and no package ships them inside its own `dependencies`, so the extension loader never resolves them. Non-host-provided runtime helpers stay real `dependencies` entries: `jiti` is imported by `rpiv-workflow/load/cache.ts` and is **not** in the host's alias table. Wired as `npm run check:host-provided-deps` and chained as the first stage of `npm run check`, so CI, husky `pre-commit`, and `prepublishOnly` all inherit it.
-
-The guard's second half scans `packages/**/*.ts` (`node_modules`, `dist`, `build`, `coverage` skipped) for `typebox` / `@sinclair/typebox` import specifiers — in `from "…"`, bare `import "…"`, and `require("…")` positions, including dynamic `import()` — and exits 1 on any subpath the host does not alias. The host's alias table (`getAliases()` in `dist/core/extensions/loader.js`, mirrored by `VIRTUAL_MODULES`) covers exactly six keys: `typebox`, `typebox/compile`, `typebox/value`, and the same three under `@sinclair/typebox`. A bare `typebox` import is redirected to the bundled copy, but `typebox/guard`, `typebox/system`, `typebox/error` and friends resolve against whatever the package tree can reach — with a physical copy installed that is a second live instance in the host process, without one it is `ERR_MODULE_NOT_FOUND` at load. Both are runtime failures, so the manifest half alone is not a sufficient invariant: dropping the copy and keeping an unaliased import just moves the breakage from a warning to a crash. Violations report as `path:line: specifier`. The `@earendil-works/pi-*` specifiers are deliberately **not** enumerated — the repo imports them bare and a host bump moves their subpaths along with them, so only the package whose alias table we mirrored gets a hard-coded list.
-
-## Skill-Name Collision Guard
-`check-skill-name-collisions.mjs` compares the two configured skill sets — `skills/matt-pocock/`
-(the vendored Matt Pocock skills, shipped by the root `pi` manifest) and `packages/rpiv-pi/skills/`
-— and exits 1 on any directory name holding a `SKILL.md` in both. Three names collide in the two
-upstream collections — `research`, `implement`, `code-review` — and all three are dispatched **by
-name** from the built-in `/wf` workflows (`implement` an `acts` stage in all four, `code-review` a
-gate stage in polish and vet, `research` build's second stage), which is why the vendored set
-excludes them; `CONTEXT.md` records that omission as load-bearing and `skills/matt-pocock/README.md`
-explains it to whoever updates the directory. The guard exists because updating the vendored set
-means re-applying the exclusions **by hand**, and a forgotten exclusion fails silently: precedence
-runs `<cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills > ~/.pi/agent/skills > installed
-package`, so a duplicate anywhere above the package shadows rpiv-pi's body while the graph keeps
-routing by that name, and the `contract:` those graphs validate against is harvested by a separate
-provider that finds nothing to replace it with (matt's skills declare none). It compares
-**directory names**, not frontmatter, because Pi discovers skills by directory and merely warns when
-a declared `name:` differs from its parent — so directory names are what actually collide at load
-time; a directory without a `SKILL.md` is skipped, which is how `packages/rpiv-pi/skills/_shared`
-stays out. A **missing** root is a failure rather than an empty set, so a layout change cannot
-silently void the comparison. Wired as `npm run check:skill-names`, the third pre-commit step, and a
-CI step between `check:file-sizes` and `check`.
-
 ## Architectural Boundaries
-- **NO third-party deps** — Node built-ins + shell-outs only; semver comparison is hand-rolled rather than depending on an npm package
-- **`packages/rpiv-pi` is the canonical version oracle** — every other package follows; never read version from a different package
-- **`peerDependencies` are intentionally untouched** by `sync-versions.js` — the zero-cross-imports contract requires they stay `"*"`
-- **Fail-fast via `process.exit(1)`** — no thrown errors at top level; the wrapped runner exits on shell failure
-- **Lockstep is sacred** — only one source of truth for the current version; `sync-versions.js` guarantees parity
-- **Filesystem-driven discovery** — `readdirSync("packages")` is the only enumeration mechanism; new packages auto-pick-up with no script edits
+- **NO third-party deps** — Node built-ins only; semver matching is a regex, not a dependency
+- **The root `package.json` is the canonical version oracle** — every package follows it, and nothing reads a version from a package manifest
+- **`peerDependencies` are intentionally untouched** by `sync-versions.js` — the zero-cross-imports contract requires they stay `"*"`; rewriting one would smuggle a range into a field that means "whatever the host or sibling provides"
+- **Fail-fast via `process.exit(1)`** — no thrown errors at top level
+- **Lockstep is sacred** — exactly one source of truth (the root `version`); `sync-versions.js` derives the other twelve, `--check` proves it
+- **A root version that is not semver fails before a package is read** — it is the only number left to get wrong
+- **Filesystem-driven discovery** — `readdirSync("packages")` is the only enumeration mechanism; a new package is covered on arrival
 - **`private: true` packages bump but are not installed by the root manifest** — `rpiv-test-utils` is workspace-only
 - **No publish path** — no `npm publish`, no release script, no CHANGELOG promotion; the repo ships as a Pi source and nothing else
-- **Host-provided packages are never `dependencies`** — Pi supplies and aliases them; the guard fails the build if a manifest claims its own installable copy
-- **Only host-aliased import specifiers** — `typebox`, `typebox/compile`, `typebox/value` (and the `@sinclair/typebox` spellings) resolve to the host's copy; every other `typebox/*` subpath is a second instance or a load-time failure, and the guard rejects it
+- **Host-provided packages are never `dependencies`** — Pi supplies and aliases them; an installed copy is a second live instance in one process
+- **Only host-aliased import specifiers** — `typebox`, `typebox/compile`, `typebox/value` (and the `@sinclair/typebox` spellings) resolve to the host's copy; any other subpath is a second instance or a load-time failure
 
 <important if="you are bumping versions or adding a package">
 ## Versioning (no publish path)
-1. **Versions are hand-maintained and lockstep.** Every `packages/*/package.json` carries the same `version`; `node scripts/sync-versions.js` (or `npm run versions:sync`) fails if they drifted, then rewrites intra-monorepo deps to `^<version>`. Nothing else consumes the number — there is no registry to publish to.
-2. **Do not add `npm publish` / `prepublishOnly` / release scripts back.** This checkout is installed into Pi as a Pi source (`pi install git:github.com/hs1n/pi-monocoque`) or from a local path; the monorepo root's `pi` manifest is what makes the root a valid package root.
-3. **Bumping the `@earendil-works/pi-*` devDependencies is a real change**: bump the exact pins in root `devDependencies` (and mirror them in root `overrides`), then `npm install`, `npm run check`, `npx vitest run`, and a real load against that host version (`pi --no-session -nt -p OK` with the packages installed) before committing.
-4. Adding a package: create `packages/<name>/package.json` at the lockstep version, run `npm run versions:sync`, and — if it is a Pi extension — add it to the root `pi.extensions` manifest so a git/root install picks it up, then `siblings.ts` + `rpiv-pi/package.json` `peerDependencies: "*"`.
+1. **One version, in the root.** Bump `version` in the root `package.json`, then `npm run versions:sync` — it writes every `packages/*` version and rewrites intra-monorepo deps to `^<version>`. `npm run versions:check` is the read-only form CI runs. Never hand-edit a package version. Nothing consumes the number — there is no registry to publish to.
+2. **Do not add `npm publish` / `prepublishOnly` / release scripts back.** This checkout is installed into Pi as a Pi source or from a local path; the monorepo root's `pi` manifest is what makes the root a valid package root.
+3. **Bumping the `@earendil-works/pi-*` devDependencies is a real change**: bump the exact pins in root `devDependencies` (and mirror them in root `overrides`), then `npm install`, `npm run check`, `npx vitest run`, and a real load against that host version (`pi --no-session -nt -p OK` with the packages installed) before committing. Why they are pinned exact: `details.md` § Fresh-Resolution Hazard.
+4. Adding a package: create `packages/<name>/package.json` (any placeholder version), run `npm run versions:sync` to stamp the root version onto it, and — if it is a Pi extension — add it to the root `pi.extensions` manifest so a git/root install picks it up, then `siblings.ts` + `rpiv-pi/package.json` `peerDependencies: "*"`. Full checklist: `.rpiv/guidance/details.md`.
+5. **CHANGELOGs are historical.** Nothing promotes them; add entries under `[Unreleased]` by hand when a change is worth recording.
 </important>
