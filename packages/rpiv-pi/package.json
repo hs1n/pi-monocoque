@@ -64,9 +64,7 @@
 		"@hs1n/rpiv-web-tools": "*",
 		"@hs1n/rpiv-args": "*",
 		"@hs1n/rpiv-workflow": "*",
-		"yaml": "*",
 		"jiti": "*",
-		"@standard-schema/spec": "*",
 		"typebox": "*"
 	},
 	"contributors": [

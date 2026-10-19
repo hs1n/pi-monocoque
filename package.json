@@ -1,6 +1,6 @@
 {
 	"name": "pi-monocoque",
-	"version": "0.0.0",
+	"version": "2.13.8",
 	"private": true,
 	"type": "module",
 	"workspaces": [
@@ -25,15 +25,17 @@
 		]
 	},
 	"scripts": {
-		"check": "npm run check:host-provided-deps && biome check --write --error-on-warnings . && tsc --noEmit -p tsconfig.base.json",
+		"check": "npm run check:host-provided-deps && npm run check:unused-deps && biome check --write --error-on-warnings packages scripts test vitest.config.ts && tsc --noEmit -p tsconfig.base.json",
 		"check:files": "biome check --write --error-on-warnings",
 		"check:decision-codes": "node scripts/check-no-decision-codes.mjs",
 		"check:file-sizes": "node scripts/check-file-sizes.mjs",
 		"check:host-provided-deps": "node scripts/check-host-provided-deps.mjs",
+		"check:unused-deps": "node scripts/check-unused-deps.mjs",
 		"check:skill-names": "node scripts/check-skill-name-collisions.mjs",
 		"test": "vitest run",
 		"coverage": "vitest run --coverage",
 		"versions:sync": "node scripts/sync-versions.js",
+		"versions:check": "node scripts/sync-versions.js --check",
 		"prepare": "husky || true"
 	},
 	"devDependencies": {
