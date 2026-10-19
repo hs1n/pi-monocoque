@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { createMockCtx, createMockPi, stubGitExec, writeGuidanceTree } from "@hs1n/rpiv-test-utils";
@@ -123,6 +123,39 @@ describe("session_start hook — notifications", () => {
 		expect(warnCall?.[0]).toContain("╭");
 		expect(warnCall?.[0]).toContain("╯");
 		expect(warnCall?.[0]).not.toContain("npm:");
+	});
+
+	it("warns when a higher-precedence copy shadows a bundled skill", async () => {
+		vi.mocked(syncBundledAgents).mockReturnValueOnce(emptySync);
+		vi.mocked(findMissingSiblings).mockReturnValueOnce([]);
+		// `~/.agents/skills` outranks the installed package and Pi always reads it.
+		const userSkills = join(homedir(), ".agents", "skills");
+		mkdirSync(join(userSkills, "research"), { recursive: true });
+		writeFileSync(join(userSkills, "research", "SKILL.md"), "---\nname: research\n---\n");
+		try {
+			const { pi, captured } = createMockPi({ exec: stubGitExec({}) as never });
+			registerSessionHooks(pi);
+			const ctx = createMockCtx({ cwd: projectDir, hasUI: true });
+			await captured.events.get("session_start")?.[0]({ reason: "startup" } as never, ctx as never);
+			const warnCall = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls.find((c) => c[1] === "warning");
+			expect(warnCall?.[0]).toContain("shadowed");
+			expect(warnCall?.[0]).toContain("research");
+			// `research` is contract-carrying and dispatched by name from /wf, so the
+			// shadowing copy does more than replace a body — it strands the graph.
+			expect(warnCall?.[0]).toContain("/wf routes research by name");
+		} finally {
+			rmSync(join(homedir(), ".agents"), { recursive: true, force: true });
+		}
+	});
+
+	it("stays silent when no bundled skill is shadowed", async () => {
+		vi.mocked(syncBundledAgents).mockReturnValueOnce(emptySync);
+		vi.mocked(findMissingSiblings).mockReturnValueOnce([]);
+		const { pi, captured } = createMockPi({ exec: stubGitExec({}) as never });
+		registerSessionHooks(pi);
+		const ctx = createMockCtx({ cwd: projectDir, hasUI: true });
+		await captured.events.get("session_start")?.[0]({ reason: "startup" } as never, ctx as never);
+		expect((ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls.filter((c) => c[1] === "warning")).toEqual([]);
 	});
 
 	it("skips notifications when !hasUI", async () => {

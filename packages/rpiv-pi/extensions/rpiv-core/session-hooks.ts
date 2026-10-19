@@ -5,10 +5,12 @@
  * Handler order is deliberate — preserve it.
  */
 
+import { join } from "node:path";
 import {
 	type BeforeAgentStartEvent,
 	type ExtensionAPI,
 	type ExtensionContext,
+	getAgentDir,
 	isToolCallEventType,
 	type ToolCallEvent,
 } from "@earendil-works/pi-coding-agent";
@@ -31,7 +33,11 @@ import {
 import { clearInjectionState, handleToolCallGuidance, injectRootGuidance, takeRootGuidance } from "./guidance.js";
 import { readLoadedSiblingSources } from "./loaded-siblings.js";
 import { findMissingSiblings, type LoadedSiblingSources } from "./package-checks.js";
+import { BUNDLED_SKILL_NAMES, BUNDLED_SKILLS_DIR } from "./paths.js";
 import { injectPipelinePointer, PIPELINE_POINTER } from "./pipeline-pointer.js";
+import { getCapturedProjectTrust } from "./session-capture.js";
+import { agentsSkillDirs, buildSkillContractsFromFrontmatter } from "./skill-contracts-source.js";
+import { findShadowedSkills, formatShadowWarning } from "./skill-shadow.js";
 import { isStaleCtxError } from "./utils.js";
 
 /**
@@ -171,6 +177,7 @@ async function onSessionStart(
 		notifyCleanup(ctx.ui, cleanup);
 		notifyAgentSyncDrift(ctx.ui, agents);
 		warnMissingSiblings(ctx.ui, loaded);
+		warnShadowedSkills(ctx.ui, ctx.cwd);
 	}
 }
 
@@ -292,6 +299,41 @@ function notifyCleanup(ui: UI, result: CleanupResult): void {
 	if (result.errors.length > 0) {
 		ui.notify(`Agent cleanup reported ${result.errors.length} error(s)`, "warning");
 	}
+}
+
+/**
+ * Every directory Pi reads ahead of the installed package, in dispatch order.
+ *
+ * `.agents/skills` (cwd up to the repo root, then `~/.agents/skills`) is
+ * enumerated by the same helper the contract harvester uses, so the warning and
+ * the registry can never disagree about which tree holds a skill. The other two
+ * are Pi's defaults, read by `loadSkills`: the project `.pi/skills` only on a
+ * trusted project — Pi will not dispatch from it otherwise, and a warning about
+ * a copy that cannot run is noise.
+ */
+function shadowSearchDirs(cwd: string): string[] {
+	const trusted = getCapturedProjectTrust() === true;
+	const dirs = [...agentsSkillDirs(cwd, trusted)];
+	if (trusted) dirs.push(join(cwd, ".pi", "skills"));
+	dirs.push(join(getAgentDir(), "skills"));
+	return dirs;
+}
+
+/**
+ * Announce bundled skills that resolve to a copy outside this package.
+ *
+ * The precedence chain lets a same-named copy win silently, and the `/wf`
+ * graphs dispatch by name — so a shadowed `research` runs someone else's body
+ * while the graph validates against a contract that is no longer harvested.
+ * Frontmatter is only read once something is actually shadowed: the bundled
+ * contract set is what separates "a different body runs" from "the graph that
+ * routes this name is validating against nothing".
+ */
+function warnShadowedSkills(ui: UI, cwd: string): void {
+	const shadowed = findShadowedSkills(BUNDLED_SKILL_NAMES, shadowSearchDirs(cwd));
+	if (shadowed.length === 0) return;
+	const critical = new Set(buildSkillContractsFromFrontmatter(BUNDLED_SKILLS_DIR).map(([name]) => name));
+	ui.notify(`\n${formatShadowWarning(shadowed, critical)}`, "warning");
 }
 
 function warnMissingSiblings(ui: UI, loaded: LoadedSiblingSources): void {

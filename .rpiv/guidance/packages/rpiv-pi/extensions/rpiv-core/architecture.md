@@ -15,7 +15,13 @@ four built-in `/wf` workflows (build / vet / polish / ship) + skill contracts in
 the `@hs1n/rpiv-workflow` sibling via guarded dynamic imports. Pipeline-stage skills
 carry `disable-model-invocation` — gated to explicit `/skill:<name>` or workflow
 dispatch, with a compact stage index injected at session start
-(`pipeline-pointer.ts`).
+(`pipeline-pointer.ts`). **A bundled skill can also be SHADOWED**: a same-named
+copy under `<cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills >
+~/.pi/agent/skills` outranks the installed package, and because the `/wf` graphs
+dispatch by name, a shadowed contract-carrying skill leaves the graph routing to a
+body that declares no matching contract. `session_start` probes those directories
+(`skill-shadow.ts`, pure) and `session-hooks.ts` warns in the action-required
+banner — the runtime half of the trap `skills/matt-pocock/README.md` documents.
 
 **The module map, the per-file dependency enumeration, and the detached-execution
 internals are in `details.md` beside this file — NOT auto-injected.** Read it when
