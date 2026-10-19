@@ -46,8 +46,9 @@ one module in a single process.
 _Avoid_: bundled, vendored, built-in
 
 **lockstep**:
-Every `packages/*/package.json` shares one `version`, hand-maintained and enforced by
-`sync-versions.js`. Nothing is published, so the version is a marker, not a release.
+Every `packages/*/package.json` shares the root `package.json`'s `version`, which is the only
+place it is edited — `sync-versions.js` writes it everywhere else (`--check` verifies).
+Nothing is published, so the version is a marker, not a release.
 _Avoid_: semver, independently versioned
 
 ### Side calls

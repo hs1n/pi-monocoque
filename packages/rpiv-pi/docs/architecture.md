@@ -150,6 +150,7 @@ restart Pi. Your `.rpiv/artifacts/` tree, `~/.config/rpiv-pi/models.json`, and
 
 ## Versioning
 
-Every `@hs1n/rpiv-*` package ships in lockstep from the monorepo root. Versions are
-hand-maintained and nothing is published — `npm run versions:sync` at the root verifies
-parity and rewrites intra-monorepo deps. Never run `npm version` inside this package.
+Every `@hs1n/rpiv-*` package ships in lockstep from the monorepo root, whose `package.json`
+`version` is the only place the number is edited — `npm run versions:sync` writes it into
+every package and rewires intra-monorepo deps (`npm run versions:check` verifies; CI runs it).
+Nothing is published. Never run `npm version` inside this package.

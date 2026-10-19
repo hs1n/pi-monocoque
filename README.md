@@ -73,7 +73,8 @@ npm run coverage     # what the pre-push hook runs
 - One Vitest runner, one Biome config, one `tsconfig.base.json` at the root.
 - Husky gates commits (`check:decision-codes` → `check:file-sizes` → `check`) and pushes
   (full coverage).
-- Versions are hand-maintained lockstep: bump them, then `npm run versions:sync`.
+- Versions are lockstep from one source: bump the root `package.json`, then `npm run versions:sync`
+  (it stamps all 12 packages); `npm run versions:check` verifies in CI.
 - Agent-facing architecture notes live under [`.rpiv/guidance/`](./.rpiv/guidance) and are
   injected per directory as you work.
 

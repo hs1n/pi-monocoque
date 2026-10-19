@@ -96,7 +96,7 @@ than behavioral changes:
   `npm install --omit=dev` there, which is why the root `prepare` is `husky || true`. A
   local-checkout install (`pi install <checkout>`) loads the same manifest live, and
   `scripts/fork-pi-install.sh` still installs the packages individually by path. Versions
-  stay hand-maintained lockstep (`npm run versions:sync`).
+  stay lockstep with the root `package.json` as their only source (`npm run versions:sync`).
 - **`zh-TW` (繁體中文) joined the locale picker**, with `locales/zh-TW.json` in
   `rpiv-todo` and `rpiv-ask-user-question`; the ambiguous `zh` label now reads
   `简体中文`. Upstream's own `zh.json` maps are untouched — note that they are three keys
