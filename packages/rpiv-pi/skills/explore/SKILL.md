@@ -4,25 +4,6 @@ description: Analyze solution options for a feature or change, comparing approac
 argument-hint: "[feature/change description]"
 shell-timeout: 10
 disable-model-invocation: true
-contract:
-  produces:
-    kind: produces
-    meta:
-      artifactKind: solutions
-    data:
-      type: object
-      properties:
-        verdict:
-          enum: [pass, fail, needs_input]
-        status:
-          enum: [in-progress, ready]
-        confidence:
-          enum: [high, medium, low]
-        complexity:
-          enum: [low, medium, high]
-  consumes:
-    meta:
-      artifactKind: [research]
 ---
 
 # Explore

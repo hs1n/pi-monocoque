@@ -4,14 +4,6 @@ description: Create structured git commits by analyzing staged and unstaged chan
 argument-hint: "[message] [--baseline <path>]"
 allowed-tools: Bash(git *), Bash(node *), Read, Glob, Grep
 shell-timeout: 10
-contract:
-  produces:
-    kind: side-effect
-    meta:
-      effect: git-commit
-  consumes:
-    meta:
-      world: dirty-tree
 ---
 
 # Commit Changes
@@ -20,7 +12,7 @@ You are tasked with creating git commits for repository changes.
 
 ## Input
 
-`$ARGUMENTS` — optional commit message hint, optionally with `--baseline <path>` (a workflow's run-start snapshot of paths that were already dirty before the run began). Peel the `--baseline` flag first; the remainder (if any) is the message hint. Empty/literal → infer from history and `git diff`.
+`$ARGUMENTS` — optional commit message hint, optionally with `--baseline <path>` (a snapshot of paths that were already dirty before this work began). Peel the `--baseline` flag first; the remainder (if any) is the message hint. Empty/literal → infer from history and `git diff`.
 
 ## Metadata
 
@@ -38,7 +30,7 @@ git log --pretty=%s -n 20 2>/dev/null || true
 node "${SKILL_DIR}/../_shared/git-changes.mjs" --baseline <path>
 ```
 
-`---pre-existing (do NOT commit — dirty before this run)---` — present in that re-run's output when some listed files were already dirty before the run began. These are **out of scope**: they are not this run's work. **Never `git add` a path in this section** — a workflow commits only the changes it produced. The re-run's `---status---` block already excludes them; they are shown purely so you know they exist and must be left uncommitted.
+`---pre-existing (do NOT commit — dirty before this run)---` — present in that re-run's output when some listed files were already dirty before the run began. These are **out of scope**: they are not this session's work. **Never `git add` a path in this section** — commit only the changes this session produced. The re-run's `---status---` block already excludes them; they are shown purely so you know they exist and must be left uncommitted.
 
 ## Context:
 - **In-session**: If there's conversation history, use it to understand what was built/changed

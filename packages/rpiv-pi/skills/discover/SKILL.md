@@ -4,16 +4,6 @@ description: Interview the developer one question at a time to extract feature i
 argument-hint: "[free-text feature description | existing artifact path]"
 shell-timeout: 10
 disable-model-invocation: true
-contract:
-  produces:
-    kind: produces
-    meta:
-      artifactKind: frd
-    data:
-      type: object
-      properties:
-        status:
-          enum: [in-progress, in-review, ready]
 ---
 
 # Discover

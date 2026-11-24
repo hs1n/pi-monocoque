@@ -4,52 +4,6 @@ description: Decompose a research artifact into independent vertical slices — 
 argument-hint: "<research-path> | --research <path>  |  --slices <map> --slice-verdicts <verdict>..."
 shell-timeout: 10
 disable-model-invocation: true
-contract:
-  produces:
-    kind: produces
-    meta:
-      artifactKind: slices
-    data:
-      type: object
-      required: [slices, slice_count]
-      properties:
-        status:
-          enum: [in-progress, in-review, ready]
-        slice_count:
-          type: integer
-          minimum: 1
-          maximum: 32
-        coverage:
-          type: array
-          items:
-            type: object
-            required: [id]
-            properties:
-              id: { type: string }
-              brief: { type: string }
-        slices:
-          type: array
-          minItems: 1
-          maxItems: 32
-          items:
-            type: object
-            required: [n, title]
-            properties:
-              n: { type: integer, minimum: 1 }
-              title: { type: string }
-              deps: { type: array, items: { type: integer } }
-              covers: { type: array, items: { type: string } }
-  consumes:
-    data:
-      type: object
-      properties:
-        status:
-          const: ready
-    reads:
-      slices: {}
-      slice-verdicts: {}
-    meta:
-      artifactKind: [research]
 ---
 
 # Slice
@@ -60,7 +14,7 @@ You decompose a feature into **independent vertical slices** and write a slice m
 
 `$ARGUMENTS` takes two forms:
 
-1. **Fresh** — a path to a `.rpiv/artifacts/research/*.md` artifact, positional or as `--research <path>` (the flag form is how the build workflow dispatches it — equivalent, same input). Decompose from scratch via Steps 1–6, grounded in that research. The research artifact is **required**: if the argument is missing, empty, or not a research path, print an error and stop — it's a dispatch error (the workflow runs `research` before `slice`).
+1. **Fresh** — a path to a `.rpiv/artifacts/research/*.md` artifact, positional or as `--research <path>` (two spellings of the same input). Decompose from scratch via Steps 1–6, grounded in that research. The research artifact is **required**: if the argument is missing, empty, or not a research path, print an error and stop — it's a dispatch error, not an empty research doc.
 2. **Re-slice** (the re-slice loop) — `--slices <map-path> --slice-verdicts <verdict-path> … [--slice-check <structural-verdict-path> …]` (the `--slice-verdicts` and `--slice-check` flags repeat). **Re-cut the existing slice map** to clear the failures its verdicts name. Recognize this form by the `--slices` flag and follow **Re-slice mode** below — NOT the fresh Steps (no confirm). `--slice-check` carries the **deterministic** structural findings (dependency cycles, dropped coverage units, unbacked `file:line` citations) — treat them exactly like a verdict's findings; they are the un-gameable floor and MUST all be cleared.
 
 ## Metadata
@@ -89,7 +43,7 @@ A vertical slice is a coherent, independently-buildable capability that cuts thr
 
 ## Steps
 
-1. **Input.** Read the research path FULLY (no limit/offset) and read the key source files it cites — these are your grounding. A missing, empty, or non-research argument is a dispatch error: print an error and stop (the workflow runs `research` before `slice`, so a research artifact is always available).
+1. **Input.** Read the research path FULLY (no limit/offset) and read the key source files it cites — these are your grounding. A missing, empty, or non-research argument is a dispatch error: print an error and stop — run `research` first, so a research artifact is always available to cut from.
 2. **Decompose.** Identify the capabilities the work delivers, then group them into independent vertical slices by **mechanism, not by location** — a shared package, file, or subsystem is never itself a reason to group two units; one mechanism may claim many coverage units, or one, and unit count is not the test. First enumerate the brief's **coverage units** — the distinct observable outcomes it asks for, each with a short stable `id` (`c1`, `c2`, …) and a one-line `brief` — then assign every unit to the slice(s) that deliver it via each slice's `covers:`, so every unit is claimed by at least one slice. Every slice's `Draws on:` cites a real `file:line` from the research read in Step 1 — write the **repo-root-relative path** (`packages/billing/src/invoice.ts:NN`), never a subdirectory-relative form (`src/invoice.ts:NN`) or a bare basename (`invoice.ts:NN`).
 3. **Resolve ambiguity.** Settle from the research/code wherever you can. When a genuine decomposition fork remains (e.g. "is this finding in scope for the brief, or deferred?"), use `ask_user_question` with 2–4 concrete options — **one at a time**, wait for the answer. **Granularity is not such a fork** — how finely to cut is settled by the `design-readiness` rubric, not by the developer; never offer "N vs M slices" options.
 4. **Confirm the decomposition.** Once, before writing: `ask_user_question` — "{N} slices for {topic}. Slice 1: {name}. Slices 2–N: {brief}. Approve?". Header "Slices". Options: "Approve (Recommended)" (write the map); "Adjust slices" (reorder/merge/split); "Change scope" (add/remove). Apply the answer, then write.

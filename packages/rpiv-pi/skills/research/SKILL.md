@@ -4,19 +4,6 @@ description: Answer structured research questions about a codebase using targete
 argument-hint: "[free-text research prompt]"
 shell-timeout: 10
 disable-model-invocation: true
-contract:
-  produces:
-    kind: produces
-    meta:
-      artifactKind: research
-    data:
-      type: object
-      properties:
-        status:
-          enum: [in-progress, in-review, ready]
-  consumes:
-    meta:
-      artifactKind: [frd]
 ---
 
 # Research
@@ -93,7 +80,7 @@ The final artifact feeds design or blueprint.
 
 ### Step 2: Dispatch Analysis Agents
 
-Spawn analysis agents using the Agent tool — all in a **single assistant message with multiple Agent calls** (concurrent, synchronous). **Never `run_in_background`**: its completion can't re-drive a workflow session, so the skill ends its turn before writing the document and the stage fails with no artifact.
+Spawn analysis agents using the Agent tool — all in a **single assistant message with multiple Agent calls** (concurrent, synchronous). **Never `run_in_background`**: its completion cannot re-drive this session, so the skill ends its turn before writing the document and you end with no artifact.
 
 **Launch marker** — in that SAME assistant message, as its text block (it adds no turn, so the one-message parallel dispatch shape stays intact), emit:
 
@@ -385,4 +372,4 @@ Please review and let me know if you have follow-up questions.
   - ALWAYS gather metadata before writing (Step 4)
   - NEVER write the document with placeholder values
 - **Frontmatter consistency**: Always include frontmatter, use snake_case fields
-- **Progress markers are transcript text only**: the `[Questions]:` / `[Dispatched]:` / `[Returned]:` / `[Synthesizing]:` lines are one-line status for the lane console's live tail — never artifact content — and NEVER quote the research document's path in a marker, or anywhere else, before the file is written.
+- **Progress markers are transcript text only**: the `[Questions]:` / `[Dispatched]:` / `[Returned]:` / `[Synthesizing]:` lines are one-line status for the reader watching the session — never artifact content — and NEVER quote the research document's path in a marker, or anywhere else, before the file is written.

@@ -4,39 +4,6 @@ description: Plan complex features by decomposing them into vertical slices (one
 argument-hint: "[research artifact path or feature description]"
 shell-timeout: 10
 disable-model-invocation: true
-contract:
-  produces:
-    kind: produces
-    meta:
-      artifactKind: plan
-    data:
-      type: object
-      required: [phases, phase_count]
-      properties:
-        status:
-          enum: [in-progress, in-review, ready]
-        phase_count:
-          type: integer
-          minimum: 1
-          maximum: 32
-        phases:
-          type: array
-          minItems: 1
-          maxItems: 32
-          items:
-            type: object
-            required: [n, title]
-            properties:
-              n: { type: integer, minimum: 1 }
-              title: { type: string }
-  consumes:
-    data:
-      type: object
-      properties:
-        status:
-          const: ready
-    meta:
-      artifactKind: [research, solutions]
 ---
 
 # Blueprint
@@ -98,7 +65,7 @@ When this command is invoked:
 
 This is NOT a discovery sweep. Focus on DEPTH (how things work, what patterns to follow) not BREADTH (where things are).
 
-1. **Spawn parallel research agents** using the Agent tool — all in a **single assistant message with multiple Agent calls** (concurrent, synchronous). **Never `run_in_background`**: its completion can't re-drive a workflow session, so the skill ends its turn before writing the plan and the stage fails with no artifact.
+1. **Spawn parallel research agents** using the Agent tool — all in a **single assistant message with multiple Agent calls** (concurrent, synchronous). **Never `run_in_background`**: its completion cannot re-drive this session, so the skill ends its turn before writing the plan and you end with no artifact.
 
    - Use **codebase-pattern-finder** to find existing implementations to model after — the primary template for code shape
 
@@ -372,7 +339,7 @@ Use the `ask_user_question` tool to confirm. Question: "Slice {N/M}: {slice name
    - [ ] Performance acceptable with 1000+ todo items
    ```
 
-   **Write-scope rule (per-phase, mandatory before parallel implement):** every command in a phase's `#### Automated Verification:` block must be **write-scoped to that phase's own `files:` set** — running it must not modify anything outside the phase's `files:`. Phases run concurrently under build's parallel implement lane, so a command that rewrites the wider tree corrupts a sibling phase's in-flight edit; narrow any formatter or auto-fixer to the phase's paths (take the project's command vocabulary from its guidance `# Commands` table — where the table gives only an unscoped form, narrow it to the phase's paths rather than substituting a different tool). Read-only repo-wide commands (a type check, a non-fixing lint, a scoped test selection) are permitted. Whole-repo build/test verification belongs to the plan's final whole-plan block, owned by `validate` — never to a phase.
+   **Write-scope rule (per-phase, mandatory before parallel implement):** every command in a phase's `#### Automated Verification:` block must be **write-scoped to that phase's own `files:` set** — running it must not modify anything outside the phase's `files:`. Phases may run concurrently when implemented in parallel, so a command that rewrites the wider tree corrupts a sibling phase's in-flight edit; narrow any formatter or auto-fixer to the phase's paths (take the project's command vocabulary from its guidance `# Commands` table — where the table gives only an unscoped form, narrow it to the phase's paths rather than substituting a different tool). Read-only repo-wide commands (a type check, a non-fixing lint, a scoped test selection) are permitted. Whole-repo build/test verification belongs to the plan's final whole-plan block, owned by `validate` — never to a phase.
 
    **Who runs AV lines:** `implement` runs each phase's own `#### Automated Verification:` commands in its shell and flips the checkboxes; `validate` re-runs them agent-side over the whole finished plan. Both are agents with a real shell and judgment — no deterministic harness re-executes these lines. Still prefer ONE self-contained command per line that exits 0 when the criterion holds, with the target path inside the backtick span; prose around the span is context for the agent, not executed syntax. Remember AV lines are written before sibling phases land: a check asserting another phase's rename target or source may be true at phase time and false on the final tree — scope each line to what YOUR phase owns.
 

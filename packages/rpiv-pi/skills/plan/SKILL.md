@@ -4,39 +4,6 @@ description: Convert a design artifact into a phased implementation plan with pa
 argument-hint: "[design artifact path]"
 shell-timeout: 10
 disable-model-invocation: true
-contract:
-  produces:
-    kind: produces
-    meta:
-      artifactKind: plan
-    data:
-      type: object
-      required: [phases, phase_count]
-      properties:
-        status:
-          enum: [in-progress, in-review, ready]
-        phase_count:
-          type: integer
-          minimum: 1
-          maximum: 32
-        phases:
-          type: array
-          minItems: 1
-          maxItems: 32
-          items:
-            type: object
-            required: [n, title]
-            properties:
-              n: { type: integer, minimum: 1 }
-              title: { type: string }
-  consumes:
-    data:
-      type: object
-      properties:
-        status:
-          const: ready
-    meta:
-      artifactKind: [design]
 ---
 
 # Plan
@@ -402,7 +369,7 @@ Success Criteria are **authored upstream in `/skill:design` Step 6.1** and verif
 1. **Automated Verification** (run by execution agents): the project's own test and lint commands, as recorded in its guidance `# Commands` table; file-existence checks; type checking; test suites.
 2. **Manual Verification** (requires human): UI/UX, real-conditions performance, hard-to-automate edge cases, UAT.
 
-**Write-scope rule (per-phase, mandatory before parallel implement):** every command in a phase's `#### Automated Verification:` block must be **write-scoped to that phase's own `files:` set** — running it must not modify anything outside the phase's `files:`. Phases run concurrently under build's parallel implement lane, so a command that rewrites the wider tree corrupts a sibling phase's in-flight edit; narrow any formatter or auto-fixer to the phase's paths (take the project's command vocabulary from its guidance `# Commands` table — where the table gives only an unscoped form, narrow it to the phase's paths rather than substituting a different tool). Read-only repo-wide commands (a type check, a non-fixing lint, a scoped test selection) are permitted. Whole-repo build/test verification belongs to the plan's final whole-plan block, owned by `validate` — never to a phase.
+**Write-scope rule (per-phase, mandatory before parallel implement):** every command in a phase's `#### Automated Verification:` block must be **write-scoped to that phase's own `files:` set** — running it must not modify anything outside the phase's `files:`. Phases may run concurrently when implemented in parallel, so a command that rewrites the wider tree corrupts a sibling phase's in-flight edit; narrow any formatter or auto-fixer to the phase's paths (take the project's command vocabulary from its guidance `# Commands` table — where the table gives only an unscoped form, narrow it to the phase's paths rather than substituting a different tool). Read-only repo-wide commands (a type check, a non-fixing lint, a scoped test selection) are permitted. Whole-repo build/test verification belongs to the plan's final whole-plan block, owned by `validate` — never to a phase.
 
 **Whole-plan gate achievability rule:** every command promised in the plan's final whole-plan block must be able to pass on the base tree plus this plan's own changes — validate judges criteria literally, so a criterion that is red at base for files the plan never touches converts pre-existing debt into a permanent `verdict: fail`. For repo-wide *style* gates (lint, format checks) default to the delta-scoped form — run the tool over the plan's file union (e.g. `npx eslint <plan files>` exits 0) — and promise an absolute repo-wide "exits 0" only for build/test commands, or when there is evidence the gate is green at base (the research artifact or project guidance says so). Known base debt the plan won't repair is recorded under Notes as a deferral, never as a criterion. (Mirrored in synthesize/SKILL.md — edit both together.)
 

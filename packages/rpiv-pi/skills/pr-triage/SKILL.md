@@ -3,31 +3,6 @@ name: pr-triage
 description: "Triage a GitHub pull request before committing review effort — fetch the PR thread (description, review comments, linked issues, CI status), assess the diff against whatever architecture/standards the target repo actually carries, and emit a triage disposition (Review · Request changes · Hold · Decline) with security tier and convention drift. Use when the user wants a PR sized up, asks 'should I review/merge this PR', or wants a recommended next step on an incoming PR. Produces triage documents in .rpiv/artifacts/triage/. Read-only — never checks out or mutates the working tree. Stack-agnostic: works in any language or framework, with or without architecture docs."
 argument-hint: "[PR number | PR URL | empty = current branch]"
 shell-timeout: 15
-contract:
-  produces:
-    kind: produces
-    meta:
-      artifactKind: triage
-    data:
-      type: object
-      required: [security_flag, blockers_count]
-      properties:
-        status:
-          enum: [in-progress, ready]
-        security_flag:
-          type: integer
-          minimum: 0
-          maximum: 2
-        blockers_count:
-          type: integer
-          minimum: 0
-        risk:
-          enum: [low, medium, high]
-        convention_drift:
-          enum: [none, local, structural]
-  consumes:
-    meta:
-      world: github-pr
 ---
 
 # PR Triage
@@ -35,7 +10,7 @@ contract:
 Size up a pull request **before** spending review effort: read the PR thread, compare
 the diff against whatever standard the target repo carries, and emit a routing verdict.
 Triage **classifies and routes** — it does not adjudicate line by line (that's
-`code-review`, which the routed workflow runs). Read-only: no checkout, no mutation.
+`code-review`, which runs next). Read-only: no checkout, no mutation.
 
 Stack-agnostic by design. The skill hard-codes no language, build tool, directory
 layout, or standards file — it discovers what the repo has and degrades to the code
@@ -68,7 +43,7 @@ cannot capture.
 **Read-only contract (load-bearing):** every agent is dispatched with read-only tools.
 The skill MUST NOT `git checkout`, switch branches, or edit files — it reasons about the
 PR diff as text fetched through `gh`. The security gate runs on fetched diff text
-*before* any routed workflow touches the tree.
+*before* any session checks the branch out.
 
 ## Steps
 
@@ -228,21 +203,23 @@ one-question-at-a-time rule). Present:
 - the **Top Blockers** (ranked) and the **fit** judgment,
 - the **recommended action** (below).
 
-**Disposition options.** This is **initial triage**, a gate before review — the pipeline is
+**Disposition options.** This is **initial triage**, a gate before review — the sequence is
 triage → review → merge, and triage never merges. The positive outcome is *proceed to review*,
 never *approve* or *merge*. The next step is a plain action (open a review, send back to the
-author, comment, close). The rpiv review workflow `vet` is the review stage (review → repair →
-commit), the one optional mechanism a triage hands forward.
+author, comment, close). For the Review disposition, the review is `/skill:code-review`
+against the PR branch, followed by `/skill:commit`; that chain is the one optional mechanism a
+triage hands forward.
 
 | Disposition (the option label) | When | Next step |
 |---|---|---|
-| **Review** | passes triage — security SAFE, in scope, no obvious pre-review blockers | proceed to review: open a code review, or `/wf vet "<pr-url>"` (the rpiv review → repair → commit loop) |
+| **Review** | passes triage — security SAFE, in scope, no obvious pre-review blockers | proceed to review: open a code review, or run `/skill:code-review` on the PR branch (then `/skill:commit`) |
 | **Request changes** | obvious blockers the author should fix before a full review is worthwhile (structural drift, undelivered intent) | open a Request-changes review with the blockers — back to the author |
 | **Hold** | `fit` is `needs-scope-decision` / `possibly-redundant`; an open question must settle first | comment the scope question (with the redirect); don't review yet |
 | **Decline** | out of scope / duplicate / superseded; not worth reviewing | close with the reason + where it belongs (relocate) |
 
-`/wf vet` is offered only with **Review** — it is the review stage that follows an accepted triage.
-The other dispositions are plain actions (back to the author, comment, close), no workflow.
+The `/skill:code-review` line is offered only with **Review** — it is the review step that follows an
+accepted triage. The other dispositions are plain actions (back to the author, comment,
+close), no review pass.
 
 **Recommend the FEASIBLE option** (the recommended one listed FIRST, marked `(recommended)`):
 - **Decline** when the change clearly should not merge *here* (duplicate, out of scope, superseded).
@@ -251,7 +228,7 @@ The other dispositions are plain actions (back to the author, comment, close), n
 - **ALWAYS pair Hold and Decline with a redirect** — the reason AND where it belongs (which existing
   capability, which repo, which issue). Never park or reject without a path.
 - **Request changes** when there are obvious blockers the author should resolve before review.
-- Otherwise **Review** — it passed triage; send it to the review stage. This is the positive
+- Otherwise **Review** — it passed triage; send it to review (`/skill:code-review`). This is the positive
   outcome of triage; it does NOT mean "merge" (that comes after review).
 - Offer the other dispositions too, but exactly ONE is recommended. Mark a clearly-wrong option
   `not recommended — {reason}`, the way a reviewer would.
@@ -274,10 +251,10 @@ The other dispositions are plain actions (back to the author, comment, close), n
    under a minute):
    - `## Bottom line` — lead with the fit/crux judgment, then the **Recommendation** as a plain
      action (open a review / back to the author / comment the scope question / close), then the
-     optional rpiv line (`/wf vet "<pr-url>"` — Review only), then a **Definition of done** line
+     optional rpiv line (`/skill:code-review` on the PR branch — Review only), then a **Definition of done** line
      — the condition that flips the verdict (resolve N blockers → Review-ready; for Hold/Decline,
-     the answer or redirect that settles it). Any `/wf` command uses the PR **URL** (`pr_url` /
-     the helper's `url:`), never a bare `#number` — the URL resolves from a fresh session.
+     the answer or redirect that settles it). Name the PR **URL** (`pr_url` /
+     the helper's `url:`) wherever the recommendation is carried forward — the URL resolves from a fresh session.
    - `## Top Blockers` — the Step 4 ranking, 3–5 items, crux first; never minor nits.
    - `## Convention Drift` — `### Structural` as full blocks; `### Minor` collapsed to ONE
      line per nit (never full blocks for `local` rows).
@@ -314,7 +291,7 @@ CI:          {passing|failing|pending|none}
 
 Recommendation: {Review|Request changes|Hold|Decline} — {one-line why, plain prose}
 Next step:      {the action: open a review / back to the author / comment the scope question / close with a redirect}
-                {optional rpiv, Review only: `/wf vet "{pr_url}"`}
+                {optional rpiv, Review only: code review of "{pr_url}"}
                 {BLOCK: STOP — resolve the security finding before any checkout}
 
 > 🆕 Tip: start a fresh session with `/new` before chaining.
@@ -338,7 +315,7 @@ Next step:      {the action: open a review / back to the author / comment the sc
   On a `BLOCK` (`security_flag: 2`) still write the artifact — the audit record matters.
 - **ALWAYS write the artifact exactly once** with Write (NEVER Edit).
 - **NEVER put minor (`local`) nits in `## Top Blockers`.**
-- **ALWAYS use the PR URL in any `/wf` command, never a bare `#number`.** The URL resolves from a
+- **ALWAYS carry the PR URL, never a bare `#number`, wherever the recommendation names the PR.** The URL resolves from a
   fresh session; a number does not. (`#number` is fine in display headings only.)
 - **NEVER paste the raw PR thread into a prompt.** Hand each agent only its path — `patch_path` to
   security, `context_path` to drift/intent.
@@ -349,7 +326,7 @@ Next step:      {the action: open a review / back to the author / comment the sc
 
 - **Read-only is load-bearing**: no checkout, no branch switch, no Edit/Write to source.
   All three agents inherit read-only tool sets. The security gate runs on fetched diff
-  text *before* the routed workflow ever touches the tree.
+  text *before* any session ever checks the tree out.
 - **Standards are discovered, not assumed**: the skill never hard-codes a doc path or a
   stack. It resolves the strongest available standard per module — explicit docs →
   linter rules → peer code — and degrades to peer-code inference, which exists in every
@@ -358,14 +335,13 @@ Next step:      {the action: open a review / back to the author / comment the sc
 - **Language/framework-agnostic**: convention and security findings name the *concept*
   the diff violates in the module's own terms. No assumption of TS/Node, a build tool,
   or a directory layout.
-- **`security_flag` is the gate field**: an integer a downstream `gate(...)` consumer reads via
+- **`security_flag` is the gate field**: an integer a downstream consumer reads via
   `Number()`; a `BLOCK` (2) halts the run (the skill writes the artifact and stops regardless —
-  it never checks out the tree). No built-in `/wf` workflow consumes it now that the built-in
-  `pr-triage` graph has been removed; the consumer is a user-authored workflow or other downstream
-  reader. The enums (`risk`, `convention_drift`) and the tally fields are display-only. Keep
-  frontmatter fields verbatim — `artifacts-locator` greps them.
+  it never checks out the tree). Nothing in this repo reads it automatically any more; the
+  consumer is a downstream reader of your choice. The enums (`risk`, `convention_drift`) and the
+  tally fields are display-only. Keep frontmatter fields verbatim — `artifacts-locator` greps them.
 - **Triage gates; it does not review**: no per-line adjudication, no severity reconciliation, no
-  verification pass — that's the review stage. Keep this skill cheap: three agents, one
+  verification pass — that's the review step. Keep this skill cheap: three agents, one
   checkpoint, one write.
 - **GitHub-coupled**: requires `gh` auth and an open PR. The helper degrades to
   `strategy: no-gh` / `no-pr` (never a shell error) so the skill body can stop cleanly.

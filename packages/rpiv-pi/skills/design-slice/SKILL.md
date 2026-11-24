@@ -1,32 +1,15 @@
 ---
 name: design-slice
-description: Design ONE vertical slice from a slice map in isolation — its architecture decisions, file map, key interfaces, integration points, and success criteria — and write a per-slice design doc to .rpiv/artifacts/designs/. Single-pass, no research subagents, no self-review; asks the user only when a genuine design fork blocks the slice. Dispatched once per slice by a design fanout; the per-slice designs are later merged by synthesize. Use as a fanout unit, not standalone.
+description: Design ONE vertical slice from a slice map in isolation — its architecture decisions, file map, key interfaces, integration points, and success criteria — and write a per-slice design doc to .rpiv/artifacts/designs/. Single-pass, no research subagents, no self-review; asks the user only when a genuine design fork blocks the slice. Run one instance per slice, in parallel; the per-slice designs are later merged by synthesize. Use as a fanout unit, not standalone.
 argument-hint: "<slices-path> Slice N: <title> [--upstream <design-path>]..."
 allowed-tools: Read, Grep, Glob, Write
 shell-timeout: 10
 disable-model-invocation: true
-contract:
-  produces:
-    kind: produces
-    meta:
-      artifactKind: design
-    data:
-      type: object
-      properties:
-        status:
-          enum: [in-progress, in-review, ready]
-        # Derived from the path + frontmatter by the build workflow's design parser, never authored:
-        # `matches` iff the basename's `_slice-<N>_` token equals `slice_n`.
-        filename_slice:
-          enum: [matches]
-  consumes:
-    meta:
-      artifactKind: [slices, design]
 ---
 
 # Design Slice
 
-You design **one** vertical slice from a slice map, in isolation, and write its design doc. One pass. You do **not** decompose (the slice is already cut), implement, or self-review — the workflow's grade panel judges your output. You **may** ask the user only when a genuine design fork blocks this slice.
+You design **one** vertical slice from a slice map, in isolation, and write its design doc. One pass. You do **not** decompose (the slice is already cut), implement, or self-review — a `grade` pass over the design is the judge, not you. You **may** ask the user only when a genuine design fork blocks this slice.
 
 ## Input
 
@@ -34,8 +17,7 @@ You design **one** vertical slice from a slice map, in isolation, and write its 
 
 - The first token is the path to a slice map under `.rpiv/artifacts/slices/`.
 - The remainder (`Slice N: <title>`) names the **single** slice to design. Parse `N` from `Slice (\d+)`.
-- `--upstream <path>` *(repeats, optional)* — a direct dependency's per-slice design doc,
-  injected by the design fanout once that dependency completes. Read each one's
+- `--upstream <path>` *(repeats, optional)* — a direct dependency's per-slice design doc, passed in once that dependency is done. Read each one's
   `## Key Interfaces` (the decided contract this slice builds on) and `## Notes / Deferred`
   (to detect an undecided fork). Absent ⇒ this slice is a root (no upstream dependency).
 
@@ -114,7 +96,7 @@ tags: [design, slice]
 ## Hard rules
 
 - **One slice only.** Never design or touch work that the slice map assigns to a different slice.
-- **The path carries the slice.** The basename's `_slice-<N>_` segment is mandatory and must equal `slice_n` — the workflow resolves which slice a design belongs to from both, and a title that happens to look like an ID (`LV-2`, `DT-1`) never substitutes for it.
+- **The path carries the slice.** The basename's `_slice-<N>_` segment is mandatory and must equal `slice_n` — both the path and the frontmatter name the slice, so a title that happens to look like an ID (`LV-2`, `DT-1`) never substitutes for it.
 - **Code shape, not implementation.** Interfaces, file map, decisions — `implement` writes the actual code later.
 - **No discovery/analysis subagents. No self-review.** Read the files the slice names; decide; write. Ask only to clear a genuine blocking fork.
 - **Build against decided upstream contracts.** When `--upstream` designs are provided, consume their `## Key Interfaces` as fixed — never redesign a dependency's contract. If a contract you depend on is undecided (parked in the upstream's `## Notes / Deferred`), escalate (Step 5), don't guess.

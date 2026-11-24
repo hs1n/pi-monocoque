@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Pre-flight lint for `#### Reconciliation` directives — the deterministic
- * `reconcile` gate's own parser (reconcile-directives.mjs, the same module
- * extensions/rpiv-core/built-ins/reconcile.ts imports) run in check-only mode,
- * so a directive that lints clean here parses and applies cleanly at the gate.
+ * Pre-flight lint for `#### Reconciliation` directives — the shared directive
+ * grammar (reconcile-directives.mjs, the skill layer's own copy) run in
+ * check-only mode, so a directive that lints clean here is structurally sound
+ * before an amend round is spent on it.
  * The implement skill runs this after recording a directive and before printing
  * its closing block: every finding caught here is one `/skill:amend` repair
  * session plus a gate re-entry that never happens.
@@ -37,7 +37,7 @@ import {
 	declaredWriteSet,
 	phaseSection,
 	reconciliationRecords,
-} from "../../extensions/rpiv-core/built-ins/reconcile-directives.mjs";
+} from "./reconcile-directives.mjs";
 
 const usage = () => {
 	console.error("usage: node reconcile-lint.mjs <plan.md> [--phase <N>] [--root <dir>]");

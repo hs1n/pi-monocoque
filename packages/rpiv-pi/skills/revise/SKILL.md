@@ -4,20 +4,6 @@ description: Surgically update an existing implementation plan in .rpiv/artifact
 argument-hint: "[plan-path | --plans <path> --reviews <path>] [feedback]"
 shell-timeout: 10
 disable-model-invocation: true
-contract:
-  produces:
-    kind: produces
-    meta:
-      artifactKind: plan
-    data:
-      type: object
-      properties:
-        status:
-          enum: [in-progress, in-review, ready]
-  consumes:
-    reads:
-      plans: {}
-      reviews: {}
 ---
 
 # Revise
@@ -28,10 +14,10 @@ You are tasked with updating existing implementation plans based on user feedbac
 
 `$ARGUMENTS` accepts two shapes:
 
-1. **Workflow form** — `--plans <plan-path> --reviews <review-path>`. The orchestrator wires both upstream artifacts in. The plan path is the file to update; the review path carries the findings that drive the edits. Treat the review's content as the feedback.
+1. **Flag form** — `--plans <plan-path> --reviews <review-path>`. Both files are passed in by the caller. The plan path is the file to update; the review path carries the findings that drive the edits. Treat the review's content as the feedback.
 2. **Manual form** — `<plan-path> "<feedback>"`, e.g. `.rpiv/artifacts/plans/2025-10-16_09-00-00_feature.md "Split Phase 2 into two phases"`.
 
-Recognize the workflow form by the `--plans` / `--reviews` flag tokens; recognize the manual form by the absence of those flags. When both `--plans` and `--reviews` are present, read the review FULLY and synthesize its findings as the feedback set.
+Recognize the flag form by the `--plans` / `--reviews` flag tokens; recognize the manual form by the absence of those flags. When both `--plans` and `--reviews` are present, read the review FULLY and synthesize its findings as the feedback set.
 
 ## Metadata
 
@@ -62,7 +48,7 @@ When this command is invoked:
 
 2. **Handle different input scenarios**:
 
-   **If `--plans` AND `--reviews` flags are present (workflow form)**:
+   **If `--plans` AND `--reviews` flags are present (flag form)**:
    - Take the `--plans` value as the plan file path.
    - Read the `--reviews` artifact FULLY (the review findings are the feedback set).
    - Skip directly to substep 3 — no preliminary questions needed.

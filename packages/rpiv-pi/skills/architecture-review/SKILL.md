@@ -4,40 +4,6 @@ description: Conduct a top-down, layer-by-layer architecture review of a softwar
 argument-hint: "[target path: file, directory, or module]"
 shell-timeout: 10
 disable-model-invocation: true
-contract:
-  produces:
-    kind: produces
-    meta:
-      artifactKind: architecture-review
-    data:
-      type: object
-      required: [phases, layer_count]
-      properties:
-        status:
-          enum: [in-progress, ready]
-        layer_count:
-          type: integer
-          minimum: 1
-        phases:
-          type: array
-          minItems: 1
-          maxItems: 32
-          items:
-            type: object
-            required: [n, title]
-            properties:
-              n: { type: integer, minimum: 1 }
-              title: { type: string }
-              depends_on:
-                type: array
-                items: { type: integer, minimum: 1 }
-              blast_radius:
-                enum: [internal, public-API, on-disk, cross-module]
-              effort:
-                enum: [S, M, L]
-  consumes:
-    meta:
-      world: target-path
 ---
 
 # Architecture Review
@@ -95,7 +61,7 @@ Layers mirror dependency direction. Higher layers consume lower-layer vocabulary
    - Persistence / on-disk format
    - Cross-cutting utilities
 
-2. **For complex targets, dispatch parallel agents** to accelerate categorization — all in a **single assistant message with multiple Agent calls** (concurrent, synchronous). **Never `run_in_background`**: its completion can't re-drive a workflow session, so the skill ends its turn before writing the review and the stage fails with no artifact.
+2. **For complex targets, dispatch parallel agents** to accelerate categorization — all in a **single assistant message with multiple Agent calls** (concurrent, synchronous). **Never `run_in_background`**: its completion cannot re-drive this session, so the skill ends its turn before writing the review and you end with no artifact.
 
    **Agent — codebase-locator:** "Map every source file in {target path} to one responsibility from the standard role buckets (facade, vocabulary, DSL, command, loaders, validation, orchestration, sessions, persistence, utilities). Return a file → responsibility table."
 

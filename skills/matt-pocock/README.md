@@ -20,11 +20,11 @@ Six of upstream's `engineering/` skills are deliberately **absent**:
 
 | Not vendored | Why |
 | --- | --- |
-| `code-review`, `implement`, `research` | Each collides by name with a skill under `packages/rpiv-pi/skills/`, where all three are dispatched **by name** from the built-in `/wf` graphs. Any higher-precedence copy shadows rpiv's body while the graph still routes by that name. The **Skill ownership** section of `CONTEXT.md` records why the absence is load-bearing. |
+| `code-review`, `implement`, `research` | Each collides by name with a skill under `packages/rpiv-pi/skills/`. A same-named copy that outranks the installed package shadows rpiv's body, so `/skill:<name>` silently runs the vendored one instead — no error, no merge. The **Skill ownership** section of `CONTEXT.md` owns that naming split. |
 | `implement-spec`, `pr`, `retro` | Not in use here. |
 
-None of the 22 declares a `contract:` block, so they are invisible to rpiv's contract harvesting
-(`buildUserSkillContracts`) and cannot perturb contract-driven routing.
+A skill here declares no `contract:` block, and nothing in this repo reads one. Keep these copies
+verbatim regardless — that is what makes drift detectable.
 
 ## Fork-modified: `grilling`
 
@@ -56,11 +56,10 @@ collides with `packages/rpiv-pi/skills/`, and regenerate `PROVENANCE.json`. Then
 
 **Do not re-run the installer that put these in `~/.agents/skills`.** It is lock-driven, and its lock
 still carries all 25 names, so it will restore `code-review`, `implement` and `research` into a
-location that outranks the installed package — silently shadowing three skills the built-in `/wf`
-graphs dispatch by name. **That is the exact failure this directory exists to prevent**, and it is
-why the absence of those three is load-bearing rather than tidy. If the installer is wanted for
-something else, keep its output out of `~/.agents/skills`, or verify afterwards that the three names
-are still absent.
+location that outranks the installed package — silently shadowing the three rpiv skills they collide
+with. **That is the exact failure this directory exists to prevent**, and it is why the absence of
+those three is load-bearing rather than tidy. If the installer is wanted for something else, keep
+its output out of `~/.agents/skills`, or verify afterwards that the three names are still absent.
 
 ## The precedence trap this arrangement accepts
 

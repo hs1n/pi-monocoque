@@ -1,13 +1,10 @@
 ---
 name: lens-grade
-description: Judge ONE target (an artifact or the working-tree diff) through ONE lens against a pass/fail rubric, and write a single JSON verdict. Judge only — never edit, never run the code, no subagents, no questions. Dispatched in parallel by the `meta` workflow's grader fanout, one session per lens.
+description: Judge ONE target (an artifact or the working-tree diff) through ONE lens against a pass/fail rubric, and write a single JSON verdict. Judge only — never edit, never run the code, no subagents, no questions. Run one instance per lens, in parallel.
 argument-hint: "--unit <u> --lens <l> --round <n> --generation <g> --target <path|description> [--<context> <path> ...] --out <dir> --rubric \"<text>\""
 allowed-tools: Read, Grep, Glob, Bash, Write
 shell-timeout: 60
 disable-model-invocation: true
-contract:
-  produces:
-    kind: produces
 ---
 
 # Lens grade

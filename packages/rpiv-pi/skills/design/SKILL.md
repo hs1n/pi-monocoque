@@ -4,24 +4,6 @@ description: Design complex features by decomposing them into vertical slices, g
 argument-hint: "[research artifact path] | --resume <in-progress design path>"
 shell-timeout: 10
 disable-model-invocation: true
-contract:
-  produces:
-    kind: produces
-    meta:
-      artifactKind: design
-    data:
-      type: object
-      properties:
-        status:
-          enum: [in-progress, in-review, ready]
-  consumes:
-    data:
-      type: object
-      properties:
-        status:
-          const: ready
-    meta:
-      artifactKind: [research, solutions]
 ---
 
 # Design
@@ -91,7 +73,7 @@ When this command is invoked:
 
 This is NOT a discovery sweep. Focus on DEPTH (how things work, what patterns to follow) not BREADTH (where things are).
 
-1. **Spawn parallel research agents** using the Agent tool — all in a **single assistant message with multiple Agent calls** (concurrent, synchronous). **Never `run_in_background`**: its completion can't re-drive a workflow session, so the skill ends its turn before writing the design and the stage fails with no artifact.
+1. **Spawn parallel research agents** using the Agent tool — all in a **single assistant message with multiple Agent calls** (concurrent, synchronous). **Never `run_in_background`**: its completion cannot re-drive this session, so the skill ends its turn before writing the design and you end with no artifact.
 
    - Use **codebase-pattern-finder** to find existing implementations to model after — the primary template for code shape
    - Use **codebase-analyzer** to understand HOW integration points work in detail
@@ -381,7 +363,7 @@ Update decomposition (add/remove/reorder remaining slices) and confirm before co
 
 The artifact was created as a skeleton in Step 5 and filled progressively in Step 6.4. This step verifies completeness and flips status.
 
-1. **Verify all Architecture entries are filled**: Every file heading from the decomposition must have a non-empty code block. If any are still empty, **return to Step 6** — never fill at finalize time (bypasses 6.2/6.3). Empty here = workflow off-rail.
+1. **Verify all Architecture entries are filled**: Every file heading from the decomposition must have a non-empty code block. If any are still empty, **return to Step 6** — never fill at finalize time (bypasses 6.2/6.3). Empty here = the design is off-rail.
 
 2. **Verify all `## Slices` entries are filled**: Every `### Slice N: {name}` subsection must have a `**Files**:` line AND non-empty `#### Automated Verification:` + `#### Manual Verification:` subsections. If any are still empty, **return to Step 6** — Success Criteria authored in 6.1 must be written in 6.4 alongside code. Empty here = workflow off-rail (same invariant as empty code fences).
 

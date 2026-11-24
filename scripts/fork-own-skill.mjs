@@ -11,25 +11,12 @@
  *   So a copy of `skills/<name>/` placed in your own library SHADOWS the bundled
  *   one — you can take over skills one at a time, and `/reload` picks it up.
  *
- *   The skill's `contract:` frontmatter is what the `/wf` engine validates
- *   against. It is harvested by a SEPARATE provider (owner "user-skills") that
- *   enumerates Pi's default skill locations, and it WINS over the bundled
- *   contract (last writer wins). Two consequences worth knowing:
- *
- *     - Same contract, changed body   -> completely silent. This is the normal
- *                                        "own-ify" case.
- *     - Changed contract              -> one load-time collision message naming
- *                                        both owners. Never silent.
- *
- *   WHERE you put the copy matters less than it used to. Harvesting originally
- *   read only `<agentDir>/skills` + `<cwd>/.pi/skills` — pi's `loadSkills` helper
- *   ignores `.agents/skills` entirely — so a copy under any `.agents/skills` was
- *   dispatched while its contract stayed INVISIBLE, and a divergent contract was
- *   ignored with no collision message. This fork now enumerates `.agents/skills`
- *   too (`agentsSkillDirs` in skill-contracts-source.ts); upstream does not. All
- *   four locations work here. Prefer `~/.agents/skills` (global) or
+ *   Which locations Pi actually dispatches from decides whether a copy is
+ *   visible at all. `loadSkills` reads `<agentDir>/skills` + `<cwd>/.pi/skills`
+ *   and ignores `.agents/skills`; this fork enumerates `.agents/skills` too, so
+ *   all four locations work here. Prefer `~/.agents/skills` (global) or
  *   `<cwd>/.pi/skills` (per project): a PROJECT `.agents/skills` also depends on
- *   that fork-local fix, and pi gates dispatching from it on project trust.
+ *   the fork-local fix, and Pi gates dispatching from it on project trust.
  *
  *   Skills are NOT self-contained: 25 of 30 reference sibling helpers as
  *   `${SKILL_DIR}/../_shared/<file>.mjs`. Copying only `SKILL.md` yields a skill
@@ -46,11 +33,6 @@
  *   --target <dir>   library root (default: ~/.agents/skills)
  *   --force          overwrite an already-owned skill
  *   --dry-run        report what would happen, touch nothing
- *
- * Deep verification (does the engine really receive the contract?) is a real
- * load-time check and needs the repo's runner — it is not replicated here:
- *   ./node_modules/.bin/vitest run <a co-located *.test.ts that calls
- *   buildUserSkillContracts(<tmpdir>)>   # from packages/rpiv-pi/extensions/rpiv-core
  */
 
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync } from "node:fs";
@@ -68,39 +50,6 @@ function bundledSkillNames() {
 		.filter((n) => !n.startsWith("_") && !n.startsWith("."))
 		.filter((n) => existsSync(join(BUNDLED_DIR, n, "SKILL.md")))
 		.sort();
-}
-
-/** Frontmatter is the block between the first two `---` lines. */
-function frontmatter(md) {
-	const lines = md.split("\n");
-	if (lines[0]?.trim() !== "---") return null;
-	const end = lines.indexOf("---", 1);
-	return end === -1 ? null : lines.slice(1, end).join("\n");
-}
-
-/** True iff the frontmatter declares a non-empty `contract:` block. */
-function hasContract(md) {
-	const fm = frontmatter(md);
-	if (!fm) return false;
-	const lines = fm.split("\n");
-	const at = lines.findIndex((l) => l.startsWith("contract:"));
-	if (at === -1) return false;
-	return lines.slice(at + 1).some((l) => /^\s+\S/.test(l));
-}
-
-/** The verbatim `contract:` block, for reporting. */
-function contractBlock(md) {
-	const fm = frontmatter(md);
-	if (!fm) return "";
-	const lines = fm.split("\n");
-	const at = lines.findIndex((l) => l.startsWith("contract:"));
-	if (at === -1) return "";
-	const rest = [];
-	for (const line of lines.slice(at)) {
-		if (rest.length > 0 && /^\S/.test(line)) break;
-		rest.push(line);
-	}
-	return rest.join("\n");
 }
 
 /** Sibling helpers a skill references as `${SKILL_DIR}/../_shared/<file>`. */
@@ -177,7 +126,6 @@ function ownSkill(name, opts) {
 
 	const isOverride = bundledSkillNames().includes(name);
 	console.log(`${isOverride ? "↻" : "+"} ${name} → ${dest}${isOverride ? "  (overrides the bundled skill)" : ""}`);
-	console.log(`    contract: ${hasContract(srcMd) ? "declared" : "MISSING — /wf will not see this skill"}`);
 	console.log(`    _shared:  ${refs.length === 0 ? "none referenced" : `${refs.length} copied (${refs.join(", ")})`}`);
 	for (const f of missing) console.error(`    ✗ ${f} referenced but absent from the bundled _shared/`);
 	// A skill whose own referenced helper could not be copied is BROKEN — the exact
@@ -205,12 +153,8 @@ function listOwned(opts) {
 		const md = readSkillMd(join(opts.target, n));
 		const refs = md ? sharedRefs(md) : [];
 		const broken = refs.filter((f) => !existsSync(join(opts.target, "_shared", f)));
-		// Only skills that override a bundled one or declare a contract participate
-		// in the /wf contract system; anything else is a foreign conversational skill.
-		const participates = bundled.has(n) || (md !== null && hasContract(md));
 		const tags = [
 			bundled.has(n) ? "overrides bundled" : "new skill",
-			participates && md && !hasContract(md) ? "NO CONTRACT" : "",
 			broken.length > 0 ? `BROKEN _shared (${broken.join(", ")})` : "",
 		].filter(Boolean);
 		console.log(`  ${n.padEnd(28)} ${tags.join(" · ")}`);
@@ -254,21 +198,14 @@ function checkOwned(opts) {
 		if (n.startsWith(".") || n.startsWith("_")) continue;
 		const md = readSkillMd(join(opts.target, n));
 		if (md === null) continue;
-		if (!bundled.has(n) && !hasContract(md)) {
+		if (!bundled.has(n)) {
 			skipped += 1;
 			continue;
 		}
 		checked += 1;
 		const problems = [];
-		if (!hasContract(md)) problems.push("no contract: block — /wf cannot validate this skill");
 		for (const f of sharedRefs(md)) {
 			if (!existsSync(join(opts.target, "_shared", f))) problems.push(`missing _shared/${f}`);
-		}
-		if (bundled.has(n)) {
-			const src = readSkillMd(join(BUNDLED_DIR, n));
-			if (src && contractBlock(src) !== contractBlock(md)) {
-				problems.push("contract diverges from the bundled one — expect one collision message at /wf load");
-			}
 		}
 		if (problems.length === 0) {
 			console.log(`  ✓ ${n}`);
@@ -278,7 +215,7 @@ function checkOwned(opts) {
 			for (const p of problems) console.log(`      ${p}`);
 		}
 	}
-	console.log(`\n${checked} checked, ${skipped} skipped (no contract: block and not overriding a bundled skill)`);
+	console.log(`\n${checked} checked, ${skipped} skipped (not overriding a bundled skill)`);
 	return bad === 0;
 }
 

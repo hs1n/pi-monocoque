@@ -1,22 +1,19 @@
 ---
 name: design-review
-description: One consolidated developer checkpoint over EVERY per-slice design a carve fanout produced — present the proposed shape (approach, data types, key interfaces, file map, scope) as a compact cross-slice summary and let the developer accept or adjust via ask_user_question, then surgically apply any adjustment in place (cascading a changed contract to its dependent slices) before synthesis. Single fan-in pass; the accept↔adjust loop lives inside the skill. Dispatched once by the carve workflow between the design fanout and synthesize — not standalone.
+description: One consolidated developer checkpoint over EVERY per-slice design a design fanout produced — present the proposed shape (approach, data types, key interfaces, file map, scope) as a compact cross-slice summary and let the developer accept or adjust via ask_user_question, then surgically apply any adjustment in place (cascading a changed contract to its dependent slices) before synthesis. Single fan-in pass; the accept↔adjust loop lives inside the skill. Run it once, after the design fanout and before synthesize — not standalone.
 argument-hint: "--designs <design-path> [--designs <design-path> ...] --slices <slices-path>"
 allowed-tools: Read, Edit, Write, Grep, Glob
 shell-timeout: 10
 disable-model-invocation: true
-contract:
-  produces:
-    kind: produces
 ---
 
 # Design Review
 
-You run **one** developer checkpoint over **all** the per-slice designs a carve `slice-design` fanout produced. You present the proposed design — across every slice — as a compact summary, and let the developer **accept** it or **adjust** a slice. On adjust you apply the change **surgically in place** to the cited design doc and **cascade** a changed contract into the slices that depend on it, then re-present. One fan-in pass; the accept↔adjust loop is internal. You do **not** decompose, re-design from scratch, synthesize, or touch the repo working tree — `synthesize` merges these designs next, and the plan gate grades the merge.
+You run **one** developer checkpoint over **all** the per-slice designs a `design-slice` fanout produced. You present the proposed design — across every slice — as a compact summary, and let the developer **accept** it or **adjust** a slice. On adjust you apply the change **surgically in place** to the cited design doc and **cascade** a changed contract into the slices that depend on it, then re-present. One fan-in pass; the accept↔adjust loop is internal. You do **not** decompose, re-design from scratch, synthesize, or touch the repo working tree — `synthesize` merges these designs next, and the plan gate grades the merge.
 
 ## Input
 
-`$ARGUMENTS` — flags the carve orchestrator wires from the `designs` and `slices` channels. Parse generically:
+`$ARGUMENTS` — the flag set the caller builds from the `designs` and `slices` inputs. Parse generically:
 
 - **Designs** — every `--designs <path>` flag (repeatable). Each is a per-slice design doc under `.rpiv/artifacts/designs/`. Its frontmatter carries `slice_n`, `slice_title`, and `depends_on`.
 - **Slices** — the single `--slices <path>` flag: the slice map under `.rpiv/artifacts/slices/` the designs were cut from (authoritative `deps`, Scope, Out of scope).
@@ -64,15 +61,15 @@ The first tab-separated field is `<iso>` (use as `last_updated` when you edit a 
 
    Apply **only** what the developer asked — touch nothing else (the `amend` discipline). Read the cited `file:line` in the repo to ground an interface edit, but never edit repo source. Bump each edited design's `last_updated: <iso>`. Re-present the updated summary (Step 2) and re-ask (Step 3) until the developer accepts.
 
-   **Escape hatch.** If an adjustment is too deep to reconcile by patch — a dependent needs a fundamentally different approach, not a renamed contract — do **not** fake it. Say so plainly and tell the developer this needs a re-slice (carve's `slice-fix` → re-slice → re-design path), then stop; that structural authority lives upstream, not here.
+   **Escape hatch.** If an adjustment is too deep to reconcile by patch — a dependent needs a fundamentally different approach, not a renamed contract — do **not** fake it. Say so plainly and tell the developer this needs a re-slice (re-cut the slice map, then re-design the affected slices), then stop; that structural authority lives upstream, not here.
 
-5. **On Accept** — print **every** design doc path you reviewed, each on its own line (edited or not, all N of them — not just the ones you adjusted). The `designs` channel journals what you announce, so a path you omit vanishes from the audit trail and from `synthesize`'s fan-in; every reviewed artifact must be journaled. Then a one-line summary: `design accepted: {N} slices, {adjusted} adjusted`. The carve workflow routes to `subplan`/`synthesize` next.
+5. **On Accept** — print **every** design doc path you reviewed, each on its own line (edited or not, all N of them — not just the ones you adjusted). That printed list is the audit trail `synthesize` reads, so a path you omit vanishes from it; list every reviewed artifact. Then a one-line summary: `design accepted: {N} slices, {adjusted} adjusted`. Next comes `synthesize`, which merges these designs into one plan.
 
 ## Hard rules
 
 - **One consolidated prompt, not one per slice.** You see every design at once and ask once (re-asking only after an adjustment). Per-slice approval is exactly what the design fanout forbids — don't reintroduce it.
 - **Surgical, not wholesale.** Apply only what the developer's adjustment cites; leave every other design and every untouched section byte-for-byte. You are a reviser, not a re-designer.
 - **Cascade a changed contract.** When an adjustment changes a slice's `## Key Interfaces`, its transitive dependents are stale — reconcile them in place in the same pass, or the developer's choice silently loses the merge.
-- **Re-emit in place.** Edit each design at its SAME path so the `designs` channel updates latest-wins for `synthesize`; never fork a new design path.
+- **Re-emit in place.** Edit each design at its SAME path so `synthesize` reads the latest version; never fork a new design path.
 - **Fix designs, never the repo.** Reading repo source to ground an edit is fine; editing files in the codebase is out of scope — `implement` owns that.
 - **No subagents, no decomposition, no synthesis.** Read, present, apply the developer's call, re-emit. `synthesize` merges next; the plan gate grades it.

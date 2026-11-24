@@ -4,16 +4,6 @@ description: Execute an approved implementation plan from .rpiv/artifacts/plans/
 argument-hint: "[plan-path] [Phase N]"
 allowed-tools: Read, Edit, Write, Bash(*), Glob, Grep
 disable-model-invocation: true
-contract:
-  produces:
-    kind: side-effect
-    meta:
-      effect: code-mutation
-  consumes:
-    reads:
-      plans:
-        meta:
-          artifactKind: plan
 ---
 
 # Implement
@@ -29,13 +19,13 @@ The input above is `<plan-path> [phase]`:
 - Anything after it (e.g. "Phase 2") names a single phase to scope to.
 
 Rules:
-- If a phase is named → **single-phase (sequenced lane) mode.** Phases run **sequentially, in the plan's dependency order**, so every earlier phase has **already landed its files** — your prerequisites are present in the working tree. Implement **ONLY the named phase**, touching **only the files that phase owns**. Hard rules for this mode:
-  - **Never implement, create, or edit another phase's files** — not even if one is missing. You are one unit of a sequenced run; back-filling another phase's work duplicates it and corrupts the next lane.
+- If a phase is named → **single-phase mode.** Phases run **sequentially, in the plan's dependency order**, so every earlier phase has **already landed its files** — your prerequisites are present in the working tree. Implement **ONLY the named phase**, touching **only the files that phase owns**. Hard rules for this mode:
+  - **Never implement, create, or edit another phase's files** — not even if one is missing. You are one step of a sequenced run; back-filling another phase's work duplicates it and corrupts the next step.
   - **A genuinely missing prerequisite is a hard error, not a decision.** If a file your phase must read or edit (one an earlier phase owns) is absent, **STOP and fail** with `prerequisite missing: <path> (expected from an earlier phase)`. Do **not** create it, do **not** `ask_user_question` about it, and do **not** defer your own edits — fail loudly so the run surfaces the ordering defect.
   - **Never silently defer your phase's own edits.** Apply every change the named phase owns, or fail. A phase that writes a partial slice and checks off nothing is worse than a clean failure.
-  - **Repo-located scratch lives under `.rpiv/tmp/`, nowhere else.** Any file you create that is not in your phase's `files:` — a probe script, a fixture, a captured payload — goes under `.rpiv/tmp/` (exempt from the workflow's scope floor) or outside the repo entirely. The floor counts **untracked** files too (`git status -uall`): a scratch file left at the repo root or in an undeclared directory is an undeclared write the downstream `implement-scope-check` flags. Delete repo-located scratch when you're done with it regardless.
+  - **Repo-located scratch lives under `.rpiv/tmp/`, nowhere else.** Any file you create that is not in your phase's `files:` — a probe script, a fixture, a captured payload — goes under `.rpiv/tmp/` (exempt from the plan's declared write-set) or outside the repo entirely. That write-set counts **untracked** files too (`git status -uall`): a scratch file left at the repo root or in an undeclared directory is an undeclared write the downstream `implement-scope-check` flags. Delete repo-located scratch when you're done with it regardless.
   - Do not read, edit, or check off other phases' sections. Stop and print the closing block as soon as the named phase's own success criteria pass.
-  - **Record a `#### Reconciliation` directive for cross-phase test updates you can't apply yourself.** Under build/vet's parallel implement lane, a correct change in YOUR phase can invalidate a test expectation that lives in a SIBLING phase's landed section — and single-phase mode forbids editing another phase's files. Do NOT edit the sibling's file and do NOT silently skip it: record a `#### Reconciliation` directive in your OWN phase's section. The directive is a machine-findable, machine-applicable `find → replace` against a single repo-root-relative target, so the downstream `reconcile` stage can apply it write-restricted to the plan's declared write-set:
+  - **Record a `#### Reconciliation` directive for cross-phase test updates you can't apply yourself.** Under a parallel run of several phases, a correct change in YOUR phase can invalidate a test expectation that lives in a SIBLING phase's landed section — and single-phase mode forbids editing another phase's files. Do NOT edit the sibling's file and do NOT silently skip it: record a `#### Reconciliation` directive in your OWN phase's section. The directive is a machine-findable, machine-applicable `find → replace` against a single repo-root-relative target, so a later `reconcile` step can apply it write-restricted to the plan's declared write-set:
     ```
     #### Reconciliation
     - `path/to/x.test.ts`: replace `expect(r).toBe(3)` → `expect(r).toBe(4)` — <one-line rationale>
@@ -53,7 +43,7 @@ Rules:
       const s = `a ${b} c d`;
       ```
     ````
-    The target MUST be in the plan's declared write-set — the union of every phase's `files:`, twin-expanded (`x.ts` licenses `x.test.ts`) — the same authority the scope floor enforces; eligibility is plan-derived, never a filename convention, so any language's test or expectation file qualifies once declared. `reconcile` rejects (and reports) a directive against an undeclared path — route such an edit through validate's remediation arm or the owning phase. Record directives only for MECHANICAL expectation/consistency updates you can state concretely; a real logic change in a sibling's files is plan-level work (`/skill:revise`), not a reconciliation directive.
+    The target MUST be in the plan's declared write-set — the union of every phase's `files:`, twin-expanded (`x.ts` licenses `x.test.ts`) — the same authority `implement`'s write-scope rule enforces; eligibility is plan-derived, never a filename convention, so any language's test or expectation file qualifies once declared. `reconcile` rejects (and reports) a directive against an undeclared path — route such an edit through validate's remediation step or the owning phase. Record directives only for MECHANICAL expectation/consistency updates you can state concretely; a real logic change in a sibling's files is plan-level work (`/skill:revise`), not a reconciliation directive.
 
     When you record one: Read the target file first and copy the `find` bytes verbatim from its live content (never from memory — `reconcile` matches raw bytes and does not guess); any backtick in a span forces the fenced form (the inline grammar cannot express it). Then verify with `node "${SKILL_DIR}/../_shared/reconcile-lint.mjs" <plan-path> --phase <N>` — the gate's own parser in check-only mode — and fix every finding it prints before your closing block. Each defect the lint catches is one amend session and a gate fix round that never happens.
 - If no phase is named → **sequential full-plan mode:** implement every phase in the plan sequentially.
@@ -62,7 +52,7 @@ Rules:
 ## Getting Started
 
 With a plan path in hand:
-- Read the plan completely for context (overview, ordering constraints, other phases' file changes yours may build on). In **single-phase mode**, do **not** scan for checkmarks as a resume signal: any `- [x]` outside the named phase is a sibling lane's in-flight progress, not prior-completed work. Checkmarks only matter within the named phase's own section.
+- Read the plan completely for context (overview, ordering constraints, other phases' file changes yours may build on). In **single-phase mode**, do **not** scan for checkmarks as a resume signal: any `- [x]` outside the named phase is a sibling phase's in-flight progress, not prior-completed work. Checkmarks only matter within the named phase's own section.
 - Read the original ticket and all files mentioned in the plan
 - **Read files fully** - never use limit/offset parameters, you need complete context
 - Think deeply about how the pieces fit together
@@ -73,7 +63,7 @@ With a plan path in hand:
 
 Plans are carefully designed, but reality can be messy. Your job is to:
 - Follow the plan's intent while adapting to what you find
-- In sequential full-plan mode, implement each phase fully before starting the next. In **single-phase mode** there is no "next" — you implement only the named phase (its prior phases run concurrently in other lanes and are not guaranteed done)
+- In sequential full-plan mode, implement each phase fully before starting the next. In **single-phase mode** there is no "next" — you implement only the named phase (its prior phases run concurrently in other sessions and are not guaranteed done)
 - Verify your work makes sense in the broader codebase context
 - Update checkboxes in the plan as you complete sections — in **single-phase mode**, only within the named phase's own section; never touch another phase's `- [ ]` / `- [x]`
 
@@ -97,7 +87,7 @@ If you encounter a mismatch:
 
 After implementing a phase:
 - **Sequential full-plan mode:** run the plan's own whole-plan success-criteria commands (the project's build + test commands, as recorded in its guidance `# Commands` table).
-- **Single-phase mode:** run **only the commands under the named phase's own `#### Automated Verification:` block** — and flip exactly those `- [ ]` → `- [x]`. Do **not** gate completion on the project's whole-repo build/test command: that runs sibling phases' not-yet-present code and is the downstream `validate` stage's job (whole-plan / cross-phase validation), not implement's. Under build's parallel implement lane, sibling phases run concurrently in the same working tree; the tree shows their in-flight changes — verify only your own phase's `files:`, and keep every command you run write-scoped to that set (a command that rewrites the wider tree corrupts a sibling's in-flight edit; narrow any formatter/auto-fixer to the phase's paths).
+- **Single-phase mode:** run **only the commands under the named phase's own `#### Automated Verification:` block** — and flip exactly those `- [ ]` → `- [x]`. Do **not** gate completion on the project's whole-repo build/test command: that runs sibling phases' not-yet-present code and is the subsequent `validate` run's job (whole-plan / cross-phase validation), not implement's. When several phases run in parallel, sibling phases work concurrently in the same working tree; the tree shows their in-flight changes — verify only your own phase's `files:`, and keep every command you run write-scoped to that set (a command that rewrites the wider tree corrupts a sibling's in-flight edit; narrow any formatter/auto-fixer to the phase's paths).
 - Fix any issues before proceeding
 - Update your progress in both the plan and your todos
 - Check off completed items in the plan file itself using Edit
@@ -122,7 +112,7 @@ These resume heuristics assume **sequential** accumulation and apply to **sequen
 - Pick up from the first unchecked item
 - Verify previous work only if something seems off
 
-In **single-phase mode**, ignore checkmarks outside the named phase entirely — they are sibling lanes' parallel progress, not a base to build on. Resume logic applies **only within the named phase's own section**: if your phase's own `#### Automated Verification:` items are already `- [x]` from a prior run of this same lane, trust those; otherwise implement the named phase's changes per the plan regardless of checkbox state elsewhere.
+In **single-phase mode**, ignore checkmarks outside the named phase entirely — they are sibling phases' parallel progress, not a base to build on. Resume logic applies **only within the named phase's own section**: if your phase's own `#### Automated Verification:` items are already `- [x]` from a prior run of this same phase, trust those; otherwise implement the named phase's changes per the plan regardless of checkbox state elsewhere.
 
 Remember: You're implementing a solution, not just checking boxes. Keep the end goal in mind and maintain forward momentum.
 

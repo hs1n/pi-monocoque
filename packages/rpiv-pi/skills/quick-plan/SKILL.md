@@ -1,63 +1,24 @@
 ---
 name: quick-plan
-description: "Produce a single unsliced, consistently-phased implementation plan for a small, well-understood task and write it directly to .rpiv/artifacts/plans/ with status: ready — one non-interactive pass, no slice decomposition, no in-skill review (the workflow's grade and validate stages are the gates). Dispatched by the ship preset's plan stage; also usable standalone for a small task whose research is done or whose shape is obvious. Prefer blueprint for multi-component features needing slice-by-slice micro-checkpoints, and plan when turning an existing design artifact into phases."
+description: "Produce a single unsliced, consistently-phased implementation plan for a small, well-understood task and write it directly to .rpiv/artifacts/plans/ with status: ready — one non-interactive pass, no slice decomposition, no in-skill review (a `grade` + `validate` pass afterwards is the gate). Usable standalone for a small task whose research is done or whose shape is obvious; prefer blueprint for multi-component features needing slice-by-slice micro-checkpoints, and plan when turning an existing design artifact into phases."
 argument-hint: "[research artifact path or feature description]"
 shell-timeout: 10
 disable-model-invocation: true
-contract:
-  produces:
-    kind: produces
-    meta:
-      artifactKind: plan
-    data:
-      type: object
-      required: [phases, phase_count]
-      properties:
-        status:
-          enum: [ready]
-        phase_count:
-          type: integer
-          minimum: 1
-          maximum: 32
-        phases:
-          type: array
-          minItems: 1
-          maxItems: 32
-          items:
-            type: object
-            required: [n, title]
-            properties:
-              n: { type: integer, minimum: 1 }
-              title: { type: string }
-        acceptance:
-          type: array
-          items:
-            type: object
-            required: [id, disposition]
-            properties:
-              id: { type: string }
-              disposition: { enum: [implemented, deferred, rebound] }
-              phase: { type: integer, minimum: 1 }
-              reason: { type: string }
-              command: { type: string }
-  consumes:
-    meta:
-      artifactKind: [research, acceptance]
 ---
 
 # Quick Plan
 
-You produce a **single, unsliced, consistently-phased** implementation plan for a small, well-understood task and write it directly to `.rpiv/artifacts/plans/` with `status: ready`. One non-interactive pass — no slice decomposition, no skeleton-then-fill, no in-skill review. The workflow's `grade` and `validate` stages (or your own review, standalone) are the gates; this skill only emits the artifact those gates parse.
+You produce a **single, unsliced, consistently-phased** implementation plan for a small, well-understood task and write it directly to `.rpiv/artifacts/plans/` with `status: ready`. One non-interactive pass — no slice decomposition, no skeleton-then-fill, no in-skill review. A `grade` + `validate` pass afterwards (or your own review, standalone) is the gate; this skill only emits the artifact those checks parse.
 
 The expected shape is **one phase** (the small-task default). Add a phase only when the task genuinely splits into independently-verifiable units that share no file. This is the trimmed mimic of `blueprint`'s artifact shape minus every step that exists to produce _confidence in_ the artifact.
 
 ## Input
 
-`$ARGUMENTS` — one of four shapes (the skill is sound however the caller wires it):
+`$ARGUMENTS` — one of four shapes (the skill is sound however it is invoked):
 
-- **Flags (workflow dispatch)** — `--research <path> --goal <path> [--acceptance <path>]`. Read ALL files FULLY (no limit/offset). The research doc is the grounding; the goal file is the verbatim brief — every ask it names is either implemented by a phase or deferred under `## Out of Scope`. The acceptance file, when given, is the goal-derived inventory (`items:` frontmatter, ids `a1…`): the plan MUST record a per-item `acceptance:` disposition — `implemented` naming the phase, or `deferred` with a reason — every item, no omissions (the completeness gate anchors on the inventory, and validate executes each item's evidence command against the finished tree).
+- **Flags** — `--research <path> --goal <path> [--acceptance <path>]`. Read ALL files FULLY (no limit/offset). The research doc is the grounding; the goal file is the verbatim brief — every ask it names is either implemented by a phase or deferred under `## Out of Scope`. The acceptance file, when given, is the goal-derived inventory (`items:` frontmatter, ids `a1…`): the plan MUST record a per-item `acceptance:` disposition — `implemented` naming the phase, or `deferred` with a reason — every item, no omissions (the completeness gate anchors on the inventory, and validate executes each item's evidence command against the finished tree).
 - **Research artifact path** — a `.md` path under `.rpiv/artifacts/research/`. Read it FULLY (no limit/offset); it is the grounding for the plan.
-- **Injected research** — when dispatched by a workflow `reads: ["research"]` stage, the research doc is already in context; treat `$ARGUMENTS` as the task description / goal.
+- **Injected research** — when the research doc is already in context (a caller that read it and pasted it in, or a session that carried it forward), treat `$ARGUMENTS` as the task description / goal.
 - **Free-text** (standalone small task) — `$ARGUMENTS` is the task description; research is done or the shape is obvious.
 
 If `$ARGUMENTS` is empty AND no research doc is in context, print an error and stop — there is nothing to plan from.
@@ -101,7 +62,7 @@ If the research already gave you the pattern (Code References + Integration Poin
 
 Write the plan **in one pass** to `.rpiv/artifacts/plans/<slug>_<description>.md` (`<slug>` from the Metadata block; `<description>` is a brief kebab-case summary). Set frontmatter `status: ready` directly — there is no `in-progress`/`in-review` transition. **Do not author a `risks:` frontmatter array** (see Important Notes).
 
-The artifact MUST be **consistently phased**: frontmatter `phases:` array length == number of `## Phase N:` headings == scalar `phase_count`. Any drift and `planPhaseRecords` halts the workflow at plan time. Single phase is the default.
+The artifact MUST be **consistently phased**: frontmatter `phases:` array length == number of `## Phase N:` headings == scalar `phase_count`. Any drift makes the plan unreadable to everything downstream — `implement` and `validate` walk it by phase number. Single phase is the default.
 
 Use this template (single-phase shown; replicate the `## Phase N:` block per phase only when genuinely multi-phase):
 
@@ -171,13 +132,13 @@ Then print the path and a one-line summary: `quick-plan written: {N} phase(s), {
 
 ## Important Notes
 
-- **Consistently phased, always.** `phases:` length == `## Phase N:` heading count == scalar `phase_count`. A half-phased plan throws at plan time. Single phase is the small-task default — only split when units are independently verifiable and share no file.
-- **No `risks:` frontmatter — this is the panel lightening.** The grade panel dispatches its `risk-rulings` unit (the risk-flag adjudication, with its mechanics-evidence and verify-at-implement duties) **only** when the artifact carries `risks:`. With none declared, no risk unit runs, `risk_rulings` is omitted everywhere, and `correctness` runs its cheap semantic spot-check alone. Do NOT invent a `"correctness-simplified"` dimension (grade does not recognize it and would deadlock the gate); the lightening is realized by the plan's shape, not by a new dimension.
-- **One Write, `status: ready` directly.** No skeleton-then-fill, no progressive `Edit`, no 3-state status machine. The artifact is gated externally (the workflow's `grade` + `validate`, or your own review standalone).
-- **At most ONE `codebase-pattern-finder` dispatch.** Never parallel, never `run_in_background` — a background completion cannot re-drive this session and the stage fails with no artifact. Skip the dispatch when research already surfaced the pattern.
-- **Non-interactive.** No `ask_user_question` checkpoint. A checkpoint without blueprint's dimension sweep is pure latency on a fast-path preset whose output is immediately grade-gated. Resolve ambiguity from the research and the real code; if a genuine fork can't be settled, make the most defensible call and let the grade panel catch it.
+- **Consistently phased, always.** `phases:` length == `## Phase N:` heading count == scalar `phase_count`. A half-phased plan breaks every phase-by-phase consumer. Single phase is the small-task default — only split when units are independently verifiable and share no file.
+- **No `risks:` frontmatter — this is the panel lightening.** The `risk-rulings` dimension runs (the risk-flag adjudication, with its mechanics-evidence and verify-at-implement duties) **only** when the artifact carries `risks:`. With none declared, no risk unit runs, `risk_rulings` is omitted everywhere, and `correctness` runs its cheap semantic spot-check alone. Do NOT invent a `"correctness-simplified"` dimension (grade does not recognize it and the gate would deadlock); the lightening is realized by the plan's shape, not by a new dimension.
+- **One Write, `status: ready` directly.** No skeleton-then-fill, no progressive `Edit`, no 3-state status machine. The artifact is gated externally (a `grade` + `validate` pass, or your own review standalone).
+- **At most ONE `codebase-pattern-finder` dispatch.** Never parallel, never `run_in_background` — a background completion cannot re-drive this session, and you end with no artifact. Skip the dispatch when research already surfaced the pattern.
+- **Non-interactive.** No `ask_user_question` checkpoint. A checkpoint without blueprint's dimension sweep is pure latency on a fast path whose output is immediately graded. Resolve ambiguity from the research and the real code; if a genuine fork can't be settled, make the most defensible call and let the graders catch it.
 - **Defer explicitly, never silently.** Every goal ask no phase implements gets a one-line `## Out of Scope` deferral with a reason — the completeness gate blocks on a named ask that is neither addressed nor deferred.
 - **Dispose of every acceptance item.** With `--acceptance` given, the `acceptance:` mapping is the machine-readable form of that same rule: every inventory id, exactly once, `implemented` (with phase) or `deferred` (with reason). The completeness gate reads the inventory directly, so a missing or mislabeled disposition is a blocking gap — and validate will run each item's evidence command regardless of what the plan claims.
 - **Ground every citation.** Every `file:line` in prose or code comments uses a repo-root-relative path and is verifiable at the current revision — the plan passes the deterministic `plan-cite-check` floor.
 - **NEVER edit source files.** This skill produces a plan document, not implementation. Source editing is `implement`'s job.
-- **Drops blueprint's ceremony by design:** multi-slice decomposition, skeleton-then-fill, the per-slice `slice-verifier` loop, the dual post-finalization review (`artifact-code-reviewer` + `artifact-coverage-reviewer`), the 6-dimension sweep, and parallel research are all absent here — the workflow's own gates own that confidence.
+- **Drops blueprint's ceremony by design:** multi-slice decomposition, skeleton-then-fill, the per-slice `slice-verifier` loop, the dual post-finalization review (`artifact-code-reviewer` + `artifact-coverage-reviewer`), the 6-dimension sweep, and parallel research are all absent here — the external `grade` + `validate` pass owns that confidence.
