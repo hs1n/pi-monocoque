@@ -100,11 +100,6 @@ export const SIBLINGS: readonly SiblingPlugin[] = [
 		marker: "@hs1n/rpiv-args:loaded",
 		provides: "skill-argument resolver — substitutes $N/$ARGUMENTS in skill bodies",
 	},
-	{
-		pkg: "npm:@hs1n/rpiv-workflow",
-		matches: /rpiv-workflow(?![-\w])/i,
-		provides: "/wf command + workflow runner — chain skills into typed multi-stage pipelines",
-	},
 ];
 
 /**
@@ -131,5 +126,13 @@ export const LEGACY_SIBLINGS: readonly LegacyPackage[] = [
 		label: "pi-subagents",
 		matches: /(^|[^\w/-])pi-subagents(?![-\w])/i,
 		reason: "superseded by @tintinweb/pi-subagents (resumed maintenance) in rpiv-pi 1.0.0",
+	},
+	{
+		// rpiv-workflow shipped the `/wf` command and its stage graphs. Removed
+		// outright once multi-stage work moved to Pi's own Agent / SubagentWorkflow
+		// tools; an installed copy would load a runner with no consumer left.
+		label: "rpiv-workflow",
+		matches: /rpiv-workflow(?![-\w])/i,
+		reason: "removed — multi-stage work now uses Pi's Agent / SubagentWorkflow tools directly",
 	},
 ];

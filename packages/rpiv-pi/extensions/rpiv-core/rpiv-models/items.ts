@@ -11,17 +11,7 @@ import { getSupportedThinkingLevels } from "@earendil-works/pi-ai";
 import type { SelectItem } from "@earendil-works/pi-tui";
 import { loadJsonConfigWithLegacyFallback, modelKey } from "@hs1n/rpiv-config";
 import { type ModelsConfigSchema, THINKING_LEVEL_VALUES, type ThinkingLevelValue } from "../models-config.js";
-import {
-	CHECK,
-	SCOPE_AGENTS,
-	SCOPE_DEFAULTS,
-	SCOPE_PRESETS,
-	SCOPE_RESET_ALL,
-	SCOPE_SKILLS,
-	SCOPE_STAGES,
-	SCOPES,
-	withCheck,
-} from "./overrides.js";
+import { CHECK, SCOPE_AGENTS, SCOPE_DEFAULTS, SCOPE_RESET_ALL, SCOPE_SKILLS, SCOPES, withCheck } from "./overrides.js";
 
 // ---------------------------------------------------------------------------
 // Sentinel values
@@ -47,9 +37,7 @@ export function scopeItems(raw: ModelsConfigSchema): SelectItem[] {
 	return [
 		{ value: SCOPE_DEFAULTS, label: withCheck("defaults", SCOPES.defaults.hasOverride(raw)) },
 		{ value: SCOPE_AGENTS, label: withCheck("agents", SCOPES.agents.hasOverride(raw)) },
-		{ value: SCOPE_STAGES, label: withCheck("stages", SCOPES.stages.hasOverride(raw)) },
 		{ value: SCOPE_SKILLS, label: withCheck("skills", SCOPES.skills.hasOverride(raw)) },
-		{ value: SCOPE_PRESETS, label: withCheck("presets", SCOPES.presets.hasOverride(raw)) },
 		{ value: SCOPE_RESET_ALL, label: "reset all overrides" },
 	];
 }

@@ -66,17 +66,11 @@ export function findShadowedSkills(bundledNames: ReadonlySet<string>, searchDirs
 const REPORT_LIMIT = 4;
 
 /**
- * Render the warning banner for `shadowed`. `criticalNames` are the bundled
- * skills carrying a `contract:` block — for those the shadowing copy does not
- * merely replace a body, it strands the graph that routes to that name, so they
- * get called out by name. Returns "" when there is nothing to say.
+ * Render the warning banner for `shadowed`: every name, the winning path, and
+ * what to do about it. Returns "" when there is nothing to say.
  */
-export function formatShadowWarning(
-	shadowed: readonly ShadowedSkill[],
-	criticalNames: ReadonlySet<string> = new Set(),
-): string {
+export function formatShadowWarning(shadowed: readonly ShadowedSkill[]): string {
 	if (shadowed.length === 0) return "";
-	const critical = shadowed.filter((s) => criticalNames.has(s.name)).map((s) => s.name);
 	const shown = shadowed.slice(0, REPORT_LIMIT);
 	const hidden = shadowed.length - shown.length;
 	const title = `rpiv-pi: ${shadowed.length} bundled skill${shadowed.length === 1 ? "" : "s"} shadowed`;
@@ -84,13 +78,6 @@ export function formatShadowWarning(
 		...shown.map((s) => `• ${s.name} → ${s.locations[0]}`),
 		...(hidden > 0 ? [`… and ${hidden} more`] : []),
 		"",
-		...(critical.length > 0
-			? [
-					`/wf routes ${critical.join(", ")} by name: the graph still runs`,
-					"that stage, the copy declares no matching contract.",
-					"",
-				]
-			: []),
 		"Delete the higher-precedence copy, or expect that body to run.",
 	]);
 }

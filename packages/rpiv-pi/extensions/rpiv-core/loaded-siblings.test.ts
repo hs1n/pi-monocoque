@@ -23,13 +23,13 @@ describe("readLoadedSiblingSources (#216)", () => {
 			host(
 				[{ name: "todo", sourceInfo: { path: "/kit/@hs1n/rpiv-todo/index.ts" } }],
 				[
-					{ name: "wf", source: "extension", sourceInfo: { path: "/kit/@hs1n/rpiv-workflow/index.ts" } },
+					{ name: "i18n", source: "extension", sourceInfo: { path: "/kit/@hs1n/rpiv-i18n/index.ts" } },
 					{ name: "notes", source: "skill", sourceInfo: { path: "/u/skills/rpiv-advisor-notes/SKILL.md" } },
 					{ name: "p", source: "prompt", sourceInfo: { path: "/u/prompts/rpiv-web-tools.md" } },
 				],
 			),
 		);
-		expect(snapshot.extensionPaths).toEqual(["/kit/@hs1n/rpiv-todo/index.ts", "/kit/@hs1n/rpiv-workflow/index.ts"]);
+		expect(snapshot.extensionPaths).toEqual(["/kit/@hs1n/rpiv-todo/index.ts", "/kit/@hs1n/rpiv-i18n/index.ts"]);
 	});
 
 	it("tolerates entries without sourceInfo", () => {

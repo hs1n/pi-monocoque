@@ -73,14 +73,6 @@ beforeEach(async () => {
 	const args = await import("../packages/rpiv-args/args.js");
 	args.invalidateSkillIndex();
 
-	const workflowInternal = await import("@hs1n/rpiv-workflow/internal");
-	workflowInternal.__resetBuiltIns();
-	workflowInternal.__resetLoadCache();
-	workflowInternal.__resetLifecycleRegistry();
-	workflowInternal.__resetSkillContracts();
-	workflowInternal.__resetStrikeBudgets();
-	workflowInternal.__resetWorkflowExecutionHost();
-
 	const guidance = await import("../packages/rpiv-pi/extensions/rpiv-core/guidance.js");
 	guidance.clearInjectionState();
 	const gitContext = await import("../packages/rpiv-pi/extensions/rpiv-core/git-context.js");
@@ -90,18 +82,6 @@ beforeEach(async () => {
 	sessionHooks.__resetSessionHooksAnnounced();
 	const sessionCapture = await import("../packages/rpiv-pi/extensions/rpiv-core/session-capture.js");
 	sessionCapture.__resetSessionCaptureState();
-	const runLaneRegistry = await import("../packages/rpiv-pi/extensions/rpiv-core/run-lane-registry.js");
-	runLaneRegistry.__resetRunLaneRegistry();
-	const subagentUsage = await import("../packages/rpiv-pi/extensions/rpiv-core/subagent-usage.js");
-	subagentUsage.__resetSubagentUsage();
-	const laneToolDefs = await import("../packages/rpiv-pi/extensions/rpiv-core/lane-tool-defs.js");
-	laneToolDefs.__resetLaneToolDefs();
-	const questionLifecycle = await import("../packages/rpiv-pi/extensions/rpiv-core/question-lifecycle.js");
-	questionLifecycle.__resetQuestionLifecycle();
-	const laneSwitcher = await import("../packages/rpiv-pi/extensions/rpiv-core/lane-switcher.js");
-	laneSwitcher.__resetLaneSwitcher();
-	const laneProgress = await import("../packages/rpiv-pi/extensions/rpiv-core/lane-progress.js");
-	laneProgress.__resetLaneProgress();
 	const skillBracket = await import("../packages/rpiv-pi/extensions/rpiv-core/skill-bracket.js");
 	skillBracket.__resetSkillBracketState();
 	const modelsConfigModule = await import("../packages/rpiv-pi/extensions/rpiv-core/models-config.js");
@@ -135,15 +115,6 @@ beforeEach(async () => {
 	rmSync(askUserQuestionConfig, { force: true });
 	rmSync(webToolsConfig, { force: true });
 	rmSync(modelsConfig, { force: true, recursive: true });
-
-	// User overlay for `/wf` workflows: canonical file at
-	// `~/.config/rpiv-workflow/workflows.config.ts` plus a drop-in directory
-	// at `~/.config/rpiv-workflow/workflows/`. Tests that exercise the
-	// project overlay by writing under `<cwd>/.rpiv-workflow/` MUST clean it
-	// themselves in their own afterEach — the project root is per-cwd and
-	// not knowable here.
-	const workflowUserRoot = join(process.env.HOME!, ".config", "rpiv-workflow");
-	rmSync(workflowUserRoot, { recursive: true, force: true });
 
 	// Clean global agent dir parent (`~/.pi/agent/`) — not just `~/.pi/agent/agents/` —
 	// so tests that place a regular file at `~/.pi/agent` can write into a

@@ -4,12 +4,8 @@ import { describe, expect, it } from "vitest";
 import { LEGACY_SIBLINGS, resolveInstallSpec, SIBLINGS } from "./siblings.js";
 
 describe("SIBLINGS registry", () => {
-	it("contains 8 entries (pi-subagents at SIBLINGS[0] — tintinweb fork is the dispatch runtime)", () => {
-		expect(SIBLINGS).toHaveLength(8);
-	});
-
-	it("includes rpiv-workflow (the /wf runtime sibling)", () => {
-		expect(SIBLINGS.find((s) => s.pkg === "npm:@hs1n/rpiv-workflow")).toBeDefined();
+	it("contains 7 entries (pi-subagents at SIBLINGS[0] — tintinweb fork is the dispatch runtime)", () => {
+		expect(SIBLINGS).toHaveLength(7);
 	});
 
 	it("lists @tintinweb/pi-subagents at SIBLINGS[0]", () => {

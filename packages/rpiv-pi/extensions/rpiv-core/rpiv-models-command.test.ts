@@ -270,7 +270,7 @@ describe("/rpiv-models — override checkmarks", () => {
 	it("floats scopes that hold overrides to the top, keeping reset-all last", async () => {
 		rmSync(CONFIG_PATH, { force: true });
 		mkdirSync(dirname(CONFIG_PATH), { recursive: true });
-		writeFileSync(CONFIG_PATH, JSON.stringify({ stages: { plan: "zai/glm-4-7" } }), "utf-8");
+		writeFileSync(CONFIG_PATH, JSON.stringify({ skills: { commit: "zai/glm-4-7" } }), "utf-8");
 
 		vi.mocked(showFilterablePicker).mockResolvedValueOnce(null); // cancel at scope
 		const { pi, handler } = makePi();
@@ -278,7 +278,7 @@ describe("/rpiv-models — override checkmarks", () => {
 		await handler()("", makeCtx());
 
 		const scopeListItems = (vi.mocked(showFilterablePicker).mock.calls[0][1] as { items: SelectItem[] }).items;
-		expect(scopeListItems[0].value).toBe("stages"); // overridden scope floated up
+		expect(scopeListItems[0].value).toBe("skills"); // overridden scope floated up
 		expect(scopeListItems[scopeListItems.length - 1].value).toBe("__reset_all__"); // reset stays last
 	});
 
@@ -385,32 +385,14 @@ describe("removeOverride (cascade cleanup)", () => {
 		expect(next.agents).toBeUndefined();
 	});
 
-	it("collapses the whole presets tree when the last stage is removed", () => {
+	it("keeps sibling keys when removing one entry from a scope map", () => {
 		const { next, removed } = removeOverride(
-			{ presets: { build: { stages: { research: "zai/glm-4-7" } } } },
-			"presets",
-			["build", "research"],
+			{ skills: { commit: "zai/glm-4-7", research: "anthropic/opus" } },
+			"skills",
+			["commit"],
 		);
 		expect(removed).toBe(true);
-		expect(next.presets).toBeUndefined();
-	});
-
-	it("keeps sibling stages/workflows when removing one preset stage", () => {
-		const { next, removed } = removeOverride(
-			{
-				presets: {
-					build: { stages: { research: "zai/glm-4-7", plan: "anthropic/opus" } },
-					polish: { stages: { review: "zai/glm-4-7" } },
-				},
-			},
-			"presets",
-			["build", "research"],
-		);
-		expect(removed).toBe(true);
-		expect(next.presets).toEqual({
-			build: { stages: { plan: "anthropic/opus" } },
-			polish: { stages: { review: "zai/glm-4-7" } },
-		});
+		expect(next.skills).toEqual({ research: "anthropic/opus" });
 	});
 
 	it("removes a defaults override", () => {
@@ -424,12 +406,6 @@ describe("removeOverride (cascade cleanup)", () => {
 		const { next, removed } = removeOverride(config, "agents", ["research"]);
 		expect(removed).toBe(false);
 		expect(next).toEqual(config);
-	});
-
-	it("reports removed=false for an absent preset stage", () => {
-		const config = { presets: { build: { stages: { research: "zai/glm-4-7" } } } };
-		expect(removeOverride(config, "presets", ["build", "plan"]).removed).toBe(false);
-		expect(removeOverride(config, "presets", ["polish", "review"]).removed).toBe(false);
 	});
 });
 
@@ -531,74 +507,15 @@ describe("applyOverride", () => {
 		expect(result.agents).toEqual({ existing: "openai/gpt-5.5", commit: "zai/glm-4-7" });
 	});
 
-	it("adds a stage entry with thinking as an object", () => {
-		const result = applyOverride({}, "stages", ["plan"], { model: "openai/gpt-5.5", thinking: "off" });
-		expect(result.stages).toEqual({ plan: { model: "openai/gpt-5.5", thinking: "off" } });
-	});
-
-	it("adds a preset stage to a new workflow", () => {
-		const result = applyOverride({}, "presets", ["build", "research"], { model: "zai/glm-4-7" });
-		expect(result.presets).toEqual({ build: { stages: { research: "zai/glm-4-7" } } });
-	});
-
-	it("adds a preset stage to an existing workflow", () => {
-		const result = applyOverride(
-			{ presets: { build: { stages: { research: "zai/glm-4-7" } } } },
-			"presets",
-			["build", "plan"],
-			{ model: "openai/gpt-5.5", thinking: "medium" },
-		);
-		expect(result.presets).toEqual({
-			build: { stages: { research: "zai/glm-4-7", plan: { model: "openai/gpt-5.5", thinking: "medium" } } },
-		});
+	it("adds a skill entry with thinking as an object", () => {
+		const result = applyOverride({}, "skills", ["plan"], { model: "openai/gpt-5.5", thinking: "off" });
+		expect(result.skills).toEqual({ plan: { model: "openai/gpt-5.5", thinking: "off" } });
 	});
 
 	it("returns config unchanged for an unknown scope", () => {
 		const config = { defaults: "zai/glm-4-7" };
 		const result = applyOverride(config, "unknown", ["key"], { model: "openai/gpt-5.5" });
 		expect(result).toEqual(config);
-	});
-});
-
-describe("/rpiv-models — loadWorkflowMap error handling", () => {
-	it("notifies error when loadWorkflowMap throws for stages scope", async () => {
-		const sources = await import("./models-config-sources.js");
-		vi.spyOn(sources, "loadWorkflowMap").mockRejectedValueOnce(new Error("load failed"));
-		vi.mocked(showFilterablePicker).mockResolvedValueOnce("stages");
-		const { pi, handler } = makePi();
-		registerRpivModelsCommand(pi);
-		const ctx = makeCtx();
-		await handler()("", ctx);
-		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("No workflows"), "error");
-	});
-
-	it("notifies error when loadWorkflowMap throws for presets scope", async () => {
-		const sources = await import("./models-config-sources.js");
-		vi.spyOn(sources, "loadWorkflowMap").mockRejectedValueOnce(new Error("load failed"));
-		vi.mocked(showFilterablePicker).mockResolvedValueOnce("presets");
-		const { pi, handler } = makePi();
-		registerRpivModelsCommand(pi);
-		const ctx = makeCtx();
-		await handler()("", ctx);
-		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("No workflows"), "error");
-	});
-
-	it("exits cleanly when the presets STAGE step's loadWorkflowMap rejects (second call)", async () => {
-		rmSync(CONFIG_PATH, { force: true });
-		const sources = await import("./models-config-sources.js");
-		// Workflow step succeeds; the stage step's second load rejects (e.g. the
-		// workflow was deleted between picks).
-		vi.spyOn(sources, "loadWorkflowMap")
-			.mockResolvedValueOnce({ build: ["plan", "research"] })
-			.mockRejectedValueOnce(new Error("load failed"));
-		vi.mocked(showFilterablePicker).mockResolvedValueOnce("presets").mockResolvedValueOnce("build"); // workflow picked; stage step then aborts before its picker
-		const { pi, handler } = makePi();
-		registerRpivModelsCommand(pi);
-		const ctx = makeCtx();
-		await handler()("", ctx);
-
-		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("No workflows"), "error");
-		expect(existsSync(CONFIG_PATH)).toBe(false); // aborted before any write
 	});
 });
 
@@ -644,34 +561,6 @@ describe("/rpiv-models — ESC navigates one level up", () => {
 
 		const stored = JSON.parse(readFileSync(CONFIG_PATH, "utf-8"));
 		expect(stored.defaults).toBe("zai/glm-4-7"); // the re-picked model won
-	});
-
-	it("ESC at the model picker for presets returns to the STAGE picker (one level), not the workflow", async () => {
-		rmSync(CONFIG_PATH, { force: true });
-		const sources = await import("./models-config-sources.js");
-		vi.spyOn(sources, "loadWorkflowMap").mockResolvedValue({ build: ["plan", "research"] });
-
-		// presets → build → plan → ESC at model (back to STAGE) → research → model → save.
-		vi.mocked(showFilterablePicker)
-			.mockResolvedValueOnce("presets")
-			.mockResolvedValueOnce("build") // workflow
-			.mockResolvedValueOnce("plan") // stage
-			.mockResolvedValueOnce(null) // ESC at model → back to stage (NOT workflow)
-			.mockResolvedValueOnce("research") // re-pick stage
-			.mockResolvedValueOnce("zai/glm-4-7"); // model (non-reasoning) → commit
-		const { pi, handler } = makePi();
-		registerRpivModelsCommand(pi);
-		await handler()("", makeCtx());
-
-		const calls = vi.mocked(showFilterablePicker).mock.calls;
-		// calls: [0]scope [1]workflow [2]stage [3]model [4]stage-again [5]model-again.
-		const reshownStage = calls[4][1] as { title: string; preferredValue?: string };
-		expect(reshownStage.title).toContain("Stage"); // landed on the stage picker, not workflow
-		expect(reshownStage.preferredValue).toBe("plan"); // preselects the stage we backed out of
-
-		const stored = JSON.parse(readFileSync(CONFIG_PATH, "utf-8"));
-		expect(stored.presets.build.stages.research).toBe("zai/glm-4-7");
-		expect(stored.presets.build.stages.plan).toBeUndefined(); // only one level up — workflow kept
 	});
 
 	it("ESC at the first key step returns to the scope picker, where a different scope proceeds", async () => {

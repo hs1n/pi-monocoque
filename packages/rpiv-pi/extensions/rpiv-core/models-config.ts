@@ -2,7 +2,7 @@
  * models-config — TypeBox schema, loader, and codec for
  * ~/.config/rpiv-pi/models.json.
  *
- * Per-agent and per-stage model/effort overrides. Fail-soft: missing or
+ * Per-agent and per-skill model/effort overrides. Fail-soft: missing or
  * malformed JSON degrades to empty config (no overrides). Unknown model
  * strings pass through to modelRegistry.find — the host rejects what it
  * doesn't recognise.
@@ -61,8 +61,7 @@ const _persistableLevelsMatchPiAi: _PersistableLevelsMatchPiAi = true;
  * 6 lanes clears the widest built-in fanout batch (the grade panel: five
  * dimensions plus the risk-rulings unit when the plan declares `risks:`; a
  * cap of 4 split the five-dimension panel into a 4+1 second batch on every
- * panel); no rate-limit events were observed at 4. Re-exported from
- * packages/rpiv-pi/extensions/rpiv-core/workflow-execution-host.ts to preserve the tested public surface.
+ * panel); no rate-limit events were observed at 4.
  */
 export const DEFAULT_MAX_CONCURRENCY = 6;
 
@@ -129,42 +128,24 @@ const ModelEntrySchema = Type.Union(
 );
 
 /**
- * Per-preset block: stages-only. Per-preset agent overrides are
- * a non-goal — the agent-sync seam at `agents.ts:processSourceEntries` has no
- * workflow context at frontmatter-injection time. `additionalProperties: false`
- * rejects per-preset `defaults` or `agents` blocks at validation.
- */
-const PresetSchema = Type.Object(
-	{
-		stages: Type.Optional(Type.Record(Type.String(), ModelEntrySchema)),
-	},
-	{ additionalProperties: false },
-);
-
-/**
  * Top-level models.json schema.
  *
- * `defaults` cascades into agents, stages, skills, and preset-stage entries.
+ * `defaults` cascades into agents and skills entries.
  * `agents` keys match bundled-agent filenames (sans .md).
- * `stages` keys match workflow stage names (the graph key, not skill).
- * `skills` keys match the post-alias skill name (StageRef.skill on the
- * workflow path; the parsed name on the standalone-skill bracket path).
- * `presets` keys match workflow names; inner `stages` keys match stage
- * names within that workflow.
+ * `skills` keys match the post-alias skill name (the parsed name on the
+ * standalone-skill bracket path).
  *
  * `Type.Record(Type.String(), …)` wrappers are structurally dynamic and cannot
- * stamp `additionalProperties: false` — record-key typos (`presets.buildd`,
- * `skills.committ`) pass schema validation by design and fall through to the
- * defaults cascade at lookup. `findUnknownModelKeys` (wired into session_start
- * by models-config-validate.ts) is the runtime warn-on-miss safety net.
+ * stamp `additionalProperties: false` — record-key typos (`skills.committ`)
+ * pass schema validation by design and fall through to the defaults cascade at
+ * lookup. `findUnknownModelKeys` (wired into session_start by
+ * models-config-validate.ts) is the runtime warn-on-miss safety net.
  */
 const ModelsConfigSchema = Type.Object(
 	{
 		defaults: Type.Optional(ModelEntrySchema),
 		agents: Type.Optional(Type.Record(Type.String(), ModelEntrySchema)),
-		stages: Type.Optional(Type.Record(Type.String(), ModelEntrySchema)),
 		skills: Type.Optional(Type.Record(Type.String(), ModelEntrySchema)),
-		presets: Type.Optional(Type.Record(Type.String(), PresetSchema)),
 		maxConcurrency: Type.Optional(
 			Type.Integer({
 				minimum: 1,
@@ -197,9 +178,7 @@ export interface ResolvedModelConfig {
 export interface ModelsConfig {
 	defaults?: ResolvedModelConfig;
 	agents?: Record<string, ResolvedModelConfig>;
-	stages?: Record<string, ResolvedModelConfig>;
 	skills?: Record<string, ResolvedModelConfig>;
-	presets?: Record<string, { stages?: Record<string, ResolvedModelConfig> }>;
 	/** Background-lane concurrency cap. Absent/invalid ⇒ DEFAULT_MAX_CONCURRENCY (via resolveMaxConcurrency). */
 	maxConcurrency?: number;
 }
@@ -294,9 +273,9 @@ export function loadModelsConfig(): ModelsConfig {
 	}
 	// The SAME strip on every other non-agents axis (review 2026-08-31 I3):
 	// the shared ModelEntrySchema admits `tools`/`extensions` everywhere, but
-	// only the agents-axis lookup consumes them — a stages/skills/preset entry
-	// carrying them passed validation and silently granted nothing. One warn
-	// per load, naming the offending axes.
+	// only the agents-axis lookup consumes them — a skills entry carrying them
+	// passed validation and silently granted nothing. One warn per load, naming
+	// the offending axes.
 	const strippedAxes = new Set<string>();
 	const stripAgentAxisFields = (entry: ResolvedModelConfig, axis: string): ResolvedModelConfig => {
 		if (entry.extensions !== undefined || entry.tools !== undefined) {
@@ -307,9 +286,7 @@ export function loadModelsConfig(): ModelsConfig {
 		return entry;
 	};
 	const agents: Record<string, ResolvedModelConfig> = {};
-	const stages: Record<string, ResolvedModelConfig> = {};
 	const skills: Record<string, ResolvedModelConfig> = {};
-	const presets: Record<string, { stages?: Record<string, ResolvedModelConfig> }> = {};
 
 	if (validated.agents && typeof validated.agents === "object") {
 		for (const [name, entry] of Object.entries(validated.agents)) {
@@ -317,30 +294,9 @@ export function loadModelsConfig(): ModelsConfig {
 		}
 	}
 
-	if (validated.stages && typeof validated.stages === "object") {
-		for (const [name, entry] of Object.entries(validated.stages)) {
-			stages[name] = stripAgentAxisFields(resolvedEntryWithCascade(entry, defaults), "stages");
-		}
-	}
-
 	if (validated.skills && typeof validated.skills === "object") {
 		for (const [name, entry] of Object.entries(validated.skills)) {
 			skills[name] = stripAgentAxisFields(resolvedEntryWithCascade(entry, defaults), "skills");
-		}
-	}
-
-	if (validated.presets && typeof validated.presets === "object") {
-		for (const [wf, presetBlock] of Object.entries(validated.presets)) {
-			if (!presetBlock || typeof presetBlock !== "object") continue;
-			const presetStages: Record<string, ResolvedModelConfig> = {};
-			if (presetBlock.stages && typeof presetBlock.stages === "object") {
-				for (const [stageName, entry] of Object.entries(presetBlock.stages)) {
-					presetStages[stageName] = stripAgentAxisFields(resolvedEntryWithCascade(entry, defaults), "presets");
-				}
-			}
-			if (Object.keys(presetStages).length > 0) {
-				presets[wf] = { stages: presetStages };
-			}
 		}
 	}
 
@@ -353,9 +309,7 @@ export function loadModelsConfig(): ModelsConfig {
 	const result: ModelsConfig = {
 		defaults,
 		agents: Object.keys(agents).length > 0 ? agents : undefined,
-		stages: Object.keys(stages).length > 0 ? stages : undefined,
 		skills: Object.keys(skills).length > 0 ? skills : undefined,
-		presets: Object.keys(presets).length > 0 ? presets : undefined,
 		maxConcurrency: validated.maxConcurrency,
 	};
 	modelsConfigCache = result;
@@ -396,41 +350,22 @@ export function getAgentModelConfig(config: ModelsConfig, agentName: string): Re
 }
 
 /**
- * Per-stage cascade lookup, used by the workflow lifecycle path and the
- * standalone-skill bracket. Object-arg shape supersedes positional widening
- * as new axes land (positional `(config, stage, workflow?, skill?)` doesn't
- * scale).
+ * Per-skill cascade lookup, used by the standalone-skill bracket.
  *
  * Cascade (most-specific first):
- *   1. presets[workflow].stages[stage]   — preset-stage authored
- *   2. stages[stage]                     — per-stage
- *   3. skills[skill]                     — per-skill (post-alias target)
- *   4. defaults                          — fallback
+ *   1. skills[skill]   — per-skill (post-alias target)
+ *   2. defaults        — fallback
  *
  * Each layer was already composed against `defaults` at load time
  * (`resolvedEntryWithCascade`), so falling through layers never loses a field.
  * Two configured layers do NOT per-field merge with each other — whole-entry
- * replace at lookup (same asymmetry as today, documented at
- * models-config.test.ts:226-230).
+ * replace at lookup.
  *
- * Pass `workflow: undefined` to skip the preset rung (e.g. standalone-skill
- * bracket, agent-sync path); pass `skill: undefined` to skip the skill rung
- * (e.g. script stages with no skill); pass `stage: undefined` to skip the
- * stage rung. All missing → returns `config.defaults`.
+ * Pass `skill: undefined` to skip the skill rung; all missing → returns
+ * `config.defaults`.
  */
-export function resolveStageModel(
-	config: ModelsConfig,
-	args: { workflow?: string; stage?: string; skill?: string },
-): ResolvedModelConfig | undefined {
-	const { workflow, stage, skill } = args;
-	if (workflow && stage) {
-		const presetStage = config.presets?.[workflow]?.stages?.[stage];
-		if (presetStage) return presetStage;
-	}
-	if (stage) {
-		const flatStage = config.stages?.[stage];
-		if (flatStage) return flatStage;
-	}
+export function resolveSkillModel(config: ModelsConfig, args: { skill?: string }): ResolvedModelConfig | undefined {
+	const { skill } = args;
 	if (skill) {
 		const perSkill = config.skills?.[skill];
 		if (perSkill) return perSkill;
@@ -460,27 +395,21 @@ export function resolveMaxConcurrency(config: ModelsConfig): number {
 
 /**
  * Known valid keys per axis, supplied by the call site that can determine them
- * (bundled-agent readdir, skill registry, workflow loader). An axis whose list
- * is `undefined` is SKIPPED — its key universe couldn't be determined (e.g.
- * rpiv-workflow absent → `stages`/`workflows` unknown), so its configured keys
- * are never falsely reported as unknown.
+ * (bundled-agent readdir, skill registry). An axis whose list is `undefined` is
+ * SKIPPED — its key universe couldn't be determined, so its configured keys are
+ * never falsely reported as unknown.
  */
 export interface KnownModelKeys {
 	agents?: readonly string[];
-	stages?: readonly string[];
 	skills?: readonly string[];
-	workflows?: readonly string[];
-	stagesByWorkflow?: Record<string, readonly string[]>;
 }
 
 /**
  * Return dotted paths of configured models.json keys that match no known key —
- * e.g. `skills.committ`, `agents.codebase-analzyer`, `presets.buildd`,
- * `presets.build.stages.plann`. Record-key typos pass TypeBox validation
- * (records are structurally dynamic) and silently fall through to the defaults
- * cascade; this surfaces them. Axes with an `undefined` known-list are skipped;
- * an unknown preset workflow short-circuits (its inner stages aren't validated
- * against an absent stage list).
+ * e.g. `skills.committ`, `agents.codebase-analzyer`. Record-key typos pass
+ * TypeBox validation (records are structurally dynamic) and silently fall
+ * through to the defaults cascade; this surfaces them. Axes with an `undefined`
+ * known-list are skipped.
  */
 export function findUnknownModelKeys(config: ModelsConfig, known: KnownModelKeys): string[] {
 	const unknown: string[] = [];
@@ -497,19 +426,7 @@ export function findUnknownModelKeys(config: ModelsConfig, known: KnownModelKeys
 	};
 
 	check(config.agents, known.agents, "agents");
-	check(config.stages, known.stages, "stages");
 	check(config.skills, known.skills, "skills");
-
-	if (config.presets && known.workflows) {
-		const wfSet = new Set(known.workflows);
-		for (const [wf, block] of Object.entries(config.presets)) {
-			if (!wfSet.has(wf)) {
-				unknown.push(`presets.${wf}`);
-				continue; // unknown workflow — can't validate its inner stages
-			}
-			check(block.stages, known.stagesByWorkflow?.[wf], `presets.${wf}.stages`);
-		}
-	}
 
 	return unknown;
 }

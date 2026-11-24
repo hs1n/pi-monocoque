@@ -5,13 +5,11 @@
  * extension fail to load, suppressing the very /rpiv-setup command and
  * missing-sibling banner that tell the user to install it (issue #66).
  *
- * Files like built-in-workflows.ts and artifact-collector.ts DO value-import
- * @hs1n/rpiv-workflow — that is safe only while they stay off the
- * entry's static graph (they are reached via guarded dynamic imports). That
- * invariant was previously enforced by comments alone; this test walks the
- * static import graph from index.ts and fails on any reachable sibling value
- * import. Type-only imports (`import type` / `export type ... from`) are
- * erased at runtime and therefore allowed.
+ * A file that needs a sibling reaches it through a guarded dynamic import, off
+ * the entry's static graph. That invariant was previously enforced by comments
+ * alone; this test walks the static import graph from index.ts and fails on any
+ * reachable sibling value import. Type-only imports (`import type` /
+ * `export type ... from`) are erased at runtime and therefore allowed.
  *
  * Sibling detection reuses SIBLINGS[].matches from siblings.ts — the same
  * single source of truth the presence checks and /rpiv-setup use.
@@ -24,6 +22,11 @@ import { describe, expect, it } from "vitest";
 import { SIBLINGS } from "./siblings.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
+
+/** A real sibling, used to prove the detector still detects one. */
+const SIBLING_SPECIFIER = "@hs1n/rpiv-args";
+const SIBLING_VALUE_IMPORT = `import { registerTool } from "${SIBLING_SPECIFIER}";\n`;
+const SIBLING_TYPE_IMPORT = `import type { ToolSpec } from "${SIBLING_SPECIFIER}";\n`;
 
 interface ImportEdge {
 	readonly specifier: string;
@@ -106,15 +109,17 @@ describe("sibling import graph", () => {
 		// against an edge-extraction regression silently visiting nothing.
 		expect(visited.length).toBeGreaterThan(10);
 		expect(visited).toContain("session-capture.ts");
-		expect(visited).toContain("skill-contracts-source.ts");
+		expect(visited).toContain("session-hooks.ts");
 		expect(violations).toEqual([]);
 	});
 
-	it("positive control: the walker flags known sibling value imports off the entry graph", () => {
-		// built-in-workflows.ts value-imports rpiv-workflow by design (reached
-		// only via the lazy provider's dynamic import). Walking from it must
-		// produce violations — proving the detector can actually detect.
-		const { violations } = walkStaticGraph(resolve(HERE, "built-in-workflows.ts"));
-		expect(violations.some((v) => v.includes("@hs1n/rpiv-workflow"))).toBe(true);
+	it("positive control: the detector flags a static sibling value import", () => {
+		// No file in the tree value-imports a sibling any more, so the detector is
+		// proven against a synthetic source: the static edge must be flagged and
+		// its type-only twin exempt.
+		const detected = staticEdges(SIBLING_VALUE_IMPORT).filter((e) => !e.typeOnly);
+		expect(detected.map((e) => e.specifier)).toEqual([SIBLING_SPECIFIER]);
+		expect(SIBLINGS.some((s) => s.matches.test(SIBLING_SPECIFIER))).toBe(true);
+		expect(staticEdges(SIBLING_TYPE_IMPORT).every((e) => e.typeOnly)).toBe(true);
 	});
 });

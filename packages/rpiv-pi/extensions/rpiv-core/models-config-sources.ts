@@ -3,9 +3,8 @@
  * surfaces. Used by the /rpiv-models picker (to populate pickers) and the
  * session_start warn-on-miss validator (to detect typo'd keys).
  *
- *   - bundledAgentNames(): agent keys      ← BUNDLED_AGENTS_DIR readdir
- *   - skillCommandNames(pi): skill keys    ← pi.getCommands() source==="skill"
- *   - loadWorkflowMap(cwd): workflow→stages ← rpiv-workflow loadWorkflows
+ *   - bundledAgentNames(): agent keys       ← BUNDLED_AGENTS_DIR readdir
+ *   - skillCommandNames(pi): skill keys     ← pi.getCommands() source==="skill"
  */
 
 import { readdirSync } from "node:fs";
@@ -31,21 +30,4 @@ export function skillCommandNames(pi: ExtensionAPI): string[] {
 		.filter((c: { source?: string }) => c.source === "skill")
 		.map((c: { name: string }) => (c.name.startsWith("skill:") ? c.name.slice("skill:".length) : c.name))
 		.sort();
-}
-
-/** Map workflow name → sorted stage names. */
-export async function loadWorkflowMap(cwd: string): Promise<Record<string, string[]>> {
-	// rpiv-workflow's `loadWorkflows` returns `{ workflows: [] }` for the
-	// no-sibling case (does NOT throw), so an `isModuleNotFound` catch would
-	// be unreachable AND would silently swallow genuine load failures. Real
-	// errors propagate to the caller, which decides how to surface them.
-	// Runner-free `/registration` entry — only the loader is needed, never the
-	// ~530ms engine.
-	const wf = await import("@hs1n/rpiv-workflow/registration");
-	const loaded = await wf.loadWorkflows(cwd);
-	const map: Record<string, string[]> = {};
-	for (const w of loaded.workflows) {
-		map[w.name] = Object.keys(w.stages ?? {}).sort();
-	}
-	return map;
 }

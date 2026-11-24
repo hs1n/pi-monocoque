@@ -140,9 +140,8 @@ describe("session_start hook — notifications", () => {
 			const warnCall = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls.find((c) => c[1] === "warning");
 			expect(warnCall?.[0]).toContain("shadowed");
 			expect(warnCall?.[0]).toContain("research");
-			// `research` is contract-carrying and dispatched by name from /wf, so the
-			// shadowing copy does more than replace a body — it strands the graph.
-			expect(warnCall?.[0]).toContain("/wf routes research by name");
+			// The banner names the winning copy and says what to do about it.
+			expect(warnCall?.[0]).toContain("Delete the higher-precedence copy");
 		} finally {
 			rmSync(join(homedir(), ".agents"), { recursive: true, force: true });
 		}

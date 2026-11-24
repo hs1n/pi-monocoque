@@ -14,8 +14,7 @@
 			"./packages/rpiv-todo/index.ts",
 			"./packages/rpiv-advisor/index.ts",
 			"./packages/rpiv-i18n/index.ts",
-			"./packages/rpiv-web-tools/index.ts",
-			"./packages/rpiv-workflow/extension.ts"
+			"./packages/rpiv-web-tools/index.ts"
 		],
 		"skills": [
 			"./packages/rpiv-pi/skills",

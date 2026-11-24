@@ -9,7 +9,6 @@ import {
 	loadModelsConfig,
 	type ModelsConfig,
 	resolveMaxConcurrency,
-	resolveStageModel,
 } from "./models-config.js";
 
 const TEST_HOME = process.env.HOME!;
@@ -51,7 +50,7 @@ describe("models-config", () => {
 						"codebase-analyzer": { model: "openai:o3-pro", thinking: "high" },
 						"web-search-researcher": "anthropic:claude-sonnet-4-20250514",
 					},
-					stages: {
+					skills: {
 						research: { thinking: "xhigh" },
 						plan: "anthropic:claude-sonnet-4-20250514",
 					},
@@ -69,12 +68,12 @@ describe("models-config", () => {
 			expect(config.agents!["web-search-researcher"]).toEqual({
 				model: "anthropic:claude-sonnet-4-20250514",
 			});
-			expect(config.stages).toBeDefined();
-			expect(config.stages!.research).toEqual({
+			expect(config.skills).toBeDefined();
+			expect(config.skills!.research).toEqual({
 				thinking: "xhigh",
 				model: "anthropic:claude-sonnet-4-20250514", // cascaded from defaults
 			});
-			expect(config.stages!.plan).toEqual({
+			expect(config.skills!.plan).toEqual({
 				model: "anthropic:claude-sonnet-4-20250514",
 			});
 		});
@@ -98,25 +97,6 @@ describe("models-config", () => {
 			});
 		});
 
-		it("cascades defaults into stage entries", () => {
-			writeFileSync(
-				configFilePath,
-				JSON.stringify({
-					defaults: "anthropic:claude-sonnet-4-20250514",
-					stages: {
-						research: { thinking: "xhigh" },
-					},
-				}),
-				"utf-8",
-			);
-
-			const config = loadModelsConfig();
-			expect(config.stages!.research).toEqual({
-				model: "anthropic:claude-sonnet-4-20250514",
-				thinking: "xhigh",
-			});
-		});
-
 		it("cascades defaults into skills entries (per-field)", () => {
 			writeFileSync(
 				configFilePath,
@@ -135,85 +115,32 @@ describe("models-config", () => {
 			});
 		});
 
-		it("cascades defaults into preset-stage entries (per-field)", () => {
+		it("loads skills alongside agents", () => {
 			writeFileSync(
 				configFilePath,
 				JSON.stringify({
 					defaults: "anthropic/opus",
-					presets: { ship: { stages: { plan: { thinking: "high" } } } },
-				}),
-				"utf-8",
-			);
-			const config = loadModelsConfig();
-			expect(config.presets!.ship.stages!.plan).toEqual({
-				model: "anthropic/opus", // from defaults
-				thinking: "high",
-			});
-		});
-
-		it("loads skills + presets alongside agents + stages", () => {
-			writeFileSync(
-				configFilePath,
-				JSON.stringify({
-					defaults: "anthropic/opus",
+					agents: { "codebase-analyzer": "openai/gpt-5.5" },
 					skills: {
 						commit: "zai/glm-4-7",
 						research: { model: "openai/gpt-5.5", thinking: "high" },
 					},
-					presets: {
-						ship: {
-							stages: {
-								plan: "openai/gpt-5.5",
-								design: { model: "openai/gpt-5.5", thinking: "high" },
-							},
-						},
-					},
 				}),
 				"utf-8",
 			);
 			const config = loadModelsConfig();
+			expect(config.agents!["codebase-analyzer"]).toEqual({ model: "openai/gpt-5.5" });
 			expect(config.skills!.commit).toEqual({ model: "zai/glm-4-7" });
 			expect(config.skills!.research).toEqual({
 				model: "openai/gpt-5.5",
 				thinking: "high",
 			});
-			expect(config.presets!.ship.stages!.plan).toEqual({ model: "openai/gpt-5.5" });
-			expect(config.presets!.ship.stages!.design).toEqual({
-				model: "openai/gpt-5.5",
-				thinking: "high",
-			});
-		});
-
-		it("rejects per-preset `agents` / `defaults` blocks via additionalProperties:false", () => {
-			writeFileSync(
-				configFilePath,
-				JSON.stringify({
-					presets: {
-						ship: {
-							agents: { "codebase-locator": "openai/gpt-5.5" }, // stripped
-							defaults: "openai/gpt-5.5", // stripped
-							stages: { plan: "openai/gpt-5.5" },
-						},
-					},
-				}),
-				"utf-8",
-			);
-			const config = loadModelsConfig();
-			expect(config.presets!.ship.stages!.plan).toEqual({ model: "openai/gpt-5.5" });
-			expect(config.presets!.ship as Record<string, unknown>).not.toHaveProperty("agents");
-			expect(config.presets!.ship as Record<string, unknown>).not.toHaveProperty("defaults");
 		});
 
 		it("treats empty `skills: {}` identically to absent `skills` (no-bleed)", () => {
 			writeFileSync(configFilePath, JSON.stringify({ defaults: "anthropic/opus", skills: {} }), "utf-8");
 			const config = loadModelsConfig();
 			expect(config.skills).toBeUndefined();
-		});
-
-		it("treats empty `presets: { ship: {} }` identically to absent preset (no-bleed)", () => {
-			writeFileSync(configFilePath, JSON.stringify({ defaults: "anthropic/opus", presets: { ship: {} } }), "utf-8");
-			const config = loadModelsConfig();
-			expect(config.presets).toBeUndefined();
 		});
 
 		it("strips unknown keys with additionalProperties: false", () => {
@@ -374,7 +301,7 @@ describe("models-config", () => {
 			warnSpy.mockRestore();
 		});
 
-		it("strips tools/extensions on stages/skills/preset axes with one warn naming them (I3)", () => {
+		it("strips tools/extensions on the skills axis with one warn naming it (I3)", () => {
 			// Only the agents-axis lookup consumes the agent-axis fields; an entry
 			// carrying them on any other axis passed validation and silently
 			// granted nothing.
@@ -382,16 +309,14 @@ describe("models-config", () => {
 			writeFileSync(
 				configFilePath,
 				JSON.stringify({
-					stages: { "reconcile-fix": { model: "openai/o3-pro", tools: ["ext:rpiv-web-tools/tool_a"] } },
-					skills: { grade: { extensions: ["rpiv-web-tools"] } },
+					skills: { grade: { model: "openai/o3-pro", extensions: ["rpiv-web-tools"] } },
 				}),
 				"utf-8",
 			);
 			invalidateModelsConfigCache();
 			const cfg = loadModelsConfig();
-			expect(cfg.stages?.["reconcile-fix"]).toEqual({ model: "openai/o3-pro" });
-			expect(cfg.skills?.grade).toEqual({});
-			expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("skills/stages"));
+			expect(cfg.skills?.grade).toEqual({ model: "openai/o3-pro" });
+			expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("skills"));
 			warnSpy.mockRestore();
 		});
 
@@ -483,82 +408,6 @@ describe("models-config", () => {
 		});
 	});
 
-	describe("resolveStageModel", () => {
-		it("preset-stage hit wins over flat stage", () => {
-			const config: ModelsConfig = {
-				stages: { plan: { model: "anthropic/opus" } },
-				presets: {
-					ship: { stages: { plan: { model: "openai/gpt-5.5" } } },
-				},
-			};
-			expect(resolveStageModel(config, { workflow: "ship", stage: "plan" })).toEqual({
-				model: "openai/gpt-5.5",
-			});
-		});
-
-		it("falls through preset-miss to flat stage", () => {
-			const config: ModelsConfig = {
-				stages: { plan: { model: "anthropic/opus" } },
-				presets: {
-					ship: { stages: { research: { model: "openai/gpt-5.5" } } },
-				},
-			};
-			expect(resolveStageModel(config, { workflow: "ship", stage: "plan" })).toEqual({
-				model: "anthropic/opus",
-			});
-		});
-
-		it("falls through preset + stage miss to skills[skill]", () => {
-			const config: ModelsConfig = {
-				skills: { research: { model: "zai/glm-4-7", thinking: "minimal" } },
-			};
-			expect(resolveStageModel(config, { workflow: "ship", stage: "research", skill: "research" })).toEqual({
-				model: "zai/glm-4-7",
-				thinking: "minimal",
-			});
-		});
-
-		it("falls through everything to defaults", () => {
-			const config: ModelsConfig = { defaults: { model: "anthropic/opus" } };
-			expect(resolveStageModel(config, { workflow: "ship", stage: "plan", skill: "plan" })).toEqual({
-				model: "anthropic/opus",
-			});
-		});
-
-		it("returns undefined when everything is missing", () => {
-			expect(resolveStageModel({}, { workflow: "ship", stage: "plan", skill: "plan" })).toBeUndefined();
-		});
-
-		it("skips the skill rung when `skill` is undefined (script stages)", () => {
-			const config: ModelsConfig = { skills: { plan: { model: "zai/glm-4-7" } } };
-			// No skill arg → skill rung must NOT match even though `skills.plan` exists.
-			expect(resolveStageModel(config, { stage: "plan" })).toBeUndefined();
-		});
-
-		it("skips the preset rung when `workflow` is undefined (standalone bracket)", () => {
-			const config: ModelsConfig = {
-				stages: { plan: { model: "anthropic/opus" } },
-				presets: {
-					ship: { stages: { plan: { model: "openai/gpt-5.5" } } },
-				},
-			};
-			// No workflow arg → preset rung skipped; falls through to flat stages.
-			expect(resolveStageModel(config, { stage: "plan", skill: "plan" })).toEqual({
-				model: "anthropic/opus",
-			});
-		});
-
-		it("standalone bracket call shape: skill-only lookup", () => {
-			const config: ModelsConfig = {
-				defaults: { model: "anthropic/opus" },
-				skills: { commit: { model: "zai/glm-4-7" } },
-			};
-			// Standalone bracket passes only `skill`; preset + stage are undefined.
-			expect(resolveStageModel(config, { skill: "commit" })).toEqual({ model: "zai/glm-4-7" });
-			expect(resolveStageModel(config, { skill: "unknown" })).toEqual({ model: "anthropic/opus" });
-		});
-	});
-
 	describe("resolveMaxConcurrency", () => {
 		it("returns the default when maxConcurrency is absent", () => {
 			expect(resolveMaxConcurrency({})).toBe(DEFAULT_MAX_CONCURRENCY);
@@ -600,18 +449,13 @@ describe("models-config", () => {
 	describe("findUnknownModelKeys", () => {
 		const known = {
 			agents: ["codebase-analyzer", "codebase-locator"],
-			stages: ["research", "plan"],
 			skills: ["commit", "design"],
-			workflows: ["ship"],
-			stagesByWorkflow: { ship: ["research", "plan"] },
 		};
 
 		it("returns [] when every key matches", () => {
 			const config: ModelsConfig = {
 				agents: { "codebase-analyzer": { model: "a/b" } },
-				stages: { research: { model: "a/b" } },
 				skills: { commit: { model: "a/b" } },
-				presets: { ship: { stages: { plan: { model: "a/b" } } } },
 			};
 			expect(findUnknownModelKeys(config, known)).toEqual([]);
 		});
@@ -619,29 +463,17 @@ describe("models-config", () => {
 		it("flags typo'd keys across every axis as dotted paths", () => {
 			const config: ModelsConfig = {
 				agents: { "codebase-analzyer": { model: "a/b" } },
-				stages: { reserch: { model: "a/b" } },
 				skills: { committ: { model: "a/b" } },
-				presets: { ship: { stages: { plann: { model: "a/b" } } } },
 			};
 			expect(findUnknownModelKeys(config, known).sort()).toEqual(
-				["agents.codebase-analzyer", "presets.ship.stages.plann", "skills.committ", "stages.reserch"].sort(),
+				["agents.codebase-analzyer", "skills.committ"].sort(),
 			);
 		});
 
-		it("flags an unknown preset workflow and does not descend into its stages", () => {
-			const config: ModelsConfig = {
-				presets: { shipp: { stages: { plann: { model: "a/b" } } } },
-			};
-			expect(findUnknownModelKeys(config, known)).toEqual(["presets.shipp"]);
-		});
-
 		it("skips an axis whose known-list is undefined (universe unknown)", () => {
-			const config: ModelsConfig = {
-				stages: { anything: { model: "a/b" } },
-				presets: { whatever: { stages: { x: { model: "a/b" } } } },
-			};
-			// No `stages`/`workflows` provided → those axes are not validated.
-			expect(findUnknownModelKeys(config, { agents: ["codebase-analyzer"], skills: ["commit"] })).toEqual([]);
+			const config: ModelsConfig = { skills: { anything: { model: "a/b" } } };
+			// No `skills` list provided → that axis is not validated.
+			expect(findUnknownModelKeys(config, { agents: ["codebase-analyzer"] })).toEqual([]);
 		});
 
 		it("ignores defaults (no key to validate)", () => {

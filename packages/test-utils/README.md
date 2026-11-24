@@ -6,7 +6,6 @@ The shared fixture library the tests in this monorepo import — mock [Pi Agent]
 
 - **A mock Pi you inspect instead of stub** — `createMockPi()` hands back `{ pi, captured }`, and every `registerTool`, `registerCommand`, `registerShortcut`, `registerFlag`, `on` and `events.emit` call lands in a typed bucket you assert on afterwards.
 - **Scripted child sessions** — `createMockSessionChain({ steps })` dequeues one step per `spawnChild()` call (`branch`, `cancelled`, `toolTimeout`, `sessionFile`) and aggregates `sentMessages`, `notifications` and `statusUpdates` across every child.
-- **Real concurrency assertions** — `createFakeConcurrentHost()` is a Pi-free `WorkflowHostContext` double that records per-spawn `startOrder`/`endOrder`, tracks the peak in-flight count as `maxActive`, and freezes a run mid-flight with `gate: true` plus `waitForActive(n)` and `release()`.
 - **Synthetic transcripts from plain literals** — `buildSessionEntries()` with `makeUserMessage`, `makeAssistantMessage` and `makeToolResult` gives you `SessionEntry[]` while the `as unknown as` casts stay here, out of your test file.
 - **One host stub per concern** — `stubFetch` (matcher-driven, records every call), `stubGitExec`, `makeSpawnStub`, `writeGuidanceTree`, and `makeTheme`/`makeTui` for ANSI-free view tests.
 - **Structural tool-contract checks** — `assertToolContract(tool, { name, requiredFields, optionalFields })` verifies the name, description, `execute` and the exact `required` set without depending on a schema library.
@@ -26,12 +25,12 @@ The fixtures are vitest-only — every factory calls `vi`, and the package is co
 
 ```sh
 npm test              # whole suite
-npx vitest run packages/rpiv-workflow/api.test.ts   # one file
+npx vitest run packages/test-utils/manifest.test.ts   # one file
 ```
 
 ## Conventions
 
-- **Fixtures never enter production code.** Importing them would leak `vi` into the runtime bundle. The one sanctioned coupling is the type-only import of rpiv-workflow's host-port types in `pi.ts` and `concurrent-host.ts`.
+- **Fixtures never enter production code.** Importing them would leak `vi` into the runtime bundle. Type-only imports of a declared dependency's types are the one sanctioned coupling.
 - **`as unknown as` casts are allowed here and nowhere else.** pi-ai and pi-coding-agent do not export every internal discriminator; keeping the casts in fixtures is what stops them leaking into runtime types.
 - **Factories return capture buckets.** If you find yourself overriding one call at a time, add a factory variant instead.
 - **Globals restore themselves.** The repo sets `unstubGlobals: true`, so `stubFetch` needs no manual teardown.

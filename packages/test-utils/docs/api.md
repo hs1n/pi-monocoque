@@ -18,7 +18,7 @@ import { createMockPi, makeTheme, stubFetch } from "@hs1n/rpiv-test-utils";
 | `createMockSessionManager` | `(branch?: SessionEntry[], sessionId?: string, sessionName?: string) => { getBranch, getEntries, getLeafId, getSessionFile, getSessionId, getSessionName }` |
 | `createMockModelRegistry` | `(models?: Model<Api>[]) => { find, getAvailable, getApiKeyAndHeaders }` |
 | `createMockCtx` | `(opts?: MockCtxOptions) => ExtensionContext` |
-| `createMockCommandCtx` | `(opts?: MockCtxOptions) => ExtensionCommandContext & WorkflowHostContext` |
+| `createMockCommandCtx` | `(opts?: MockCtxOptions) => ExtensionCommandContext` |
 | `createMockSessionChain` | `(opts: MockSessionChainOptions) => MockSessionChain` |
 | `mockAssistantMessage` | `(text: string, stopReason?: "stop" \| "length" \| "toolUse" \| "error" \| "aborted") => unknown` |
 
@@ -107,43 +107,6 @@ Two errors it throws by design:
 ```
 createMockSessionChain: spawnChild called but no more scripted steps remain (chain consumed too many).
 createMockSessionChain: scripted child cancellation (spawnChild rejected).
-```
-
-## `concurrent-host.ts` — concurrency assertions
-
-`createFakeConcurrentHost(opts?: FakeConcurrentHostOptions) => FakeConcurrentHost`
-
-A `WorkflowHostContext` double with no Pi import, built to prove parallel-fanout behaviour end to
-end. It deliberately deviates from the `{ pi, captured }` shape and uses plain closures rather than
-`vi.fn()`.
-
-| Option | Default |
-| --- | --- |
-| `maxConcurrency` | `1` |
-| `cwd` | `"/tmp/fake-concurrent-cwd"` |
-| `hasUI` | `false` |
-| `gate` | `false` — when `true`, every spawn blocks until `release()` |
-| `bucket` | `"audits"` |
-| `childBranch(rec, index)` | one assistant message reading `` `wrote .rpiv/artifacts/${bucket}/unit-${index}.md` `` |
-
-The host reports `ctx`, `spawns: FakeSpawnRecord[]`, `maxActive` (peak in-flight), `active()`,
-`notifications`, `statusUpdates`, `setMaxConcurrency(n)`, `release()`, and `waitForActive(n)`. Each
-`FakeSpawnRecord` carries `prompt`, `model`, `signal`, `reattach`, `fork`, `startOrder`, and
-`endOrder` (`-1` until settled). The outer session file is `` `${cwd}/.session.jsonl` `` and
-`getSessionId()` returns `"fake-session"`.
-
-To simulate an abort, return a `childBranch` whose assistant message carries
-`stopReason: "aborted"`. A `reattach` spawn is modelled as an empty resumed transcript.
-
-Freeze a run mid-flight:
-
-```ts
-const host = createFakeConcurrentHost({ maxConcurrency: 3, gate: true });
-const run = runWorkflow(host.ctx, spec);
-await host.waitForActive(3);
-expect(host.maxActive).toBe(3);
-host.release();
-await run;
 ```
 
 ## `session.ts` — synthetic transcripts

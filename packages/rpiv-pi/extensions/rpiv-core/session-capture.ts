@@ -13,13 +13,12 @@
  * file (runtime-traced), so an unrestored override permanently rewrites the
  * user's global default model.
  *
- * Uses pi (ExtensionAPI) from closure — not WorkflowHostContext/WorkflowHost —
- * because pi persists across session replacements and is never invalidated.
+ * Uses pi (ExtensionAPI) from closure, because pi persists across session
+ * replacements and is never invalidated.
  */
 
 import type { ExtensionAPI, ExtensionUIContext, ModelRegistry } from "@earendil-works/pi-coding-agent";
 import { parseModelKey } from "@hs1n/rpiv-config";
-import { isLaneRelayUiContext } from "./lane-relay-ui.js";
 import type { ModelThinkingLevelValue } from "./models-config.js";
 import { isStaleCtxError } from "./utils.js";
 
@@ -27,7 +26,7 @@ import { isStaleCtxError } from "./utils.js";
 export type CapturedModel = Parameters<ExtensionAPI["setModel"]>[0];
 
 // ---------------------------------------------------------------------------
-// Shared types — used by both the workflow path and the skill-bracket path.
+// Shared types — used by the skill-bracket path.
 // ---------------------------------------------------------------------------
 
 /**
@@ -119,20 +118,13 @@ export function registerSessionCapture(pi: ExtensionAPI): void {
 			},
 		) => {
 			// Project trust is a ctx-only fact (see `capturedProjectTrust`), and it
-			// describes the PROJECT rather than the foreground — so it is captured
-			// BEFORE the lane-relay skip below, which guards foreground state only.
+			// describes the PROJECT rather than the foreground.
 			// A stale ctx throws; leave it undefined rather than keeping a stale value.
 			try {
 				capturedProjectTrust = ctx.isProjectTrusted?.();
 			} catch {
 				capturedProjectTrust = undefined;
 			}
-			// A detached child re-loads rpiv-core and re-fires this hook with
-			// its bound relay ui. Skip it — capturing the relay would re-point the
-			// launcher's captured foreground UI at a child (corrupting every later /wf,
-			// whose foreground children would bind a defunct relay). The launcher's own
-			// (real-ui) session_start is the only one that captures.
-			if (isLaneRelayUiContext(ctx.ui)) return;
 			if (ctx.modelRegistry) {
 				capturedModelRegistry = ctx.modelRegistry;
 			}

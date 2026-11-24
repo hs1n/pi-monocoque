@@ -63,8 +63,6 @@
 		"@hs1n/rpiv-i18n": "*",
 		"@hs1n/rpiv-web-tools": "*",
 		"@hs1n/rpiv-args": "*",
-		"@hs1n/rpiv-workflow": "*",
-		"jiti": "*",
 		"typebox": "*"
 	},
 	"contributors": [

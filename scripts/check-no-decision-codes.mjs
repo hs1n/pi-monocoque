@@ -51,7 +51,7 @@ const REVIEW_CODE_IN_PARENS_RE = /\([^)\n]*\b(L[0-9]+-[0-9]+|review I[0-9]+)\b/;
 // Whole scoped tree, *.ts only — mirrors `npm run check`'s whole-tree posture (a
 // standing cleanliness invariant that also catches merge-introduced contamination,
 // not just staged files).
-const GUARDED_DIRS = ["packages/rpiv-workflow", "packages/rpiv-pi/extensions/rpiv-core", "packages/rpiv-advisor"];
+const GUARDED_DIRS = ["packages/rpiv-pi/extensions/rpiv-core", "packages/rpiv-advisor"];
 
 function walkTs(dir, out = []) {
 	if (!existsSync(dir)) return out;

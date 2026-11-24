@@ -91,9 +91,6 @@ never surface it. Only entries pointing at nothing at all are reported.
 bumps this package with the rest of the repo, and only `private` keeps `npm publish -ws` from
 shipping it.
 
-`concurrent-host.ts` is barrel-only: it is exported from `index.ts` but absent from both `files` and
-the `exports` map. It is the standing exception — a new module goes into all three.
-
 ## Adding the check to a new package
 
 1. Create `ship-manifest.test.ts` next to `package.json` in the package.

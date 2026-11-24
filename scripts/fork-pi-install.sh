@@ -50,7 +50,7 @@ done
 
 # Mirrors rpiv-pi's SIBLINGS registry: packages/rpiv-pi/extensions/rpiv-core/siblings.ts
 # (the same set /rpiv-setup installs). Keep in sync if upstream adds a sibling.
-CORE="rpiv-pi rpiv-args rpiv-ask-user-question rpiv-todo rpiv-advisor rpiv-i18n rpiv-web-tools rpiv-workflow"
+CORE="rpiv-pi rpiv-args rpiv-ask-user-question rpiv-todo rpiv-advisor rpiv-i18n rpiv-web-tools"
 # Opt-ins the pipeline does not need, as short-name:package-dir pairs. btw is a
 # side-conversation pattern; the fork deleted rpiv-voice/rpiv-warp/rpiv-telemetry
 # (see FORK_NOTICE.md).

@@ -6,10 +6,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 vi.mock("./models-config-sources.js", () => ({
 	bundledAgentNames: vi.fn(() => ["codebase-analyzer"]),
 	skillCommandNames: vi.fn(() => ["commit"]),
-	loadWorkflowMap: vi.fn(async () => ({ build: ["research", "plan"] })),
 }));
 
-import { loadWorkflowMap } from "./models-config-sources.js";
+import { skillCommandNames } from "./models-config-sources.js";
 import { registerModelsConfigValidation } from "./models-config-validate.js";
 
 function writeModels(config: unknown) {
@@ -29,8 +28,8 @@ function makePi() {
 }
 
 afterEach(() => {
-	vi.mocked(loadWorkflowMap).mockReset();
-	vi.mocked(loadWorkflowMap).mockResolvedValue({ build: ["research", "plan"] });
+	vi.mocked(skillCommandNames).mockReset();
+	vi.mocked(skillCommandNames).mockReturnValue(["commit"]);
 });
 
 describe("models-config-validate — session_start warn-on-miss", () => {
@@ -38,9 +37,7 @@ describe("models-config-validate — session_start warn-on-miss", () => {
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 		writeModels({
 			agents: { "codebase-analzyer": "a/b" },
-			stages: { reserch: "a/b" },
 			skills: { committ: "a/b" },
-			presets: { build: { stages: { plann: "a/b" } } },
 		});
 		const { pi, fire } = makePi();
 		registerModelsConfigValidation(pi);
@@ -48,9 +45,7 @@ describe("models-config-validate — session_start warn-on-miss", () => {
 
 		const warned = warn.mock.calls.map((c) => String(c[0]));
 		expect(warned.some((w) => w.includes("agents.codebase-analzyer"))).toBe(true);
-		expect(warned.some((w) => w.includes("stages.reserch"))).toBe(true);
 		expect(warned.some((w) => w.includes("skills.committ"))).toBe(true);
-		expect(warned.some((w) => w.includes("presets.build.stages.plann"))).toBe(true);
 		warn.mockRestore();
 	});
 
@@ -59,7 +54,6 @@ describe("models-config-validate — session_start warn-on-miss", () => {
 		writeModels({
 			agents: { "codebase-analyzer": "a/b" },
 			skills: { commit: "a/b" },
-			presets: { build: { stages: { plan: "a/b" } } },
 		});
 		const { pi, fire } = makePi();
 		registerModelsConfigValidation(pi);
@@ -80,52 +74,26 @@ describe("models-config-validate — session_start warn-on-miss", () => {
 		warn.mockRestore();
 	});
 
-	it("does not load workflows when only agents/skills axes are configured", async () => {
-		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-		writeModels({ skills: { committ: "a/b" } });
-		const { pi, fire } = makePi();
-		registerModelsConfigValidation(pi);
-		await fire();
-		expect(loadWorkflowMap).not.toHaveBeenCalled();
-		expect(warn).toHaveBeenCalledWith(expect.stringContaining("skills.committ"));
-		warn.mockRestore();
-	});
-
 	it("does nothing when no record axes are configured", async () => {
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 		writeModels({ defaults: "a/b" });
 		const { pi, fire } = makePi();
 		registerModelsConfigValidation(pi);
 		await fire();
-		expect(loadWorkflowMap).not.toHaveBeenCalled();
 		expect(warn).not.toHaveBeenCalled();
 		warn.mockRestore();
 	});
 
-	it("skips stages/presets (no crash, no false warn) when the workflow load fails", async () => {
-		vi.mocked(loadWorkflowMap).mockRejectedValueOnce(new Error("boom: workflow load failed"));
+	it("reports every key as unknown when the skill registry is empty, without throwing", async () => {
+		// Defensive: an empty skill registry should not crash; every configured
+		// key is unknown against an empty known-list.
+		vi.mocked(skillCommandNames).mockReturnValue([]);
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-		// `reserch` is unknown, but with the workflow universe unavailable the
-		// stages axis must be skipped rather than false-warned — and must not throw.
-		writeModels({ stages: { reserch: "a/b" } });
-		const { pi, fire } = makePi();
-		registerModelsConfigValidation(pi);
-		await expect(fire()).resolves.toBeUndefined();
-		expect(warn).not.toHaveBeenCalled();
-		warn.mockRestore();
-	});
-
-	it("skips a configured axis whose known-list is empty without throwing", async () => {
-		// Defensive: empty agent registry should not crash; unknown agent key is
-		// reported (empty known-list still validates — every key is unknown).
-		vi.mocked(loadWorkflowMap).mockResolvedValue({});
-		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-		writeModels({ stages: { research: "a/b" } });
+		writeModels({ skills: { research: "a/b" } });
 		const { pi, fire } = makePi();
 		registerModelsConfigValidation(pi);
 		await fire();
-		// `research` is not in the empty workflow map → flagged.
-		expect(warn).toHaveBeenCalledWith(expect.stringContaining("stages.research"));
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining("skills.research"));
 		warn.mockRestore();
 	});
 });

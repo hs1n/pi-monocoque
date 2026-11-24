@@ -1,7 +1,5 @@
 import type { ExtensionAPI, ExtensionUIContext } from "@earendil-works/pi-coding-agent";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createLaneRelayUiContext } from "./lane-relay-ui.js";
-import { __resetRunLaneRegistry, recordRun, SINGLE_UNIT_KEY } from "./run-lane-registry.js";
 import {
 	__resetSessionCaptureState,
 	getCapturedModel,
@@ -93,30 +91,6 @@ describe("session-capture", () => {
 			expect(getCapturedModelRegistry()).toBe(registry);
 			expect(getCapturedModel()).toBe(BASELINE_MODEL);
 			expect(getCapturedUiContext()).toBe(FAKE_UI);
-		});
-
-		it("skips a detached child's session_start (relay ui) — never re-points the capture", async () => {
-			__resetRunLaneRegistry();
-			recordRun("child-run", "ship");
-			const { pi, sessionStart } = makePi();
-			registerSessionCapture(pi);
-			const handler = sessionStart()!;
-			const registry = makeRegistry();
-
-			// Root launcher captures the real UI.
-			await handler({}, { modelRegistry: registry, model: BASELINE_MODEL, ui: FAKE_UI });
-
-			// A foreground child re-fires session_start with its branded relay ui — gated.
-			const relay = createLaneRelayUiContext(FAKE_UI, "child-run", SINGLE_UNIT_KEY);
-			const childRegistry = makeRegistry();
-			const childModel = { provider: "openai", id: "child-override" };
-			await handler({}, { modelRegistry: childRegistry, model: childModel, ui: relay });
-
-			// Capture is unchanged — the relay never became the launcher's foreground UI.
-			expect(getCapturedUiContext()).toBe(FAKE_UI);
-			expect(getCapturedModelRegistry()).toBe(registry);
-			expect(getCapturedModel()).toBe(BASELINE_MODEL);
-			__resetRunLaneRegistry();
 		});
 	});
 

@@ -5,7 +5,9 @@
  * Handler order is deliberate — preserve it.
  */
 
-import { join } from "node:path";
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
+import { dirname, join, resolve } from "node:path";
 import {
 	type BeforeAgentStartEvent,
 	type ExtensionAPI,
@@ -33,19 +35,18 @@ import {
 import { clearInjectionState, handleToolCallGuidance, injectRootGuidance, takeRootGuidance } from "./guidance.js";
 import { readLoadedSiblingSources } from "./loaded-siblings.js";
 import { findMissingSiblings, type LoadedSiblingSources } from "./package-checks.js";
-import { BUNDLED_SKILL_NAMES, BUNDLED_SKILLS_DIR } from "./paths.js";
+import { BUNDLED_SKILL_NAMES } from "./paths.js";
 import { injectPipelinePointer, PIPELINE_POINTER } from "./pipeline-pointer.js";
 import { getCapturedProjectTrust } from "./session-capture.js";
-import { agentsSkillDirs, buildSkillContractsFromFrontmatter } from "./skill-contracts-source.js";
 import { findShadowedSkills, formatShadowWarning } from "./skill-shadow.js";
 import { isStaleCtxError } from "./utils.js";
 
 /**
  * Module-local latch for the startup-maintenance block (per-cwd agent cleanup,
  * bundled-agent sync, and the banner). Pi fires `session_start` for every
- * session including programmatic spawns (workflow stages, batch ops), but this
+ * session including programmatic spawns (batch ops), but this
  * work must run ONCE per process load, not per fire: the banner would otherwise
- * reprint on every `/wf` stage, and `syncBundledAgents` targets the global
+ * reprint on every child session, and `syncBundledAgents` targets the global
  * `~/.pi/agent/agents/` dir whose source can't change mid-process (upgrades need
  * a restart or `/reload`) — so re-running just recomputes identical hashes.
  * `/rpiv-update-agents` and `/reload` remain the explicit re-sync paths.
@@ -305,8 +306,8 @@ function notifyCleanup(ui: UI, result: CleanupResult): void {
  * Every directory Pi reads ahead of the installed package, in dispatch order.
  *
  * `.agents/skills` (cwd up to the repo root, then `~/.agents/skills`) is
- * enumerated by the same helper the contract harvester uses, so the warning and
- * the registry can never disagree about which tree holds a skill. The other two
+ * enumerated by `agentsSkillDirs` below, so the warning and Pi's dispatch
+ * enumeration cannot disagree about which tree holds a skill. The other two
  * are Pi's defaults, read by `loadSkills`: the project `.pi/skills` only on a
  * trusted project — Pi will not dispatch from it otherwise, and a warning about
  * a copy that cannot run is noise.
@@ -319,21 +320,61 @@ function shadowSearchDirs(cwd: string): string[] {
 	return dirs;
 }
 
+/** Walk up from `start` to the git repo root, or to the filesystem root. */
+function findGitRepoRoot(start: string): string | null {
+	let dir = resolve(start);
+	for (;;) {
+		if (existsSync(join(dir, ".git"))) return dir;
+		const parent = dirname(dir);
+		if (parent === dir) return null;
+		dir = parent;
+	}
+}
+
+/**
+ * Every `.agents/skills` directory Pi reads, nearest first, ending with the
+ * always-on user one (`~/.agents/skills`).
+ *
+ * Pi's resource loader enumerates these for DISPATCH — it walks cwd up to the
+ * git repo root — while the `loadSkills` helper reads only `<agentDir>/skills`
+ * and `<cwd>/.pi/skills`. Enumerating the same tree is what lets the shadow
+ * warning name a copy Pi would actually run.
+ *
+ * `~/.agents/skills` is the one entry Pi treats as an always-trusted USER
+ * resource, so it survives an untrusted project and the project directories do
+ * not: Pi only dispatches from them when the project is trusted, and a warning
+ * about a copy that cannot run is noise.
+ */
+function agentsSkillDirs(cwd: string, trustedProject: boolean): string[] {
+	const userDir = resolve(homedir(), ".agents", "skills");
+	if (!trustedProject) return [userDir];
+	const start = resolve(cwd);
+	const root = findGitRepoRoot(start);
+	const dirs: string[] = [];
+	let dir = start;
+	for (;;) {
+		const candidate = join(dir, ".agents", "skills");
+		if (resolve(candidate) !== userDir) dirs.push(candidate);
+		if (root !== null && dir === root) break;
+		const parent = dirname(dir);
+		if (parent === dir) break;
+		dir = parent;
+	}
+	dirs.push(userDir);
+	return dirs;
+}
+
 /**
  * Announce bundled skills that resolve to a copy outside this package.
  *
- * The precedence chain lets a same-named copy win silently, and the `/wf`
- * graphs dispatch by name — so a shadowed `research` runs someone else's body
- * while the graph validates against a contract that is no longer harvested.
- * Frontmatter is only read once something is actually shadowed: the bundled
- * contract set is what separates "a different body runs" from "the graph that
- * routes this name is validating against nothing".
+ * The precedence chain lets a same-named copy win silently, so the bundled body
+ * a person expects never runs. Frontmatter is never read here: the warning is
+ * about which copy Pi dispatches, not about what any copy declares.
  */
 function warnShadowedSkills(ui: UI, cwd: string): void {
 	const shadowed = findShadowedSkills(BUNDLED_SKILL_NAMES, shadowSearchDirs(cwd));
 	if (shadowed.length === 0) return;
-	const critical = new Set(buildSkillContractsFromFrontmatter(BUNDLED_SKILLS_DIR).map(([name]) => name));
-	ui.notify(`\n${formatShadowWarning(shadowed, critical)}`, "warning");
+	ui.notify(`\n${formatShadowWarning(shadowed)}`, "warning");
 }
 
 function warnMissingSiblings(ui: UI, loaded: LoadedSiblingSources): void {

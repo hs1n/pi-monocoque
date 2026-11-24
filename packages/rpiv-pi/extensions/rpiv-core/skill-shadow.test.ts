@@ -79,17 +79,6 @@ describe("formatShadowWarning", () => {
 		expect(text).toContain("commit → /repo/.agents/skills/commit");
 	});
 
-	it("never claims /wf routing for a skill that is not contract-carrying", () => {
-		const text = formatShadowWarning([{ name: "commit", locations: ["/x/commit"] }], new Set(["research"]));
-		expect(text).not.toContain("/wf routes");
-	});
-
-	it("calls out contract-carrying names, which strand the graph rather than just a body", () => {
-		const text = formatShadowWarning(shadowed, new Set(["research"]));
-		expect(text).toContain("/wf routes research by name");
-		expect(text).not.toContain("commit by name");
-	});
-
 	it("folds the tail once the list gets long, so the banner stays readable", () => {
 		const many = Array.from({ length: 7 }, (_, i) => ({ name: `s${i}`, locations: [`/x/s${i}`] }));
 		const text = formatShadowWarning(many);

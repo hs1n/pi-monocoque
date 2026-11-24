@@ -6,23 +6,19 @@
 // under packages/rpiv-pi/skills/.
 //
 // RULE
-//   A name present in both sets is a broken workflow graph, not a style wart.
-//   Three names collide in the two upstream collections — `research`, `implement`
-//   and `code-review` — and all three are dispatched BY NAME from the built-in
-//   /wf workflows: `implement` is an `acts` stage in all four, `code-review` a
-//   gate stage in polish and vet, `research` build's second stage. The vendored
-//   set therefore leaves them out. CONTEXT.md's Skill ownership section records
-//   that omission as load-bearing rather than tidy, and skills/matt-pocock/README.md
-//   explains it to whoever updates the directory.
+//   A name present in both sets is a silent shadow, not a style wart. Three names
+//   collide in the two upstream collections — `research`, `implement` and
+//   `code-review` — so the vendored set leaves them out: with both installed, one
+//   body runs and the other is never dispatched, and nothing in Pi reports the
+//   loss. CONTEXT.md's Skill ownership section records that omission, and
+//   skills/matt-pocock/README.md explains it to whoever updates the directory.
 //
 // WHY A CHECK AND NOT A NOTE
 //   Skill precedence is
 //     <cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills >
 //     ~/.pi/agent/skills > installed package
-//   A second copy of a name anywhere above the package shadows rpiv-pi's body while
-//   the graph keeps routing by that name — and the `contract:` the graph validates
-//   against is harvested by a separate provider, which finds nothing to replace it
-//   with because matt's skills declare none. Nothing complains. Updating the
+//   A second copy of a name anywhere above the package shadows rpiv-pi's body for
+//   every later dispatch, and rpiv-core's shadow warning is the only report. Updating the
 //   vendored set means re-applying the exclusions by hand, which is exactly the
 //   instruction a person forgets, and the failure it produces is silent. So it is a
 //   gate instead.
@@ -75,9 +71,8 @@ if (collisions.length) {
 		console.error(`    ${join(PACKAGE_ROOT, name)}/`);
 	}
 	console.error(
-		"\nA duplicated name shadows the package's skill for the built-in /wf graphs, which dispatch\n" +
-			"by name, and no `contract:` replaces the one those graphs validate against.\n" +
-			"Leave it out of the vendored set — do not ship both.",
+		"\nA duplicated name means one of the two bodies never runs — precedence picks the winner\n" +
+			"silently. Leave it out of the vendored set — do not ship both.",
 	);
 	process.exit(1);
 }

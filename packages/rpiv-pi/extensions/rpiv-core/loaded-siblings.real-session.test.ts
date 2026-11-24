@@ -94,16 +94,16 @@ export default function (pi) {
 	const names = (list: { pkg: string }[]) => list.map((s) => s.pkg.replace(/^npm:/, ""));
 
 	it("tool-, command- and marker-only siblings loaded by path are not reported missing", async () => {
-		const snapshot = await snapshotWith([sibling("rpiv-todo"), sibling("rpiv-workflow"), sibling("rpiv-args")]);
+		const snapshot = await snapshotWith([sibling("rpiv-todo"), sibling("rpiv-i18n"), sibling("rpiv-args")]);
 		const missing = names(findMissingSiblings(snapshot));
 		expect(missing).not.toContain("@hs1n/rpiv-todo"); // tool + command
-		expect(missing).not.toContain("@hs1n/rpiv-workflow"); // command only
+		expect(missing).not.toContain("@hs1n/rpiv-i18n"); // command only
 		expect(missing).not.toContain("@hs1n/rpiv-args"); // event hooks only → marker
 		expect(missing).toContain("@hs1n/rpiv-advisor"); // genuinely absent
 		expect(names(findInstalledSiblings(snapshot)).sort()).toEqual([
 			"@hs1n/rpiv-args",
+			"@hs1n/rpiv-i18n",
 			"@hs1n/rpiv-todo",
-			"@hs1n/rpiv-workflow",
 		]);
 	});
 

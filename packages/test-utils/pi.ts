@@ -10,27 +10,40 @@ import type {
 	ToolDefinition,
 	ToolInfo,
 } from "@earendil-works/pi-coding-agent";
-import type { ModelSelection, WorkflowHostContext, WorkflowSessionContext } from "@hs1n/rpiv-workflow";
 import { vi } from "vitest";
 import type { MockTheme } from "./theme.js";
 
 /**
  * The mock command ctx satisfies BOTH Pi's `ExtensionCommandContext` (so tests
- * reading `model`/`modelRegistry`/etc. keep working) AND rpiv-workflow's
- * post-detachment host port (`spawnChild`/`maxConcurrency`), so consumers can
- * cast `mockCtx as WorkflowHostContext` with a plain assertion. The shape is
- * synthesized via `as unknown as` — the type is the contract, not the literal.
+ * reading `model`/`modelRegistry`/etc. keep working) AND the session-spawning
+ * surface tests drive (`spawnChild`/`maxConcurrency`), so consumers can cast a
+ * plain Pi ctx to it with one assertion. The shape is synthesized via
+ * `as unknown as` — the type is the contract, not the literal.
  */
-type MockWorkflowCtx = ExtensionCommandContext & WorkflowHostContext;
+type MockWorkflowCtx = ExtensionCommandContext & {
+	readonly maxConcurrency: number;
+	spawnChild<T>(options: MockSpawnChildOptions<T>): Promise<T>;
+};
 
-/** Options the runtime hands `spawnChild` — mirrors the rpiv-workflow host port. */
+/** Resolved per-unit model override handed to `spawnChild`. */
+interface MockModelSelection {
+	model?: string;
+	thinking?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
+}
+
+/** The child ctx `spawnChild` hands to its `withSession` callback. */
+type MockSessionContext = ExtensionCommandContext & {
+	sendUserMessage(content: string, options?: { deliverAs?: "steer" | "followUp" }): Promise<void>;
+};
+
+/** Options the runtime hands `spawnChild`. */
 interface MockSpawnChildOptions<T = void> {
 	prompt: string;
-	model?: ModelSelection;
+	model?: MockModelSelection;
 	signal?: AbortSignal;
 	reattach?: { sessionFile: string };
 	fork?: { sessionFile: string };
-	withSession: (child: WorkflowSessionContext) => Promise<T>;
+	withSession: (child: MockSessionContext) => Promise<T>;
 }
 
 /** A captured `registerShortcut` registration (KeyId → handler). */
@@ -63,10 +76,9 @@ export interface CreateMockPiOptions extends Partial<ExtensionAPI> {
 	 * Skill names to surface from `getCommands()` as `RegisteredCommand`s with
 	 * `source: "skill"` (matching the shape Pi emits from
 	 * `agent-session.js:1699` — `name` prefixed with `"skill:"`, `source`
-	 * `"skill"`). Lets tests of programmatic `/skill:<name>` dispatch (the
-	 * `rpiv-workflow` runner gates dispatch on this registry to prevent
-	 * raw-text leakage to the LLM) register the skills their workflow uses
-	 * without hand-rolling RegisteredCommand objects.
+	 * `"skill"`). Lets tests of programmatic `/skill:<name>` dispatch register
+	 * the skills they resolve by name without hand-rolling RegisteredCommand
+	 * objects.
 	 *
 	 * Overridden completely by a `getCommands` override in the same call —
 	 * `getCommands` takes precedence when both are present.
@@ -272,7 +284,7 @@ export function createMockCommandCtx(opts: MockCtxOptions = {}): MockWorkflowCtx
 			maxConcurrency: opts.maxConcurrency ?? 1,
 			sendUserMessage: vi.fn(async () => {}),
 			spawnChild: vi.fn(),
-		} as unknown as WorkflowSessionContext;
+		} as unknown as MockSessionContext;
 		return options.withSession(child);
 	});
 	return {
@@ -467,7 +479,7 @@ export function createMockSessionChain(opts: MockSessionChainOptions): MockSessi
 				step.sessionFile,
 				step.toolTimeout,
 				step.onSend,
-			) as unknown as WorkflowSessionContext;
+			) as unknown as MockSessionContext;
 			return options.withSession(child);
 		});
 
