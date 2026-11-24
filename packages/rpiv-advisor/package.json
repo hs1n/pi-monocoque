@@ -1,6 +1,6 @@
 {
 	"name": "@hs1n/rpiv-advisor",
-	"version": "2.13.8",
+	"version": "3.0.0",
 	"description": "Pi extension. A second opinion the model can request from a stronger reviewer model before it acts.",
 	"keywords": [
 		"pi-package",
@@ -47,8 +47,8 @@
 		]
 	},
 	"dependencies": {
-		"@hs1n/rpiv-config": "^2.13.8",
-		"@hs1n/rpiv-side-call": "^2.13.8"
+		"@hs1n/rpiv-config": "^3.0.0",
+		"@hs1n/rpiv-side-call": "^3.0.0"
 	},
 	"peerDependencies": {
 		"@earendil-works/pi-ai": "*",

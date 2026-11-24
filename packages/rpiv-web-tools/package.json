@@ -1,6 +1,6 @@
 {
 	"name": "@hs1n/rpiv-web-tools",
-	"version": "2.13.8",
+	"version": "3.0.0",
 	"description": "Pi extension. Web search and fetch for the model with pluggable providers (Brave, Tavily, Serper, Exa, You.com, Jina, Firecrawl, Perplexity, SearXNG, Ollama).",
 	"keywords": [
 		"pi-package",
@@ -65,7 +65,7 @@
 		]
 	},
 	"dependencies": {
-		"@hs1n/rpiv-config": "^2.13.8"
+		"@hs1n/rpiv-config": "^3.0.0"
 	},
 	"peerDependencies": {
 		"@earendil-works/pi-coding-agent": "*",

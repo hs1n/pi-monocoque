@@ -1,6 +1,6 @@
 {
 	"name": "@hs1n/rpiv-ask-user-question",
-	"version": "2.13.8",
+	"version": "3.0.0",
 	"description": "Pi extension. A structured questionnaire the model can put to you when it would otherwise guess, with typed options instead of free-form replies.",
 	"keywords": [
 		"pi-package",
@@ -99,7 +99,7 @@
 		}
 	},
 	"dependencies": {
-		"@hs1n/rpiv-config": "^2.13.8"
+		"@hs1n/rpiv-config": "^3.0.0"
 	},
 	"contributors": [
 		"juicesharp <https://github.com/juicesharp>"

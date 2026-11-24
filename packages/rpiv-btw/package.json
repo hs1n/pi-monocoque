@@ -1,6 +1,6 @@
 {
 	"name": "@hs1n/rpiv-btw",
-	"version": "2.13.8",
+	"version": "3.0.0",
 	"description": "Pi extension. The /btw slash command, for putting a one-off side question to the same primary model without polluting the main conversation.",
 	"keywords": [
 		"pi-package",
@@ -43,7 +43,7 @@
 		"LICENSE"
 	],
 	"dependencies": {
-		"@hs1n/rpiv-side-call": "^2.13.8"
+		"@hs1n/rpiv-side-call": "^3.0.0"
 	},
 	"pi": {
 		"image": "https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-btw/docs/cover.png",

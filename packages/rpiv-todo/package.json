@@ -1,6 +1,6 @@
 {
 	"name": "@hs1n/rpiv-todo",
-	"version": "2.13.8",
+	"version": "3.0.0",
 	"description": "Pi extension. A todo list for the model, rendered as a live overlay that survives /reload and conversation compaction.",
 	"keywords": [
 		"pi-package",
@@ -70,7 +70,7 @@
 		}
 	},
 	"dependencies": {
-		"@hs1n/rpiv-config": "^2.13.8"
+		"@hs1n/rpiv-config": "^3.0.0"
 	},
 	"contributors": [
 		"juicesharp <https://github.com/juicesharp>"

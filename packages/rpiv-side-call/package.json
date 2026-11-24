@@ -1,6 +1,6 @@
 {
 	"name": "@hs1n/rpiv-side-call",
-	"version": "2.13.8",
+	"version": "3.0.0",
 	"description": "Shared host-version-tolerant side-call surface for pi-monocoque sibling packages",
 	"keywords": [
 		"rpiv",
