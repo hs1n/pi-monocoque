@@ -16,7 +16,6 @@ Shared JSON config utilities for pi-monocoque sibling packages: load/save with c
 - **`@hs1n/rpiv-web-tools`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`, `validateGuidanceFields`, `GuidanceFieldsSchema`
 - **`@hs1n/rpiv-i18n`**: `loadJsonConfigWithLegacyFallback`, `saveJsonConfig`, `configPath`
 - **`@hs1n/rpiv-pi`** (rpiv-core): `configPath`, `loadJsonConfigWithLegacyFallback`, `validateConfig`, `parseModelKey`, `modelKey`, `saveJsonConfig`
-- **`@hs1n/rpiv-workflow`**: `configPath`
 
 No consumer imports plain `loadJsonConfig` anymore — all config-reading siblings migrated to `loadJsonConfigWithLegacyFallback`.
 

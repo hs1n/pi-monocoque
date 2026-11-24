@@ -8,8 +8,8 @@ extending the package.
 
 ```
 rpiv-pi/
-├── extensions/rpiv-core/   the one extension: hooks, commands, lanes, guidance, model config
-├── skills/                 30 contract-carrying skills, one directory each
+├── extensions/rpiv-core/   the one extension: hooks, commands, guidance, model config
+├── skills/                 29 skills, one directory each
 ├── agents/                 15 subagent profiles, copied to ~/.pi/agent/agents/ at runtime
 └── scripts/                deterministic helpers skills shell out to (Node built-ins only)
 ```
@@ -21,13 +21,13 @@ The `pi` manifest in `package.json` is two lines:
 ```
 
 Extensions load as TypeScript through jiti — there is no build step. Agents are not in
-the manifest; they are copied to disk instead (see [agents.md](./agents.md)).
+the manifest; they are copied to disk instead (see [bundled-agents.md](./bundled-agents.md)).
 
 ## It registers zero tools
 
 rpiv-pi calls `registerTool` nowhere. Every tool its skills use — `Agent`,
 `ask_user_question`, `todo`, `advisor`, `web_search`, `web_fetch` — comes from a sibling
-package. rpiv-pi contributes skills, agents, workflows, commands, and session behavior;
+package. rpiv-pi contributes skills, agents, commands, and session behavior;
 the siblings contribute capability.
 
 ## Session surfaces
@@ -37,9 +37,7 @@ the siblings contribute capability.
 | `/rpiv-setup` | always | Interactive only |
 | `/rpiv-update-agents` | always | |
 | `/rpiv-models` | always | Interactive only |
-| `/lanes` | always | No-ops with a notice when nothing is running |
-| `ctrl+q` | conditionally | Skipped entirely when `RPIV_LANES_HOTKEY` disables it |
-| `/skill:<name>` × 30 | Pi, from the manifest | |
+| `/skill:<name>` × 29 | Pi, from the manifest | |
 | `--rpiv-debug` flag | always | Reveals the hidden injected messages below |
 
 Session events subscribed: `session_start`, `session_compact`, `session_shutdown`,
@@ -70,7 +68,7 @@ A compaction hook never sends context directly: sending while overflow recovery 
 creates steering queue items. Instead, the compacted session is marked by identity and
 root guidance is merged with the pipeline pointer and a forced-fresh Git read in one hidden
 `before_agent_start` message on that session's next real user turn. The per-session marker
-and forced reads prevent concurrent detached sessions from consuming its restoration. Overflow retry itself
+and forced reads prevent concurrent sessions from consuming its restoration. Overflow retry itself
 resumes from the compaction summary without a synthetic last message. Run
 `pi --rpiv-debug` to see the messages as they are sent.
 
@@ -110,8 +108,8 @@ loaded with `pi -e`. They no longer trigger the missing-siblings banner, and
 `/rpiv-setup` does not install a second copy whose tools would conflict. No sibling is
 statically imported from the entry graph; a test enforces that.
 
-`/rpiv-setup` installs whichever of these eight packages are neither declared nor loaded — by
-local path for this repo's own seven, from npm for `@tintinweb/pi-subagents`:
+`/rpiv-setup` installs whichever of these seven packages are neither declared nor loaded — by
+local path for this repo's own six, from npm for `@tintinweb/pi-subagents`:
 
 | Package | Provides |
 | --- | --- |
@@ -122,21 +120,15 @@ local path for this repo's own seven, from npm for `@tintinweb/pi-subagents`:
 | `@hs1n/rpiv-i18n` | `/languages`, `--locale`, the i18n SDK |
 | `@hs1n/rpiv-web-tools` | `web_search`, `web_fetch`, `/web-tools` |
 | `@hs1n/rpiv-args` | `$N` / `$ARGUMENTS` substitution in skill bodies |
-| `@hs1n/rpiv-workflow` | `/wf` and the workflow runner |
 
 It installs them serially with a 120-second timeout each, previews every change in a
 confirmation dialog, and applies nothing until you confirm. It also prunes the
 superseded `pi-subagents` entry from `settings.json` when it finds one.
 
-Only one sibling is ever imported at runtime, behind a guarded dynamic import that
-no-ops silently when the module is absent: `@hs1n/rpiv-workflow` (built-in
-workflows, execution host, skill contracts, lane progress).
-
-Registration order is load-bearing. The session hooks, `/rpiv-update-agents`, and
-`/rpiv-setup` register unconditionally and first, so a clean install with no siblings
-still shows the missing-siblings banner and can fix itself. The three
-workflow-dependent registrars are chained strictly in sequence to avoid a
-half-initialized barrel under jiti.
+No sibling is imported at runtime. Registration order is load-bearing only in one
+place: the session hooks, `/rpiv-update-agents`, and `/rpiv-setup` register
+unconditionally and first, so a clean install with no siblings still shows the
+missing-siblings banner and can fix itself.
 
 ## Uninstall
 

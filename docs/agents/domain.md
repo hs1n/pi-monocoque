@@ -55,8 +55,8 @@ Single-context:
 ```
 
 There is a monorepo signal here — `packages/*`, eleven of them — but no `CONTEXT-MAP.md` and none
-is planned. The vocabulary is system-wide rather than per-package: `sibling`, `pipeline` versus
-`workflow`, `guidance` versus `details`, `thoughts/` all mean the same thing inside every package,
+is planned. The vocabulary is system-wide rather than per-package: `sibling`, `pipeline`,
+`guidance` versus `details`, `thoughts/` all mean the same thing inside every package,
 so per-context files would fragment one glossary into eleven. `/wait-what` follows `CONTEXT-MAP.md`
 when a repo has more than one context; this one has a single, so there is nothing to follow.
 

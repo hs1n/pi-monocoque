@@ -77,18 +77,13 @@ package — `<cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills > ~/.pi/
 installed package (this fork)` (`scripts/fork-own-skill.mjs`). The vendored set rides at the
 **lowest** rank, as part of the installed package, so it is authoritative only while no copy of
 the same name sits higher. Putting `research`, `implement` or `code-review` into `~/.agents/skills`
-or a project `.agents/skills` shadows rpiv-pi's body, while the `contract:` the graphs validate
-against is harvested by a separate provider that finds nothing to replace it with, matt's skills
-declaring none.
+or a project `.agents/skills` shadows rpiv-pi's body with a different one — matt's skills describe
+a different method for the same name, and nothing reconciles the two.
 
-All three are dispatched by name from the built-in `/wf` graphs: `implement` is an `acts`
-stage in all four (build, vet, polish, ship), `code-review` a gate stage in polish and vet,
-`research` build's second stage, dispatched as `/skill:research` (`workflows/build.ts`).
-Only the skill-shaped stages carry a contract schema, though — `code-review`'s
-`blockers_count`, which `workflows/shared.ts` sources from the skill rather than
-redeclaring per workflow, is the one number the graph routes on. `research` is
-prompt-dispatched and `implement` is an `acts` loop, so for those two the break is one of
-shape, not of validation.
+The three names are also the reason the vendored set omits them: a copy at any higher
+precedence wins `/skill:<name>` silently, which is the only dispatch path a stage has.
+`npm run check:skill-names` guards the repo, and `session_start` warns when a copy outside
+the package shadows a bundled skill.
 _Avoid_: restoring matt's `research` / `implement` / `code-review`, deleting rpiv-pi's, treating the collision as a taste question
 
 **the rest of matt's set** (`grill-with-docs`, `to-spec`, `to-tickets`, `triage`,
@@ -117,51 +112,14 @@ Per directory depth, the first existing of `AGENTS.md > CLAUDE.md >
 already loads a root `AGENTS.md`/`CLAUDE.md`.
 _Avoid_: precedence, resolution order
 
-### Workflow
+### Multi-stage work
 
 **pipeline**:
 The developer-driven RPIV stage sequence (`discover → research → design → plan →
 implement → validate`), invoked by `/skill:<name>`. Human-paced; no runner involved.
+Multi-stage work beyond one skill is orchestrated by the agent with Pi's own `Agent` and
+`SubagentWorkflow` tools, not by a declared graph.
 _Avoid_: workflow, flow, process
-
-**workflow**:
-A typed multi-stage graph run by `/wf` — `build`, `vet`, `polish`, `ship`, plus the meta
-presets. Detached: every stage executes in its own spawned child session.
-_Avoid_: pipeline, script, run
-
-**stage**:
-A node in a workflow graph. Distinct from a `### Phase`, which is a slice of work inside
-a plan artifact.
-_Avoid_: step, phase, node, task
-
-**lane**:
-The isolated child session a stage or fanout unit runs in. The interactive session is
-launcher/observer only — the lane dock, browser and console are its whole surface.
-_Avoid_: subagent, thread, worker
-
-**gate**:
-A named checkpoint whose pass predicate is a pure state-reading fold. Gates are the
-routing layer between stages: they decide where a run goes, they do not do work.
-_Avoid_: check, guard, blocker, assertion
-
-**fanout unit**:
-A skill dispatched once per unit by the workflow host — `design-slice`, `synthesize`,
-`grade`, `amend`, `elaborate`. "Use as a fanout unit, not standalone."
-_Avoid_: subtask, parallel agent, sub-stage
-
-**contract**:
-A skill's `contract:` frontmatter block (`produces` / `consumes`). It drives
-contract-driven routing, stage-compatibility validation, and outcome derivation.
-_Avoid_: schema, interface, signature
-
-**artifactKind**:
-The typed tag on what a contract produces — the value workflows route on.
-_Avoid_: type, tag, category
-
-**run budget**:
-The three ceilings on backward edges: `maxBackwardJumps`, `maxLaps`, `maxIterations`.
-Fresh per invocation, overridable per run.
-_Avoid_: limit, timeout, retry count
 
 ### Tickets
 

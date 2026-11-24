@@ -69,13 +69,6 @@ External-tier tools are namespaced `ext:<sibling>/<tool>` and the agent must dec
 ## Session Sync Lifecycle
 At session start, the rpiv-core extension syncs bundled `.md` files into the global `~/.pi/agent/agents/` — new files are always copied, and a smart gate auto-updates/auto-removes managed files whose destination still matches the recorded hash; only user-edited files are held as pending. The manifest at `~/.pi/agent/agents/.rpiv-managed.json` tracks which files are managed so user-authored agents are never touched. Sync additionally INJECTS enablement frontmatter into installed copies: `model`/`thinking` picks plus sibling-gated `tools`/`extensions` grants, flipping shipped `isolated: true` → `isolated: false` + `skills: false` when providing siblings are installed (the manifest records the hash AFTER transform — installed copies may legitimately diverge from the shipped file). Legacy per-cwd `<cwd>/.pi/agents/` installs are cleaned up at session start (`cleanupPerCwdAgents`, under a conservative all-or-nothing gate). `/rpiv-update-agents` applies full sync: force add/update/remove, overwriting user edits. Sync is not concurrency-safe across sessions sharing the target dir.
 
-## Citation Verification Contract (downstream)
-Agent output citations are verified by the workflow's deterministic citation floor (`extensions/rpiv-core/built-ins/citations.ts`), not by the agents themselves:
-- `file:line(-line)` citations are checked against the working tree; bare basenames and package-relative suffixes back a citation when exactly one tree file matches; an ambiguous suffix gets TWO tiebreaks before failing as unresolved — (1) the plan's declared `files:` write-set, (2) the nearest preceding prose mention of a candidate's full path
-- Arrow-pair revision notes (`old → new`) are skipped — each half is a revision reference, not a live claim
-- `node_modules/` probes resolve direct dependencies but the suffix walk never resolves into deps; placeholder prefixes (`path/to/`, `packages/x/`) and citations inside fenced code blocks are exempt
-- ALL citation findings are advisory (severity `low` rides the gate floor) — they route to the ship-grade panel, never block a run
-
 ## Architectural Boundaries
 - **NO agent dispatches another agent** — `Agent` never appears in any allowlist
 - **NO write or edit** — every agent is strictly read-only; `bash` is for git reads only

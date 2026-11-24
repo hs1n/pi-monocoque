@@ -1,5 +1,8 @@
 # The cross-package registries stay global, and `internal.ts` is not a debt to pay off
 
+**Status: superseded by [ADR-0005](./0005-the-typed-workflow-runtime-is-removed.md).** The package
+this record defends no longer exists. The body below is kept as history.
+
 `@hs1n/rpiv-workflow/internal.ts` carried a KNOWN DEBT note claiming its six `__reset*` exports exist
 because the registries are process-global singletons, and that "making them instantiable and
 threading an instance through `loadWorkflows` would … shrink this file toward zero". Checked against

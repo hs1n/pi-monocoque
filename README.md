@@ -14,8 +14,8 @@ own README is preserved at [docs/upstream/README.md](./docs/upstream/README.md).
 ## Install
 
 There is **no registry route**: nothing here is published to npm, and `pi install
-git:...` works only because the monorepo root declares a `pi` manifest (eight extensions +
-`packages/rpiv-pi/skills`) that Pi reads after cloning.
+git:...` works only because the monorepo root declares a `pi` manifest (seven extensions +
+the skill trees) that Pi reads after cloning.
 
 ```sh
 # the whole set, as a Pi source
@@ -34,8 +34,7 @@ verification): [INSTALL-FORK.md](./INSTALL-FORK.md).
 
 | Package | Role |
 | --- | --- |
-| [`rpiv-pi`](./packages/rpiv-pi) | The pipeline: ~30 contract-carrying skills, 15 named subagents, the four built-in `/wf` workflows, lane observability, model management. Registers zero tools. |
-| [`rpiv-workflow`](./packages/rpiv-workflow) | `/wf` runner — chains skills into typed multi-stage pipelines (declarative, validatable, resumable, predicate routing, parallel fan-out). |
+| [`rpiv-pi`](./packages/rpiv-pi) | The pipeline: 29 skills, 15 named subagents, model management. Registers zero tools. |
 | [`rpiv-ask-user-question`](./packages/rpiv-ask-user-question) | `ask_user_question` — a structured questionnaire instead of a guess. |
 | [`rpiv-todo`](./packages/rpiv-todo) | `todo` tool + `/todos` + a live overlay that survives `/reload` and compaction. |
 | [`rpiv-advisor`](./packages/rpiv-advisor) | `advisor` — escalate any step to a stronger reviewer model. |
@@ -50,15 +49,15 @@ verification): [INSTALL-FORK.md](./INSTALL-FORK.md).
 ## Using the pipeline
 
 ```
-/wf build "add a --json flag to the export command"   # a full pipeline, run detached
-/skill:discover <task>                                # or drive the stages yourself
+/skill:discover <task>                                # interview → research → design → plan → implement
 /rpiv-models                                          # per-skill model + effort overrides
-/lanes                                                # watch, step into, or answer a running lane
+/skill:implement .rpiv/artifacts/plans/<latest>.md    # drive one stage at a time
 ```
 
-Skills carry contracts: each declares what it reads and produces, and `/wf` stages are
-validated against those contracts at load and run time. `/rpiv-setup` installs any sibling
-that is missing — by local path, since there is no registry copy to fetch.
+Nothing here runs a graph. Each skill stands alone and writes a Markdown artifact under
+`.rpiv/artifacts/` that the next one reads; multi-stage work is orchestrated by the agent with
+Pi's own `Agent` and `SubagentWorkflow` tools. `/rpiv-setup` installs any sibling that is
+missing — by local path, since there is no registry copy to fetch.
 
 ## Working on this repo
 
@@ -74,13 +73,13 @@ npm run coverage     # what the pre-push hook runs
 - Husky gates commits (`check:decision-codes` → `check:file-sizes` → `check`) and pushes
   (full coverage).
 - Versions are lockstep from one source: bump the root `package.json`, then `npm run versions:sync`
-  (it stamps all 12 packages); `npm run versions:check` verifies in CI.
+  (it stamps all 11 packages); `npm run versions:check` verifies in CI.
 - Agent-facing architecture notes live under [`.rpiv/guidance/`](./.rpiv/guidance) and are
   injected per directory as you work.
 
 Deeper docs: [docs/upstream/](./docs/upstream) (upstream's narrative, kept verbatim),
 [INSTALL-FORK.md](./INSTALL-FORK.md), [FORK_NOTICE.md](./FORK_NOTICE.md),
-[packages/rpiv-pi/docs/](./packages/rpiv-pi/docs) (lanes, models, agents, workflows).
+[packages/rpiv-pi/docs/](./packages/rpiv-pi/docs) (skills, models, agents).
 
 ## License
 

@@ -15,7 +15,7 @@ Three-hook extension that hardens Pi's `/skill:<name> <args>` invocation surface
 
 ## Consumers
 - **Pi extension host** loads via `pi.extensions: ["./index.ts"]`; **Pi (interactive mode)** consumes the emitted `<skill …>` wrapper via `parseSkillBlock` — byte-exact match is required for round-trip
-- **`rpiv-pi`** lists it in `peerDependencies` and `siblings.ts`; its lane transcript strips the token-path `Skill input:` trailer back to raw args for display (`packages/rpiv-pi/extensions/rpiv-core/lane-transcript.ts:112`) via a literal regex on the label text, NOT an import (zero-cross-imports holds). **This was the only two-consumer case until this fork deleted `rpiv-warp`, whose toast summarizer stripped the same trailer.**
+- **`rpiv-pi`** lists it in `peerDependencies` and `siblings.ts` (presence marker; it registers no tool and no command).
 
 ## Module Structure
 ```
@@ -52,7 +52,7 @@ ${args}     ← suffix depends on emit path: bare vs `Skill input:`-labeled (bel
 ## System-Prompt Protocol & Token-Path Divergence
 The `before_agent_start` hook prepends a `## Skill invocation protocol (CRITICAL)` block to the system prompt every turn. The protocol explicitly tells the LLM: text after `</skill>` is argument input to the skill, never a separate command; a `Skill input:` label there marks the raw argument string, and value occurrences substituted into body slots are this real user input, not example/placeholder text. Per-turn re-application is Pi's canonical pattern (`agent-session.js:864`/`:887` — each `prompt()` passes `_baseSystemPrompt` to `emitBeforeAgentStart`, then resets to it absent extension modification); same bytes every turn → prompt-cache hit after turn 1.
 
-The token-path trailer (branch 2 above) is the structural complement. Substitution alone is not enough: it weaves the value into documentation-shaped body slots where models misread it as placeholder/example text and take the empty-input branch (issue #89). A BARE trailing suffix is not the answer either — trailing imperatives hijack LLM attention from the skill body (originally observed with `/skill:discover write a file ...` where the LLM acted on "write a file" instead of running discover's interview workflow). The `Skill input:`-labeled trailer is the deliberate middle ground: an unambiguous argument signal that does not read as a standalone command. Prose label, NOT an XML wrapper — Pi's interactive renderer shows post-`</skill>` text verbatim in a user-message box, so raw tags would leak into the UI.
+The token-path trailer (branch 2 above) is the structural complement. Substitution alone is not enough: it weaves the value into documentation-shaped body slots where models misread it as placeholder/example text and take the empty-input branch (issue #89). A BARE trailing suffix is not the answer either — trailing imperatives hijack LLM attention from the skill body (originally observed with `/skill:discover write a file ...` where the LLM acted on "write a file" instead of running discover's interview sequence). The `Skill input:`-labeled trailer is the deliberate middle ground: an unambiguous argument signal that does not read as a standalone command. Prose label, NOT an XML wrapper — Pi's interactive renderer shows post-`</skill>` text verbatim in a user-message box, so raw tags would leak into the UI.
 
 ## Substitution Order (byte-equivalent to Pi internals)
 1. `$N` positional (`\$(\d+)` greedy) — missing → empty string
@@ -79,7 +79,7 @@ The handler module exports a reset (`invalidateSkillIndex`) — `test/setup.ts` 
 <important if="you are changing the wrapper template or substitution order">
 ## Byte-Exact Contract
 1. The wrapper template (`<skill name=…>…</skill>`) MUST match Pi's built-in output character-for-character — Pi's downstream `parseSkillBlock` regex is the load-bearing parser
-2. The suffix format is path-dependent — bare `\n\n${args}` on the no-token path, `\n\nSkill input: ${args}` on the token path; empty args emit no suffix on either. `SKILL_INPUT_LABEL` MUST stay literally in sync with `SKILL_INVOCATION_PROTOCOL` and the label-stripping regex in `packages/rpiv-pi/extensions/rpiv-core/lane-transcript.ts:112`. Do not unify the two paths without re-reading "System-Prompt Protocol & Token-Path Divergence"
+2. The suffix format is path-dependent — bare `\n\n${args}` on the no-token path, `\n\nSkill input: ${args}` on the token path; empty args emit no suffix on either. `SKILL_INPUT_LABEL` MUST stay literally in sync with `SKILL_INVOCATION_PROTOCOL`. Do not unify the two paths without re-reading "System-Prompt Protocol & Token-Path Divergence"
 3. Substitution order (`$N` → `${@:N[:L]}` → `$ARGUMENTS` → `$@`) MUST NOT change — the order prevents wildcard values containing `$<digit>` from being re-substituted
 4. Add a regression test BEFORE edits: round-trip a wrapped block through Pi's exported `parseSkillBlock`
 </important>

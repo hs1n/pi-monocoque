@@ -5,18 +5,17 @@ whether the model may reach for it on its own.
 
 ## How to read these tables
 
-- **Invoke** — `/skill:<name>` from inside a Pi session, or as a stage of a `/wf`
-  workflow (see [workflows.md](./workflows.md)).
+- **Invoke** — `/skill:<name>` from inside a Pi session.
 - **Auto** — ✓ means the model may select the skill by itself from your prompt.
   22 of the 29 skills set `disable-model-invocation: true` and are marked —;
-  those run *only* on an explicit `/skill:<name>` or a workflow dispatch. A short
+  those run *only* on an explicit `/skill:<name>`. A short
   stage index is injected at session start so the model still knows they exist and
   can suggest one.
 - **Writes** — the artifact bucket under `.rpiv/artifacts/`. "side-effect" means the
   skill changes the repo (code, commits, docs) rather than emitting an artifact.
-- Every skill declares a `contract:` block (`produces` / `consumes`) in its
-  frontmatter. `/wf` uses those contracts to route each stage's output into the next
-  stage's input without you naming paths.
+
+Each skill names its upstream artifact in prose; there is no machine-readable chain
+declaration, so a stage's input is whatever the previous stage wrote.
 
 ## Intent and research
 
@@ -42,8 +41,8 @@ whether the model may reach for it on its own.
 | --- | :---: | --- | --- | --- |
 | `plan` | — | a `design` artifact | `plans/` | Converts a design into parallelized atomic phases with explicit success criteria. Prefer it when a straightforward phased breakdown is enough. |
 | `blueprint` | — | `research` or `solutions` (optional) | `plans/` | Fuses design + plan in one pass: vertical-slice decomposition with developer micro-checkpoints between phases, emitting an implement-ready plan. Lighter subagent fan-out than `design` — it trusts the research artifact's integration and precedent sections. |
-| `acceptance` | — | the verbatim `goal` brief (+ a `research` artifact for evidence grounding) | `acceptance/` | Derives the executable acceptance inventory from the goal — ID'd observable outcomes, each with a runnable evidence command where one can be derived — frozen BEFORE planning so the standard of completion cannot inherit the plan's scope. The completeness grade anchors on it; validate executes it. Dispatched by `ship` and `build` between research and planning. |
-| `quick-plan` | — | a `research` artifact (+ the verbatim `goal` brief and `acceptance` inventory under `ship`) | `plans/` | One lightweight plan for a small, well-understood task: at most a single targeted `codebase-pattern-finder` dispatch, then a single `status: ready` phased plan — no slice decomposition, no risk flags, no questions; goal asks it doesn't cover are explicitly deferred under `## Out of Scope`. The `ship` pipeline's plan stage. |
+| `acceptance` | — | the verbatim `goal` brief (+ a `research` artifact for evidence grounding) | `acceptance/` | Derives the executable acceptance inventory from the goal — ID'd observable outcomes, each with a runnable evidence command where one can be derived — frozen BEFORE planning so the standard of completion cannot inherit the plan's scope. The completeness grade anchors on it; validate executes it. Runs between research and planning. |
+| `quick-plan` | — | a `research` artifact (+ the verbatim `goal` brief and an `acceptance` inventory when one exists) | `plans/` | One lightweight plan for a small, well-understood task: at most a single targeted `codebase-pattern-finder` dispatch, then a single `status: ready` phased plan — no slice decomposition, no risk flags, no questions; goal asks it doesn't cover are explicitly deferred under `## Out of Scope`. |
 | `elaborate` | — | a `plan` artifact | `elaborations/` | Writes implement-ready code into ONE phase of a synthesized plan. A fanout unit; the results are stitched back into the plan. |
 | `revise` | — | a `plan` (+ optional `reviews`) | `plans/` | Surgically updates an existing plan after review feedback, a mid-implement blocker, or a scope change — preserving structure instead of rewriting. |
 | `amend` | — | one artifact + its `grade` verdicts | same artifact | Fixes only the failing dimensions a grade panel flagged and re-emits the artifact in place. Single-pass, no subagents; a gate's revise stage. |
@@ -54,7 +53,7 @@ whether the model may reach for it on its own.
 | --- | :---: | --- | --- | --- |
 | `implement` | — | a `plan` artifact | code changes | Executes a plan phase by phase, verifying each phase against its success criteria before moving on. |
 | `validate` | — | a `plan` + the working tree | `validation/` | Runs each phase's success criteria against the working tree and reports a `pass` / `fail` verdict. |
-| `remediate` | — | a `plan` + its failing `validation` | side-effect | The `validate` repair arm's body: re-runs each failed `verify-at-implement` risk ruling's own prescribed procedure and each structured `blockers:` entry's failing command, applies the minimal fix grounded in the failing report, and confirms it passes. Workflow-dispatched only — `build`'s `validate-fix` stage. |
+| `remediate` | — | a `plan` + its failing `validation` | side-effect | The `validate` repair arm's body: re-runs each failed `verify-at-implement` risk ruling's own prescribed procedure and each structured `blockers:` entry's failing command, applies the minimal fix grounded in the failing report, and confirms it passes. Run it after a failing `validate`, never as a first pass. |
 | `code-review` | ✓ | the working tree, a branch, or a PR | `reviews/` | Parallel specialist agents audit the diff, compare against peer code, and verify claims. Emits `blockers_count` plus severity-tagged findings. Scope argument accepts `staged`, `working`, a hash, `A..B`, or a branch; empty scope defaults to feature-branch vs default-branch. |
 | `architecture-review` | — | a file, directory, or module path | `architecture-reviews/` | Top-down, layer-by-layer audit with a uniform 10-dimension checklist per layer, triaged through a developer checkpoint. Emits a phased polish plan `blueprint` can consume per phase. Language-agnostic. |
 | `grade` | — | one artifact + one dimension name | `verdicts/` | Judges ONE artifact along ONE named quality dimension and writes a verdict JSON. It only judges — no fixes. A panel member, not standalone. |

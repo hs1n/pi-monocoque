@@ -59,7 +59,6 @@ Eleven exports, all stateless — no singletons, no caches, no import-time side 
 | [`rpiv-i18n`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n) | Config load/save |
 | [`rpiv-todo`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-todo) | Config load, guidance fields |
 | [`rpiv-ask-user-question`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-ask-user-question) | Config load, guidance fields |
-| [`rpiv-workflow`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-workflow) | Path resolution |
 
 These are versioned in lockstep with this package.
 

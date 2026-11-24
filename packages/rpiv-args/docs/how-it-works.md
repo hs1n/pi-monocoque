@@ -71,10 +71,9 @@ instruction — especially when the argument is phrased as an imperative
   `</skill>` is argument input to the skill, never a separate command, and
   that the same value may also appear substituted inside the body.
 
-The label string is a cross-package contract: `@hs1n/rpiv-pi`'s lane
-transcript and `@hs1n/rpiv-warp`'s toast summariser both strip
-`Skill input:` for display using a literal regex. Changing the label requires
-changing them too.
+The label string is shared between two places in this package: the emitter
+(`SKILL_INPUT_LABEL`) and the system-prompt protocol text that names it.
+Changing the label means changing both, and a test pins the pair.
 
 ## Skill index
 

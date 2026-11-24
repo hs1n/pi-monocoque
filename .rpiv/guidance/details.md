@@ -13,10 +13,10 @@ pi-monocoque/
 │   ├── rpiv-<feature>/           — One Pi extension per directory; npm name @hs1n/rpiv-<feature> (module identity, not a registry entry — nothing is published)
 │   └── test-utils/               — Private workspace package: shared test fixtures (never installed into Pi)
 ├── test/                         — Repo-wide Vitest setup (homedir stub + env hygiene + pi-ai//compat mocks + beforeEach singleton resets)
-├── scripts/                      — Repo guards (check-no-decision-codes.mjs, check-file-sizes.mjs, check-host-provided-deps.mjs, check-slice-overlap.mjs, check-unused-deps.mjs) + sync-versions.js (lockstep writer: root version → all 12)
+├── scripts/                      — Repo guards (check-no-decision-codes.mjs, check-file-sizes.mjs, check-host-provided-deps.mjs, check-slice-overlap.mjs, check-unused-deps.mjs) + sync-versions.js (lockstep writer: root version → all 11)
 │                                 — fork additions: fork-pi-install.sh (local-path Pi install), fork-license-audit.mjs (dependency license inventory), fork-rename-scope.mjs (scope rename), fork-own-skill.mjs (take over a bundled skill into ~/.agents/skills)
 ├── .rpiv/guidance/               — Committed guidance shadow tree (see "Guidance" above); the only tracked dir under `.rpiv/`
-├── .rpiv/artifacts/ + workflows/ — Gitignored pipeline artifacts (plans/, reviews/, goal/, failures/) and `/wf` run state
+├── .rpiv/artifacts/              — Gitignored pipeline artifacts (plans/, reviews/, goal/, failures/)
 ├── vitest.config.ts              — Single Vitest runner; `include: ['packages/*/**/*.test.ts']`, setupFiles `['./test/setup.ts']`
 ├── tsconfig.base.json            — Single shared TS config; no per-package tsconfig.json
 ├── package.json                  — npm workspaces root + the root `pi` manifest (8 extensions + rpiv-pi/skills) that makes `pi install git:<repo>` work
@@ -62,8 +62,7 @@ install.
   phase's `#### Automated Verification:` uses to stay write-scoped to its own
   `files:` set.
 - **`node scripts/fork-own-skill.mjs`** — a project-level `.agents/skills` target
-  warns: it is harvested only because of this fork's `agentsSkillDirs` fix in
-  `skill-contracts-source.ts`, and Pi gates dispatching from it on project trust.
+  warns: Pi gates dispatching from it on project trust.
 
 Full guard/versioning reference: `.rpiv/guidance/scripts/architecture.md` (rules, command
 table) and `.rpiv/guidance/scripts/details.md` (per-guard mechanics). Test contract:

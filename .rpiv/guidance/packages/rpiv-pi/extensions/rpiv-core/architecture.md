@@ -1,42 +1,32 @@
 # rpiv-core Extension
 
-Pi runtime orchestrator and detached-execution launcher/observer host. Owns zero
-tools — every tool surface lives in a sibling plugin listed in `siblings.ts`, and
-all workflow intelligence lives in `skills/`.
+Pi runtime orchestrator. Owns zero tools — every tool surface lives in a sibling
+plugin listed in `siblings.ts`, and all orchestration intelligence lives in
+`skills/`.
 
 Wires the session lifecycle hooks (guidance injection, git-context injection,
-pipeline-stage index, bundled-agent sync) and registers the `rpiv-*` slash commands
-plus the non-prefixed `/lanes`. Every `/wf` stage runs in an isolated child session
-spawned via the Pi SDK (`sdk-workflow-host.ts`); the interactive session stays a
-launcher/observer with the lane dock, lane browser/console, and the
-question-lifecycle stream. Hosts the model-management layer (`models.json`
-validation, `/rpiv-models` picker, `/skill:` override bracket) and contributes the
-four built-in `/wf` workflows (build / vet / polish / ship) + skill contracts into
-the `@hs1n/rpiv-workflow` sibling via guarded dynamic imports. Pipeline-stage skills
-carry `disable-model-invocation` — gated to explicit `/skill:<name>` or workflow
-dispatch, with a compact stage index injected at session start
-(`pipeline-pointer.ts`). **A bundled skill can also be SHADOWED**: a same-named
-copy under `<cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills >
-~/.pi/agent/skills` outranks the installed package, and because the `/wf` graphs
-dispatch by name, a shadowed contract-carrying skill leaves the graph routing to a
-body that declares no matching contract. `session_start` probes those directories
+pipeline-stage index, bundled-agent sync) and registers the `rpiv-*` slash
+commands. Hosts the model-management layer (`models.json` validation,
+`/rpiv-models` picker, `/skill:` override bracket). Pipeline-stage skills
+carry `disable-model-invocation` — gated to explicit `/skill:<name>`, with a
+compact stage index injected at session start (`pipeline-pointer.ts`). **A
+bundled skill can also be SHADOWED**: a same-named copy under
+`<cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills >
+~/.pi/agent/skills` outranks the installed package, so `/skill:<name>` runs a
+body the developer did not intend. `session_start` probes those directories
 (`skill-shadow.ts`, pure) and `session-hooks.ts` warns in the action-required
 banner — the runtime half of the trap `skills/matt-pocock/README.md` documents.
 
-**The module map, the per-file dependency enumeration, and the detached-execution
-internals are in `details.md` beside this file — NOT auto-injected.** Read it when
-you need to decide which module owns a change, or when you touch the host plumbing.
+The module map and the per-file dependency enumeration are in `details.md`
+beside this file — NOT auto-injected. Read it when you need to decide which
+module owns a change.
 
 ## Architectural Boundaries
-- **Editing `built-in-workflows.ts` or any `workflows/*.ts` module requires the workflow-invariant check**: after any change to them, run `node packages/rpiv-pi/skills/elaborate/_helpers/validate-workflow-invariant.mjs` — it re-derives the live built-in workflows + skill contracts and surfaces `route-reads-unvalidated-data` (and other) validation issues before they ship. This is the project-specific invariant check the `elaborate`/`implement` self-check protocol asks the guidance to name.
-- **NO business logic in the composer**: orchestration only — every capability owns its own registrar module. `index.ts` is a thin wiring file that still encodes ordering invariants (session-capture before skill-bracket; the rpiv-workflow-dependent registrars chained strictly in sequence inside an async IIFE to avoid a jiti half-initialized-barrel race)
-- **Lane renderers take a `LaneSnapshot`, never the registry**: `lane-snapshot.ts` is the ONLY module that reads run/lane state for display — `buildLaneSnapshot(reader)` reads once per render (live, never cached) and hands the renderers a value, which is what keeps a row byte-for-byte identical between the ambient dock and the stepped-in console, and what folds a lane's three token sources in one place. A renderer that imports `run-lane-registry.ts` for a glyph re-opens that divergence: add a field to the snapshot instead. The port's production binding is `registryLaneReader`; tests hand `buildLaneSnapshot` a literal reader
+- **NO business logic in the composer**: orchestration only — every capability owns its own registrar module. `index.ts` is a thin wiring file that still encodes one ordering invariant: session-capture before skill-bracket
 - **NO `ExtensionAPI` in pure-utility modules**: helpers (sibling registry, package checks, agent sync, installer, legacy pruner) take primitives only; the guidance engine takes `pi` explicitly
-- **Sibling imports are guarded + optional only**: presence detection is settings ∪ loaded (never an import — `sourceInfo` paths and `globalThis` marker slots). No file statically reachable from `index.ts` may value-import a sibling — enforced by `sibling-import-graph.test.ts`; runtime loads (`rpiv-workflow`) are guarded dynamic imports that degrade silently when absent (`isModuleNotFound`)
-- **Hooks owning process-global state are root-gated + idempotent**: registered on the root launcher's `session_start` (`!ctx.hasUI || isLaneRelayUiContext(ctx.ui)` → return), skipped for detached children, safe under `/reload` — never in a module-load IIFE. A detached child re-loading rpiv-core must never overwrite the process-global executor provider
-- **Hooks also register once**: Pi calls the default export at session start *and* again inside every detached child session, which is why every registration is root-gated + idempotent
-- **Per-unit models are applied at child-session creation**, resolved through the captured registry — never via a global `pi.setModel()` flip
-- **Cross-module state lives on `globalThis[Symbol.for(...)]` slots**, never module-level variables. `session-capture.ts` and `lane-tool-defs.ts` are the two documented exemptions (deliberately plain module-level state)
+- **Sibling imports are guarded + optional only**: presence detection is settings ∪ loaded (never an import — `sourceInfo` paths and `globalThis` marker slots). No file statically reachable from `index.ts` may value-import a sibling — enforced by `sibling-import-graph.test.ts`
+- **Hooks also register once**: registration stays idempotent, safe under `/reload` and under a second load of the extension in one process — never in a module-load IIFE
+- **Cross-module state lives on `globalThis[Symbol.for(...)]` slots**, never module-level variables. `session-capture.ts` is the one documented exemption (deliberately plain module-level state)
 - **NO tools registered here**: rpiv-core is a pure orchestrator — new tools belong in sibling plugins (registration pattern: `.rpiv/guidance/packages/rpiv-advisor/architecture.md`)
 
 <important if="you are adding a new tool to this extension">
@@ -58,13 +48,12 @@ New tools do not belong in rpiv-core. Add the tool to a sibling plugin instead:
 
 <important if="you are adding a new session lifecycle hook to this extension">
 ## Adding a Session Hook
-1. Add the `pi.on("event_name", async (event, ctx) => { … })` line inside the owning registrar — `session-hooks.ts` for injection-style hooks, otherwise the feature's own module (multiple registrars subscribe `session_start`: session-hooks, session-capture, lane-switcher, lane-progress, models-config-validate, workflow-execution-host)
+1. Add the `pi.on("event_name", async (event, ctx) => { … })` line inside the owning registrar — `session-hooks.ts` for injection-style hooks, otherwise the feature's own module (multiple registrars subscribe `session_start`: session-hooks, session-capture, models-config-validate)
 2. Extract the handler body into a named helper in the same file — `pi.on` lines are pure wiring
 3. Events used here: `session_start`, `session_compact`, `session_shutdown`, `tool_call`, `before_agent_start` (session-hooks); `input` + `agent_end` (skill-bracket). rpiv-core has no tool state to reconstruct, so branch-replay events are not subscribed
-4. If the hook owns process-global state, root-gate it (`!ctx.hasUI || isLaneRelayUiContext(ctx.ui)` → return) and make it idempotent — every detached child re-loads rpiv-core
-5. If the registrar dynamically imports `rpiv-workflow`, chain it after the others in the composer's sequential IIFE — concurrent imports race jiti's half-initialized barrel
-6. `before_agent_start` can return `{ message: { customType, content, display: false } }` to inject a hidden LLM-only context message
-7. `session_compact` MUST NOT call `pi.sendMessage`: auto-recovery treats those as queued steering items. Store only per-session identity state there, then merge any restored guidance/pointer/Git context into one `before_agent_start` return on the next real user turn
+4. Make the hook idempotent — it must survive `/reload` and a second load in one process
+5. `before_agent_start` can return `{ message: { customType, content, display: false } }` to inject a hidden LLM-only context message
+6. `session_compact` MUST NOT call `pi.sendMessage`: auto-recovery treats those as queued steering items. Store only per-session identity state there, then merge any restored guidance/pointer/Git context into one `before_agent_start` return on the next real user turn
 </important>
 
 <important if="you are adding a new pure utility module to this extension">

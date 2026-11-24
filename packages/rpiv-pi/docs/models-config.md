@@ -1,7 +1,7 @@
 # Model configuration
 
 How to give Pi a model provider, and how `@hs1n/rpiv-pi` routes individual
-agents, skills, and workflow stages to different models and reasoning levels.
+agents and skills to different models and reasoning levels.
 
 ## Part 1 — giving Pi a provider
 
@@ -78,28 +78,23 @@ for the session and re-read after a successful `/rpiv-models` save or a
 
 | Key | Type | Applies to |
 | --- | --- | --- |
-| `defaults` | entry | Everything below that does not override it |
+| `defaults` | entry | `agents` and `skills` entries that do not override it |
 | `agents` | `{ [agentName]: entry }` | Bundled subagents, keyed by filename without `.md` |
-| `stages` | `{ [stageName]: entry }` | A workflow stage, in every workflow that has it |
-| `skills` | `{ [skillName]: entry }` | A skill, both as a `/wf` stage and as a typed `/skill:<name>` |
-| `presets` | `{ [workflowName]: { stages: { [stage]: entry } } }` | One stage of one workflow |
+| `skills` | `{ [skillName]: entry }` | A skill, keyed by its name after the `/skill:` prefix is stripped |
 
 An **entry** is either a bare string `"provider/modelId"` or an object
 `{ "model": "provider/modelId", "thinking": "<level>" }`. No other keys are accepted at
-any level — a `presets.<name>.defaults` block, for example, is rejected by the schema.
+any level — unknown keys are rejected by the schema.
 
 ### Cascade
 
 Most specific wins:
 
-1. `presets[workflow].stages[stage]`
-2. `stages[stage]`
-3. `skills[skill]`
-4. `defaults`
+1. `skills[skill]`
+2. `defaults`
 
 Each layer is composed field-by-field against `defaults` when the file loads, so an
-entry that sets only `thinking` still inherits the default model. Two *configured*
-layers do not merge with each other — the most specific one replaces the others whole.
+entry that sets only `thinking` still inherits the default model.
 
 **The standalone `/skill:` exception.** A user-typed `/skill:<name>` picks up an
 override only from an explicit `skills[<name>]` entry. `defaults` does not arm it, so
@@ -124,11 +119,9 @@ still parses on read for back-compatibility; new saves emit the slash form.
 ### Typo detection
 
 A session-start check reports record keys that pass schema validation but would silently
-never apply — `skills.committ`, `agents.codebase-analzyer`, `presets.buildd`,
-`presets.build.stages.plann`. It warns once per process with the dotted path. The
-`agents` and `skills` axes are always checked; `stages` and `presets` are checked only
-when the workflow runner can supply the universe of names, so you never get a false
-warning from a workflow it could not see.
+never apply — `skills.committ`, `agents.codebase-analzyer`. It warns once per process with
+the dotted path, checking both axes against the names that exist on disk and in the live
+skill registry.
 
 ## Worked examples
 
@@ -146,32 +139,7 @@ warning from a workflow it could not see.
 ```
 
 Your default is Opus. `/skill:commit` and `/skill:changelog` use the cheaper GLM;
-`/skill:research` uses GPT-5.5 at high effort. Workflow-dispatched runs of the same
-skills inherit the same overrides through the cascade's skill rung.
-
-**Per-workflow stage overrides**
-
-```json
-{
-  "defaults": "anthropic/claude-opus-4-7",
-  "presets": {
-    "build": {
-      "stages": {
-        "plan": "openai/gpt-5.5",
-        "research": { "model": "openai/gpt-5.5", "thinking": "high" }
-      }
-    },
-    "polish": {
-      "stages": {
-        "blueprint": "zai/glm-4-7"
-      }
-    }
-  }
-}
-```
-
-`/wf build`'s plan and research stages use GPT-5.5, `/wf polish`'s blueprint stage uses GLM, and
-everything else falls through to Opus.
+`/skill:research` uses GPT-5.5 at high effort.
 
 **A subagent on a cheaper model**
 

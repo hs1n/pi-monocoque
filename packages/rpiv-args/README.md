@@ -128,8 +128,7 @@ directory.
 
 - [@hs1n/rpiv-pi](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi) —
   the umbrella package. Its `/rpiv-setup` command installs `rpiv-args` along
-  with the rest of the family, and its lane transcript hides the
-  `Skill input:` line from the displayed conversation.
+  with the rest of the family.
 
 ## License
 

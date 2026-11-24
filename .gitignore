@@ -14,8 +14,6 @@ packages/*/node_modules
 # it is hand-curated AI-assistant context, not run state.
 .rpiv/artifacts/
 **/.rpiv/artifacts/
-.rpiv/workflows/
-**/.rpiv/workflows/
 thoughts/
 
 # Environment

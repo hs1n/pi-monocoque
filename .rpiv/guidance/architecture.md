@@ -26,7 +26,7 @@ rules.
 
 ## Layout and build model
 - **Build model**: `noEmit: true` everywhere — packages ship raw `.ts`, which Pi loads directly via the `pi` manifest. No `dist/`, one shared `tsconfig.base.json`, no per-package tsconfig.
-- **Plugin discovery**: an extension package's `package.json` carries a `pi` field (`pi.extensions`, optionally `pi.skills`); Pi loads the default-exported function with an `ExtensionAPI`. The root manifest lists all eight extensions plus `packages/rpiv-pi/skills` — a new extension package is invisible to a git/root install until it is added there, and `root-pi-manifest.test.ts` fails the build if you forget.
+- **Plugin discovery**: an extension package's `package.json` carries a `pi` field (`pi.extensions`, optionally `pi.skills`); Pi loads the default-exported function with an `ExtensionAPI`. The root manifest lists every extension plus the skill trees — a new extension package is invisible to a git/root install until it is added there, and `root-pi-manifest.test.ts` fails the build if you forget.
 - **Sibling registry**: `packages/rpiv-pi/extensions/rpiv-core/siblings.ts` is the single source of truth for `/rpiv-setup`, missing-plugin warnings, and presence detection (settings ∪ loaded source paths, plus an optional `marker`). **No runtime imports of siblings** — the zero-cross-imports contract; `LEGACY_SIBLINGS` drives prune-on-upgrade.
 - **Opt-in extensions**: opt-in means **absent from `siblings.ts` AND from the root `pi` manifest** — it still rides lockstep + CI via the `packages/*` glob, but nothing installs or suggests it. `rpiv-btw` is the only one. This fork deleted `rpiv-voice`, `rpiv-warp`, `rpiv-telemetry`, `rpiv-site` — anything still naming them is stale.
 - **Test runner**: one Vitest at repo root (`include: ['packages/*/**/*.test.ts']`), `test/setup.ts` runs once per worker before any test file imports. Test authoring contract: `.rpiv/guidance/test/architecture.md`.
@@ -65,18 +65,17 @@ Husky hooks (local-only):
 
 Three skill sources ship here, and which one answers is not interchangeable:
 
-- `packages/rpiv-pi/skills/` — **ours**. 29 skills; the RPIV pipeline stages carry `contract:` blocks that the `/wf` graphs validate against.
+- `packages/rpiv-pi/skills/` — **ours**. 29 skills, the RPIV pipeline stages among them.
 - `skills/matt-pocock/` — Matt Pocock's set, **vendored verbatim** (MIT, `LICENSE` travels with it). It rides at the **lowest** precedence, inside the installed package.
 - `skills/skill-master/` — a Pi-native fork of Anthropic's `skill-creator`, the only one edited rather than vendored.
 
 **Three names collide upstream and the vendored set deliberately omits them: `research`,
-`implement`, `code-review`.** The omission is load-bearing, not tidiness — all three are
-dispatched BY NAME from the built-in `/wf` graphs, so a copy at any higher precedence
-(`<cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills > ~/.pi/agent/skills`) shadows
-our body while the graph keeps routing to that name, and the `contract:` is no longer
-harvested. `npm run check:skill-names` guards the repo; `session_start` warns when a copy
-outside the package shadows a bundled skill. **Never restore those three on the matt side,
-and never delete ours.**
+`implement`, `code-review`.** The omission is load-bearing, not tidiness — a copy at any higher
+precedence (`<cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills > ~/.pi/agent/skills`)
+shadows our body for that name, and `/skill:<name>` is the only dispatch path a stage has.
+`npm run check:skill-names` guards the repo; `session_start` warns when a copy outside the
+package shadows a bundled skill. **Never restore those three on the matt side, and never
+delete ours.**
 
 **Only 17 of the 52 installed skills are model-invocable** — 7 rpiv utilities
 (`commit`, `code-review`, `changelog`, `create-handoff`, `resume-handoff`, `pr-triage`,
@@ -100,7 +99,7 @@ Full entries, including what is off-limits to swap: `CONTEXT.md` § Skill owners
 
 <important if="you are touching tool registration, schemas, or session hooks anywhere in the monorepo">
 ## Cross-Package Pi Conventions
-- Tool params via the standalone `typebox` package (`import { Type } from "typebox"`) `Type.Object({...})`; the `description` field doubles as LLM-facing prompt copy. (Two `rpiv-workflow` test files still import `@sinclair/typebox`.)
+- Tool params via the standalone `typebox` package (`import { Type } from "typebox"`) `Type.Object({...})`; the `description` field doubles as LLM-facing prompt copy.
 - Tool result envelope: `{ content: [{ type: "text", text }], details: <typed object> }` — `details` is the persisted replay snapshot: replay handlers walking the session branch (e.g. rpiv-todo's `replayFromBranch()`, wired to `session_start` / `session_compact` / `session_tree`) rebuild module state from it after compaction or `/reload`.
 - pi >= 0.80 hosts export `completeSimple` from pi-ai's `/compat` entrypoint (pre-0.80 hosts: package root, no `/compat`); consumers (`rpiv-advisor`, `rpiv-btw`) call it through `@hs1n/rpiv-side-call`'s `resolveSideCall(modelRegistry)`, which tries `/compat` first and falls back to the root entrypoint only on module-resolution failures. Newer hosts additionally expose an auth-aware `ModelRuntime.completeSimple` facade off `ctx.modelRegistry` — `resolveSideCall` prefers it and reports `mode: "facade"`, whereupon the caller passes only `{ signal }` (never explicit `apiKey`/`headers`, which would bypass credential-derived baseUrl); `mode: "global"` means the caller supplies `apiKey`/`headers`, and only then is a missing literal key fatal.
 - System prompts loaded once at module init via `readFileSync(fileURLToPath(new URL("./prompts/X.txt", import.meta.url))).trimEnd()` — ESM-safe, cache-stable.
