@@ -10,9 +10,17 @@
 # times around it). That failure mode is indistinguishable from a real one at the exit
 # code, so: clear the temp dir, run, and on failure run ONCE more. The second run is the
 # verdict — a genuine test or threshold failure fails both times and still aborts the push.
+# A run that instruments NOTHING still exits 0: the thresholds compare 0/0, pass, and this
+# gate prints "passed" while measuring no code at all. That happened silently for as long as
+# the checkout lived under a directory a coverage-exclude glob matched. lcov.info is the
+# floor: one `SF:` line per measured file.
 run_coverage() {
-  rm -rf coverage/.tmp
-  npm run coverage
+  rm -rf coverage
+  npm run coverage || return 1
+  if [ ! -f coverage/lcov.info ] || ! grep -q '^SF:' coverage/lcov.info; then
+    echo "coverage measured no files — the run is not a verdict"
+    return 1
+  fi
 }
 
 echo "Running test suite with coverage before push..."

@@ -34,9 +34,14 @@ export default defineConfig({
 				functions: 93,
 				lines: 95,
 			},
+			// These globs are matched against the ABSOLUTE path, so an ancestor
+			// directory of the checkout can match one. This checkout lives under
+			// `~/.pi/agent/git/…`, which made a `**/.pi/**` entry exclude every file:
+			// coverage reported 0/0, the thresholds compared nothing, and the pre-push
+			// gate printed "coverage passed" while measuring nothing. Do not exclude a
+			// directory named after a path segment above the repo root.
 			exclude: [
 				"**/node_modules/**",
-				"**/.pi/**",
 				"**/.rpiv/**",
 				"**/docs/**",
 				"**/*.test.ts",
