@@ -116,10 +116,7 @@ function isStaleCtxError(e: unknown): boolean {
 
 /**
  * Render a caught `unknown` as a human-readable message — the `instanceof Error`
- * dance collapsed to one place. Local copy of the `formatError` in
- * packages/rpiv-workflow/internal-utils.ts:56-58 (that module disclaims its
- * public surface, so the cross-package import is not available). M2 boundary
- * duplication: tracked as a documented-constant seam.
+ * dance collapsed to one place.
  */
 function formatError(e: unknown): string {
 	return e instanceof Error ? e.message : String(e);

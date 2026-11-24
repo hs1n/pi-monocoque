@@ -480,9 +480,8 @@ export function registerArgsHandler(pi: ExtensionAPI): void {
 	pi.on("session_start", (event) => {
 		// Pi fires session_start for every session including programmatic
 		// spawns. Re-enumerating the skill set per spawn is cheap (one
-		// readdir per declared skillPath); the prior workflow-aware gate
-		// shaved that work but coupled this package to rpiv-workflow's
-		// internal Symbol. Drop the gate — correctness > microseconds.
+		// readdir per declared skillPath), and a gate on spawn kind would
+		// couple this package to another package's internals. No gate.
 		if (event.reason === "reload" || event.reason === "startup") {
 			invalidateSkillIndex();
 		}

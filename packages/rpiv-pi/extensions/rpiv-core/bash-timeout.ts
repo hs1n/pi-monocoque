@@ -32,7 +32,7 @@ type WatchableSession = Pick<AgentSession, "subscribe" | "abort">;
 
 const DEFAULT_BASH_TOOL_TIMEOUT_MS = 180_000; // 3 min — tight enough to cut a wedged scan well before it strands a gate.
 const MIN_BASH_TOOL_TIMEOUT_MS = 5_000; // a sub-5s ceiling would scythe ordinary commands.
-const MAX_BASH_TOOL_TIMEOUT_MS = 30 * 60_000; // 30 min — the hard upper bound; mirrors MAX_VALIDATION_RETRY_TIMEOUT_MS in packages/rpiv-workflow/validation-bounds.ts (same 30-min value, separately owned).
+const MAX_BASH_TOOL_TIMEOUT_MS = 30 * 60_000; // 30 min — the hard upper bound.
 
 /**
  * The resolved per-command ceiling: the 3-minute default, overridable via

@@ -110,7 +110,7 @@ function emitTerminalAttention(): void {
 	}
 }
 
-/** Delay before the background session-graph pre-warm; mirrors rpiv-workflow's /wf prewarm. */
+/** Delay before the background session-graph pre-warm. */
 export const PREWARM_DELAY_MS = 2000;
 
 type SessionModule = typeof import("./state/questionnaire-session.js");
