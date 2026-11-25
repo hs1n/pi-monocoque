@@ -7,6 +7,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- **Fork: the `gh` install hint starts with `[mono-web-tools]`, not `[rpiv-web-tools]`.** The package name and the tool names do not change.
+
 ## [2.13.8] - 2026-10-12
 
 ## [2.13.7] - 2026-10-12

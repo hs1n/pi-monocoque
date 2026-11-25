@@ -199,7 +199,7 @@ function filterFrontmatterSafeStrings(values: readonly unknown[], field: "tools"
 	const safe = strings.filter((v) => !/[\r\n]/.test(v));
 	if (safe.length !== strings.length) {
 		console.warn(
-			`[rpiv-pi] models.json: dropped ${strings.length - safe.length} \`${field}\` entr${strings.length - safe.length === 1 ? "y" : "ies"} containing newline characters — a multi-line entry would inject frontmatter lines into synced agent definitions`,
+			`[mono] models.json: dropped ${strings.length - safe.length} \`${field}\` entr${strings.length - safe.length === 1 ? "y" : "ies"} containing newline characters — a multi-line entry would inject frontmatter lines into synced agent definitions`,
 		);
 	}
 	return safe;
@@ -221,7 +221,7 @@ function resolveModelEntry(entry: unknown): ResolvedModelConfig {
 				result.thinking = obj.thinking as ModelThinkingLevelValue;
 			} else {
 				console.warn(
-					`[rpiv-pi] models.json: unknown thinking level "${obj.thinking}" — valid values: ${MODEL_THINKING_LEVEL_VALUES.join(", ")}`,
+					`[mono] models.json: unknown thinking level "${obj.thinking}" — valid values: ${MODEL_THINKING_LEVEL_VALUES.join(", ")}`,
 				);
 			}
 		}
@@ -267,7 +267,7 @@ export function loadModelsConfig(): ModelsConfig {
 	// getAgentModelConfig defaults fallback cannot leak enablement to every
 	// configured agent.
 	if (defaults && (defaults.extensions !== undefined || defaults.tools !== undefined)) {
-		console.warn("[rpiv-pi] models.json: `extensions`/`tools` in `defaults` are ignored — they are per-agent fields");
+		console.warn("[mono] models.json: `extensions`/`tools` in `defaults` are ignored — they are per-agent fields");
 		delete defaults.extensions;
 		delete defaults.tools;
 	}
@@ -302,7 +302,7 @@ export function loadModelsConfig(): ModelsConfig {
 
 	if (strippedAxes.size > 0) {
 		console.warn(
-			`[rpiv-pi] models.json: \`extensions\`/\`tools\` in ${[...strippedAxes].sort().join("/")} entries are ignored — they are per-agent fields (only \`agents.<name>\` consumes them)`,
+			`[mono] models.json: \`extensions\`/\`tools\` in ${[...strippedAxes].sort().join("/")} entries are ignored — they are per-agent fields (only \`agents.<name>\` consumes them)`,
 		);
 	}
 

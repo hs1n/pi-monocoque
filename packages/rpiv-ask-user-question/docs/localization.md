@@ -13,7 +13,7 @@ pi install git:github.com/hs1n/pi-monocoque
 
 Restart your Pi session. If you installed through
 [`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi) and ran
-`/rpiv-setup`, you already have it.
+`/mono-setup`, you already have it.
 
 The dependency is a genuinely optional peer. This package loads the SDK inside a
 `try`/`catch` at startup; when it is absent, every string falls back to its inline English

@@ -62,7 +62,7 @@ Offered only for models whose registry entry reports reasoning support. The
 picker lists `off (no reasoning sent)` plus the graded levels Pi reports for the
 selected model. `high` is marked `(recommended)`. Choosing `off` deletes the
 key, and no `reasoning` parameter is sent with the advisor call — distinct from
-`/rpiv-models`' `off (disable reasoning)`, which persists an explicit
+`/mono-models`' `off (disable reasoning)`, which persists an explicit
 `thinking: "off"`.
 
 `EFFORT_ORDINAL` orders the graded levels lowest → highest; this ordering is what

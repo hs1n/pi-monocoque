@@ -1,5 +1,5 @@
 /**
- * rpiv-models/command — /rpiv-models cascade picker command handler.
+ * rpiv-models/command — /mono-models (old name /rpiv-models) cascade picker command handler.
  *
  * Scope picker → key step(s) → model picker → effort picker → save
  * (saveJsonConfig) → invalidate cache (invalidateModelsConfigCache).
@@ -19,6 +19,7 @@
 import type { Api, Model } from "@earendil-works/pi-ai";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { modelKey } from "@hs1n/rpiv-config";
+import { type CommandOptions, registerCommandWithAliases } from "../command-aliases.js";
 import type { ModelsConfigSchema, ModelThinkingLevelValue } from "../models-config.js";
 import { showFilterablePicker } from "../models-picker.js";
 import { getModelsArgCompletions, runModelsArgs, showConfigAndUsage } from "./args.js";
@@ -35,7 +36,7 @@ import { floatChecked, type KeyStep, SCOPE_RESET_ALL, SCOPES, type ScopeDescript
 import { resetAllOverrides, resetOverride, saveOverride } from "./writes.js";
 
 export function registerRpivModelsCommand(pi: ExtensionAPI): void {
-	pi.registerCommand("rpiv-models", {
+	const options: CommandOptions = {
 		description: "Configure model and reasoning overrides in ~/.config/rpiv-pi/models.json",
 		getArgumentCompletions: (prefix: string) => getModelsArgCompletions(prefix, pi),
 		handler: async (args: string, ctx: ExtensionContext) => {
@@ -44,7 +45,8 @@ export function registerRpivModelsCommand(pi: ExtensionAPI): void {
 			if (!ctx.hasUI) return showConfigAndUsage(ctx);
 			await runCascade(ctx, pi);
 		},
-	});
+	};
+	registerCommandWithAliases(pi, { name: "mono-models", aliases: ["rpiv-models"] }, options);
 }
 
 // ---------------------------------------------------------------------------

@@ -23,48 +23,49 @@ beforeEach(() => {
 	vi.mocked(pruneLegacySiblings).mockReturnValue({ pruned: [] });
 });
 
-describe("/rpiv-setup — command shape", () => {
-	it("registers under 'rpiv-setup'", () => {
+describe("/mono-setup — command shape", () => {
+	it("registers under 'mono-setup' and keeps 'rpiv-setup' as an alias", () => {
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
+		expect(captured.commands.has("mono-setup")).toBe(true);
 		expect(captured.commands.has("rpiv-setup")).toBe(true);
 	});
 });
 
-describe("/rpiv-setup — !hasUI, no argument", () => {
+describe("/mono-setup — !hasUI, no argument", () => {
 	it("lists the changes and the apply command, and does not change settings", async () => {
 		vi.mocked(findMissingSiblings).mockReturnValue([{ pkg: "npm:@x/a", matches: /./, provides: "A" }]);
 		vi.mocked(findLegacySiblings).mockReturnValue(["npm:pi-subagents"]);
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
 		const ctx = createMockCtx({ hasUI: false });
-		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+		await captured.commands.get("mono-setup")?.handler("", ctx as never);
 		const [text, level] = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls.at(-1)!;
 		expect(level).toBe("info");
 		expect(text).toContain("npm:@x/a");
 		expect(text).toContain("npm:pi-subagents");
-		expect(text).toContain("/rpiv-setup --yes");
+		expect(text).toContain("/mono-setup --yes");
 		expect(ctx.ui.confirm).not.toHaveBeenCalled();
 		expect(pruneLegacySiblings).not.toHaveBeenCalled();
 		expect(spawnPiInstall).not.toHaveBeenCalled();
 	});
 });
 
-describe("/rpiv-setup — nothing to do", () => {
+describe("/mono-setup — nothing to do", () => {
 	it("notifies all-installed and skips confirmation when no missing siblings AND no legacy entries", async () => {
 		vi.mocked(findMissingSiblings).mockReturnValue([]);
 		vi.mocked(findLegacySiblings).mockReturnValue([]);
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+		await captured.commands.get("mono-setup")?.handler("", ctx as never);
 		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("already installed"), "info");
 		expect(ctx.ui.confirm).not.toHaveBeenCalled();
 		expect(pruneLegacySiblings).not.toHaveBeenCalled();
 	});
 });
 
-describe("/rpiv-setup — pre-confirm read-only contract", () => {
+describe("/mono-setup — pre-confirm read-only contract", () => {
 	it("does NOT call pruneLegacySiblings before user confirmation", async () => {
 		vi.mocked(findMissingSiblings).mockReturnValue([]);
 		vi.mocked(findLegacySiblings).mockReturnValue(["npm:pi-subagents"]);
@@ -75,7 +76,7 @@ describe("/rpiv-setup — pre-confirm read-only contract", () => {
 			expect(pruneLegacySiblings).not.toHaveBeenCalled();
 			return false;
 		});
-		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+		await captured.commands.get("mono-setup")?.handler("", ctx as never);
 		expect(ctx.ui.confirm).toHaveBeenCalledTimes(1);
 	});
 
@@ -85,7 +86,7 @@ describe("/rpiv-setup — pre-confirm read-only contract", () => {
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+		await captured.commands.get("mono-setup")?.handler("", ctx as never);
 		const confirmCall = (ctx.ui.confirm as ReturnType<typeof vi.fn>).mock.calls[0]!;
 		expect(confirmCall[1]).toContain("Remove from");
 		expect(confirmCall[1]).toContain("npm:pi-subagents");
@@ -98,7 +99,7 @@ describe("/rpiv-setup — pre-confirm read-only contract", () => {
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+		await captured.commands.get("mono-setup")?.handler("", ctx as never);
 		const confirmCall = (ctx.ui.confirm as ReturnType<typeof vi.fn>).mock.calls[0]!;
 		expect(confirmCall[1]).toContain(join(process.env.HOME!, ".config", "pi", "agent", "settings.json"));
 	});
@@ -109,14 +110,14 @@ describe("/rpiv-setup — pre-confirm read-only contract", () => {
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+		await captured.commands.get("mono-setup")?.handler("", ctx as never);
 		const confirmCall = (ctx.ui.confirm as ReturnType<typeof vi.fn>).mock.calls[0]!;
 		expect(confirmCall[1]).toContain("Install via `pi install`:");
 		expect(confirmCall[1]).toContain("npm:@x/a");
 	});
 });
 
-describe("/rpiv-setup — user cancels", () => {
+describe("/mono-setup — user cancels", () => {
 	it("notifies cancelled and skips both prune and install", async () => {
 		vi.mocked(findMissingSiblings).mockReturnValue([{ pkg: "npm:@x/y", matches: /./, provides: "p" }]);
 		vi.mocked(findLegacySiblings).mockReturnValue(["npm:pi-subagents"]);
@@ -124,14 +125,14 @@ describe("/rpiv-setup — user cancels", () => {
 		registerSetupCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
 		(ctx.ui.confirm as ReturnType<typeof vi.fn>).mockResolvedValueOnce(false);
-		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+		await captured.commands.get("mono-setup")?.handler("", ctx as never);
 		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("cancelled"), "info");
 		expect(pruneLegacySiblings).not.toHaveBeenCalled();
 		expect(spawnPiInstall).not.toHaveBeenCalled();
 	});
 });
 
-describe("/rpiv-setup — post-confirm prune execution", () => {
+describe("/mono-setup — post-confirm prune execution", () => {
 	it("runs pruneLegacySiblings after confirm and emits notify when entries removed", async () => {
 		vi.mocked(findMissingSiblings).mockReturnValue([]);
 		vi.mocked(findLegacySiblings).mockReturnValue(["npm:pi-subagents"]);
@@ -139,7 +140,7 @@ describe("/rpiv-setup — post-confirm prune execution", () => {
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+		await captured.commands.get("mono-setup")?.handler("", ctx as never);
 		expect(pruneLegacySiblings).toHaveBeenCalledTimes(1);
 		const pruneNotify = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls.find(
 			(c) => typeof c[0] === "string" && c[0].startsWith("Removed legacy subagent library"),
@@ -154,12 +155,12 @@ describe("/rpiv-setup — post-confirm prune execution", () => {
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+		await captured.commands.get("mono-setup")?.handler("", ctx as never);
 		expect(pruneLegacySiblings).not.toHaveBeenCalled();
 	});
 });
 
-describe("/rpiv-setup — mixed success/failure report", () => {
+describe("/mono-setup — mixed success/failure report", () => {
 	it("reports succeeded + failed with 300-char stderr snippets", async () => {
 		vi.mocked(findMissingSiblings).mockReturnValue([
 			{ pkg: "npm:@x/a", matches: /./, provides: "A" },
@@ -171,7 +172,7 @@ describe("/rpiv-setup — mixed success/failure report", () => {
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+		await captured.commands.get("mono-setup")?.handler("", ctx as never);
 		const reportCall = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls.at(-1);
 		const report: string = reportCall![0];
 		expect(report).toContain("npm:@x/a");
@@ -186,7 +187,7 @@ describe("/rpiv-setup — mixed success/failure report", () => {
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+		await captured.commands.get("mono-setup")?.handler("", ctx as never);
 		const report = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls.at(-1)![0];
 		expect(report).toContain("stdout-error");
 	});
@@ -197,13 +198,13 @@ describe("/rpiv-setup — mixed success/failure report", () => {
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+		await captured.commands.get("mono-setup")?.handler("", ctx as never);
 		const report = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls.at(-1)![0];
 		expect(report).not.toContain("Restart");
 	});
 });
 
-describe("/rpiv-setup — prune-only flow (no missing siblings)", () => {
+describe("/mono-setup — prune-only flow (no missing siblings)", () => {
 	it("skips installMissing when only legacy entries exist", async () => {
 		vi.mocked(findMissingSiblings).mockReturnValue([]);
 		vi.mocked(findLegacySiblings).mockReturnValue(["npm:pi-subagents"]);
@@ -211,7 +212,7 @@ describe("/rpiv-setup — prune-only flow (no missing siblings)", () => {
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+		await captured.commands.get("mono-setup")?.handler("", ctx as never);
 		expect(pruneLegacySiblings).toHaveBeenCalledTimes(1);
 		expect(spawnPiInstall).not.toHaveBeenCalled();
 	});

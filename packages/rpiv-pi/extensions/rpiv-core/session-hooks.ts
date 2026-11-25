@@ -81,20 +81,20 @@ export function __resetSessionHooksAnnounced(): void {
 	sessionStartInjected = new WeakSet<object>();
 }
 
-const msgAgentsAdded = (n: number) => `Copied ${n} rpiv-pi agent(s) to ~/.pi/agent/agents/`;
+const msgAgentsAdded = (n: number) => `Copied ${n} mono agent(s) to ~/.pi/agent/agents/`;
 const msgAgentsHealed = (parts: string[]) => `Synced bundled agent(s): ${parts.join(", ")}.`;
 const msgAgentsDrift = (parts: string[]) =>
-	renderBanner("rpiv-pi: bundled agents need attention", [
+	renderBanner("mono: bundled agents need attention", [
 		...parts.map((p) => `• ${p}`),
 		"",
-		"Run /rpiv-update-agents to sync.",
+		"Run /mono-update-agents to sync.",
 	]);
-const msgAgentsErrors = (n: number) => `Agent sync reported ${n} error(s). Run /rpiv-update-agents for details.`;
+const msgAgentsErrors = (n: number) => `Agent sync reported ${n} error(s). Run /mono-update-agents for details.`;
 const msgMissingSiblings = (pkgs: string[]) =>
-	renderBanner(`rpiv-pi: ${pkgs.length} sibling extension${pkgs.length === 1 ? "" : "s"} missing`, [
+	renderBanner(`mono: ${pkgs.length} sibling extension${pkgs.length === 1 ? "" : "s"} missing`, [
 		...pkgs.map((p) => `• ${p}`),
 		"",
-		"Run /rpiv-setup to install them.",
+		"Run /mono-setup to install them.",
 	]);
 
 type UI = { notify: (msg: string, sev: "info" | "warning" | "error") => void };

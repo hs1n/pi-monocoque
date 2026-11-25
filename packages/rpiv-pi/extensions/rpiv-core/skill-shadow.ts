@@ -71,7 +71,7 @@ export function formatShadowWarning(shadowed: readonly ShadowedSkill[]): string 
 	if (shadowed.length === 0) return "";
 	const shown = shadowed.slice(0, REPORT_LIMIT);
 	const hidden = shadowed.length - shown.length;
-	const title = `rpiv-pi: ${shadowed.length} bundled skill${shadowed.length === 1 ? "" : "s"} shadowed`;
+	const title = `mono: ${shadowed.length} bundled skill${shadowed.length === 1 ? "" : "s"} shadowed`;
 	return renderBanner(title, [
 		...shown.map((s) => `• ${s.name} → ${s.locations[0]}`),
 		...(hidden > 0 ? [`… and ${hidden} more`] : []),

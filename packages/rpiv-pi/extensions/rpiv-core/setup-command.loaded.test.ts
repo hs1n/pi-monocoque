@@ -1,5 +1,5 @@
 /**
- * /rpiv-setup never re-installs a sibling that is already loaded (#216) — real
+ * /mono-setup never re-installs a sibling that is already loaded (#216) — real
  * detection (package-checks + loaded-siblings) over a real settings file; only
  * the installer is mocked. Installing a copy of a sibling another package
  * already loads makes both copies register the same tools on every session.
@@ -31,11 +31,11 @@ async function runSetup(loadedToolPaths: string[]) {
 	registerSetupCommand(pi);
 	const ctx = createMockCtx({ hasUI: true });
 	vi.mocked(ctx.ui.confirm).mockResolvedValue(true);
-	await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
+	await captured.commands.get("mono-setup")?.handler("", ctx as never);
 	return ctx;
 }
 
-describe("/rpiv-setup — siblings loaded outside settings (#216)", () => {
+describe("/mono-setup — siblings loaded outside settings (#216)", () => {
 	beforeEach(() => {
 		delete (globalThis as Record<symbol, unknown>)[Symbol.for("@hs1n/rpiv-args:loaded")];
 	});

@@ -80,7 +80,7 @@ describe("session_start hook — notifications", () => {
 		registerSessionHooks(pi);
 		const ctx = createMockCtx({ cwd: projectDir, hasUI: true });
 		await captured.events.get("session_start")?.[0]({ reason: "startup" } as never, ctx as never);
-		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringMatching(/Copied 2 rpiv-pi agent/), "info");
+		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringMatching(/Copied 2 mono agent/), "info");
 	});
 
 	it("emits a single drift line combining pendingUpdate + pendingRemove", async () => {
@@ -116,10 +116,10 @@ describe("session_start hook — notifications", () => {
 		const warnCall = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls.find((c) => c[1] === "warning");
 		expect(warnCall).toBeDefined();
 		expect((warnCall![0] as string).startsWith("\n")).toBe(true);
-		expect(warnCall?.[0]).toContain("rpiv-pi: 2 sibling extensions missing");
+		expect(warnCall?.[0]).toContain("mono: 2 sibling extensions missing");
 		expect(warnCall?.[0]).toContain("@hs1n/rpiv-advisor");
 		expect(warnCall?.[0]).toContain("@hs1n/rpiv-args");
-		expect(warnCall?.[0]).toContain("Run /rpiv-setup to install them.");
+		expect(warnCall?.[0]).toContain("Run /mono-setup to install them.");
 		expect(warnCall?.[0]).toContain("╭");
 		expect(warnCall?.[0]).toContain("╯");
 		expect(warnCall?.[0]).not.toContain("npm:");
@@ -359,7 +359,7 @@ describe("G0: session_start → real syncBundledAgents → notifyAgentSyncDrift"
 		expect(existsSync(join(agentsDir, ".rpiv-managed.json"))).toBe(true);
 
 		const addedCalls = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls.filter(
-			(c) => typeof c[0] === "string" && /Copied \d+ rpiv-pi agent/.test(c[0]),
+			(c) => typeof c[0] === "string" && /Copied \d+ mono agent/.test(c[0]),
 		);
 		expect(addedCalls.length).toBe(1);
 

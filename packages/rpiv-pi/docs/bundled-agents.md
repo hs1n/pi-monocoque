@@ -5,7 +5,7 @@ does and how they get onto disk.
 
 Skills send work to these agents through the `Agent` tool. You do not start them directly. The
 `Agent` tool comes from `@tintinweb/pi-subagents` (or the API-compatible `@gotgenes` fork).
-`/rpiv-setup` installs it. Without it, the parallel-analysis skills cannot send work to an agent.
+`/mono-setup` installs it. Without it, the parallel-analysis skills cannot send work to an agent.
 
 ## Codebase specialists
 
@@ -51,10 +51,10 @@ your edits:
 | The file is missing | rpiv-pi copies it |
 | The file is the same as the bundled source | rpiv-pi does not change it |
 | The bundled source changed, and your copy has the recorded hash | rpiv-pi updates it automatically |
-| The bundled source changed, **and** you edited your copy | rpiv-pi marks it as pending. A banner tells you to run `/rpiv-update-agents` |
+| The bundled source changed, **and** you edited your copy | rpiv-pi marks it as pending. A banner tells you to run `/mono-update-agents` |
 | The file is not bundled now, and you did not edit it | rpiv-pi marks it as pending removal |
 
-`/rpiv-update-agents` runs the same sync in force mode. It adds, updates and removes files
+`/mono-update-agents` runs the same sync in force mode. It adds, updates and removes files
 without a hash check. Thus it **will** overwrite an rpiv-managed file that you edited. It never
 changes the files that you added yourself. It reads `models.json` again first. Thus the
 `model` and `thinking` overrides for each agent go into the frontmatter on disk. See

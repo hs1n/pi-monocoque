@@ -35,7 +35,7 @@ export function validateDisabledForModels(value: unknown): DisabledForModelsEntr
 			// Warn before dropping — the entry's model identity is discarded along
 			// with the bad threshold (mirrors models-config's warn-on-miss posture).
 			console.warn(
-				`[rpiv-advisor] advisor.json: unknown minEffort "${String(obj.minEffort)}" — dropping disabledForModels entry for "${obj.model}"`,
+				`[mono-advisor] advisor.json: unknown minEffort "${String(obj.minEffort)}" — dropping disabledForModels entry for "${obj.model}"`,
 			);
 			return false;
 		}

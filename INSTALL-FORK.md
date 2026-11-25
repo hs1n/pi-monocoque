@@ -131,13 +131,13 @@ Expected result: seven extensions under `packages/` (or under the clone in
 `~/.pi/agent/git/`), and `errors: 0`. To run the check against an isolated settings file, set
 `PI_CODING_AGENT_DIR` to a scratch directory. Your real install then stays unchanged.
 
-## `/rpiv-setup` installs from this checkout
+## `/mono-setup` installs from this checkout
 
-`/rpiv-setup` reads the sibling registry (`siblings.ts`). It installs each sibling that is not
+`/mono-setup` reads the sibling registry (`siblings.ts`). It installs each sibling that is not
 declared and not loaded. This repo has no publish path, so `resolveInstallSpec()` maps each
 `npm:@hs1n/rpiv-*` entry to the local package directory. A third-party entry
 (`@tintinweb/pi-subagents`) keeps its npm spec. Thus the command is safe to run here. It cannot
 pull an upstream copy of these extensions, because no such registry entry exists.
 
-With no UI, `/rpiv-setup` lists the changes and tells you to run `/rpiv-setup --yes`.
-`/rpiv-setup --yes` applies the changes with no confirmation.
+With no UI, `/mono-setup` lists the changes and tells you to run `/mono-setup --yes`.
+`/mono-setup --yes` applies the changes with no confirmation.

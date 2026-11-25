@@ -45,7 +45,7 @@ export function loadBundledSkillNames(dir: string): ReadonlySet<string> {
 		);
 	} catch (e) {
 		const reason = e instanceof Error ? e.message : String(e);
-		console.warn(`[rpiv-pi] could not enumerate bundled skills under ${dir}: ${reason}`);
+		console.warn(`[mono] could not enumerate bundled skills under ${dir}: ${reason}`);
 		return new Set<string>();
 	}
 	// An empty Set also disables the `rpiv:` status-line ownership and is
@@ -54,7 +54,7 @@ export function loadBundledSkillNames(dir: string): ReadonlySet<string> {
 	// Surface this distinctly from the catch path so the user has signal.
 	if (names.size === 0) {
 		console.warn(
-			`[rpiv-pi] bundled skills directory ${dir} contains no subdirectories — ` +
+			`[mono] bundled skills directory ${dir} contains no subdirectories — ` +
 				"the `rpiv:` skill status-line gate will not match any skill.",
 		);
 	}

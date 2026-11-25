@@ -14,6 +14,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **Fork: the `/languages` description says "mono TUI strings", not "rpiv-* TUI strings".** The i18n namespaces and the config path do not change.
+
 - **The `zh` label reads `简体中文` instead of `中文`.** Same list, same code, same maps — only the ambiguous label changed, so the two Chinese entries are now distinguishable by script rather than by trial. Alphabetical order by code is preserved (`zh`, then `zh-TW`).
 
 ### Fixed

@@ -138,7 +138,7 @@ and the `LANG`/`LC_ALL` detection are Unix conventions. They are not tested on W
 ## Related
 
 - [@hs1n/rpiv-pi](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi): the
-  umbrella package. Its `/rpiv-setup` command installs this package for you.
+  umbrella package. Its `/mono-setup` command installs this package for you.
 - [@hs1n/rpiv-todo](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-todo) and
   [@hs1n/rpiv-ask-user-question](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-ask-user-question):
   extensions that use your `/languages` selection. Each one treats this package as an optional

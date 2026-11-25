@@ -239,11 +239,11 @@ export async function applyEffectiveModel(
 		if (resolved) {
 			const ok = await pi.setModel(resolved);
 			if (!ok) {
-				console.warn(`[rpiv-pi] setModel failed for ${opts.label} (no API key?) — proceeding on current model`);
+				console.warn(`[mono] setModel failed for ${opts.label} (no API key?) — proceeding on current model`);
 			}
 			hasModelChange = true;
 		} else {
-			console.warn(`[rpiv-pi] model not found: ${opts.overrideModel} (${opts.label}) — using baseline model`);
+			console.warn(`[mono] model not found: ${opts.overrideModel} (${opts.label}) — using baseline model`);
 		}
 	}
 
@@ -252,7 +252,7 @@ export async function applyEffectiveModel(
 	if (!hasModelChange && opts.setBaselineModel && opts.baselineModel !== undefined) {
 		const ok = await pi.setModel(opts.baselineModel);
 		if (!ok) {
-			console.warn(`[rpiv-pi] setModel failed for ${opts.label} (no API key?) — proceeding on current model`);
+			console.warn(`[mono] setModel failed for ${opts.label} (no API key?) — proceeding on current model`);
 		}
 	}
 
@@ -273,7 +273,7 @@ export async function restoreBaseline(pi: ExtensionAPI, base: BaselineSnapshot):
 	if (base.hasModelChange && base.model !== undefined) {
 		const ok = await pi.setModel(base.model);
 		if (!ok) {
-			console.warn("[rpiv-pi] failed to restore baseline model — proceeding on current model");
+			console.warn("[mono] failed to restore baseline model — proceeding on current model");
 		}
 	}
 	pi.setThinkingLevel(base.thinking);

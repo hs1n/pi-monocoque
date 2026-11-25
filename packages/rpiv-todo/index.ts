@@ -269,7 +269,7 @@ export default function (pi: ExtensionAPI, importOverlay: TodoOverlayImporter = 
 			// stale-namespace error still propagates: it never self-heals, and the
 			// user needs its restart guidance.
 			if (isStaleOverlayModuleError(e)) throw e;
-			console.warn(`[rpiv-todo] overlay refresh failed (will retry on next update): ${formatError(e)}`);
+			console.warn(`[mono-todo] overlay refresh failed (will retry on next update): ${formatError(e)}`);
 		}
 	});
 

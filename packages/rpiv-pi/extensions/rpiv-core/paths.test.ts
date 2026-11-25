@@ -45,14 +45,14 @@ describe("loadBundledSkillNames", () => {
 		expect(loadBundledSkillNames("/nonexistent/rpiv-pi-skills-dir")).toEqual(new Set());
 	});
 
-	it("logs a [rpiv-pi]-prefixed warning that names the unreadable dir", () => {
+	it("logs a [mono]-prefixed warning that names the unreadable dir", () => {
 		// The defect being repro'd: today the IIFE swallows the error into
 		// `catch {}`, so the user sees no signal that enumeration failed and
 		// every downstream "unknown bundled skill" error is unattributable.
 		loadBundledSkillNames("/nonexistent/rpiv-pi-skills-dir");
 		expect(warnSpy).toHaveBeenCalledTimes(1);
 		const [msg] = warnSpy.mock.calls[0]!;
-		expect(msg).toMatch(/^\[rpiv-pi\]/);
+		expect(msg).toMatch(/^\[mono\]/);
 		expect(msg).toContain("/nonexistent/rpiv-pi-skills-dir");
 	});
 });

@@ -30,11 +30,11 @@ async function run(args: string, hasUI: boolean) {
 	const { pi, captured } = createMockPi();
 	registerSetupCommand(pi);
 	const ctx = createMockCtx({ hasUI });
-	await captured.commands.get("rpiv-setup")?.handler(args, ctx as never);
+	await captured.commands.get("mono-setup")?.handler(args, ctx as never);
 	return ctx;
 }
 
-describe("/rpiv-setup --yes", () => {
+describe("/mono-setup --yes", () => {
 	it.each([false, true])("prunes and installs with no confirmation (hasUI=%s)", async (hasUI) => {
 		const ctx = await run("--yes", hasUI);
 		expect(ctx.ui.confirm).not.toHaveBeenCalled();
@@ -60,11 +60,11 @@ describe("/rpiv-setup --yes", () => {
 	});
 });
 
-describe("/rpiv-setup — invalid argument", () => {
+describe("/mono-setup — invalid argument", () => {
 	it.each([false, true])("shows an error and changes nothing (hasUI=%s)", async (hasUI) => {
 		const ctx = await run("--force", hasUI);
 		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("Unknown argument: --force"), "error");
-		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("/rpiv-setup [--yes]"), "error");
+		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("/mono-setup [--yes]"), "error");
 		expect(findMissingSiblings).not.toHaveBeenCalled();
 		expect(ctx.ui.confirm).not.toHaveBeenCalled();
 		expect(pruneLegacySiblings).not.toHaveBeenCalled();
@@ -72,7 +72,7 @@ describe("/rpiv-setup — invalid argument", () => {
 	});
 });
 
-describe("/rpiv-setup — no argument", () => {
+describe("/mono-setup — no argument", () => {
 	it("with no UI, reports nothing to do when no change is pending", async () => {
 		vi.mocked(findMissingSiblings).mockReturnValue([]);
 		vi.mocked(findLegacySiblings).mockReturnValue([]);
@@ -88,11 +88,11 @@ describe("/rpiv-setup — no argument", () => {
 	});
 });
 
-describe("/rpiv-setup — argument completions", () => {
+describe("/mono-setup — argument completions", () => {
 	function complete(prefix: string) {
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
-		return captured.commands.get("rpiv-setup")?.getArgumentCompletions?.(prefix);
+		return captured.commands.get("mono-setup")?.getArgumentCompletions?.(prefix);
 	}
 
 	it("offers --yes for an empty or matching prefix", () => {

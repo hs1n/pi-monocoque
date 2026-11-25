@@ -16,6 +16,7 @@
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { type CommandOptions, registerCommandWithAliases } from "./command-aliases.js";
 import { readLoadedSiblingSources } from "./loaded-siblings.js";
 import { findMissingSiblings } from "./package-checks.js";
 import { spawnPiInstall } from "./pi-installer.js";
@@ -28,11 +29,11 @@ const INSTALL_TIMEOUT_MS = 120_000;
 const STDERR_SNIPPET_CHARS = 300;
 
 export const SETUP_YES_FLAG = "--yes";
-const MSG_USAGE = `Usage: /rpiv-setup [${SETUP_YES_FLAG}]`;
-const MSG_APPLY_HINT = `Run \`/rpiv-setup ${SETUP_YES_FLAG}\` to apply these changes.`;
-const MSG_NOTHING_TO_DO = "All rpiv-pi sibling dependencies already installed.";
-const MSG_CANCELLED = "/rpiv-setup cancelled";
-const MSG_CONFIRM_TITLE = "Apply rpiv-pi setup changes?";
+const MSG_USAGE = `Usage: /mono-setup [${SETUP_YES_FLAG}]`;
+const MSG_APPLY_HINT = `Run \`/mono-setup ${SETUP_YES_FLAG}\` to apply these changes.`;
+const MSG_NOTHING_TO_DO = "All mono sibling dependencies already installed.";
+const MSG_CANCELLED = "/mono-setup cancelled";
+const MSG_CONFIRM_TITLE = "Apply mono setup changes?";
 const MSG_RESTART = "Restart your Pi session to load the newly-installed extensions.";
 
 const msgUnknownArg = (arg: string) => `Unknown argument: ${arg}. ${MSG_USAGE}`;
@@ -50,7 +51,7 @@ type UI = {
 
 /** Lines that list the pending installs and the legacy entries to remove. */
 function buildPlanLines(missing: SiblingPlugin[], legacyEntries: string[]): string[] {
-	const lines: string[] = ["rpiv-pi will apply the following changes:", ""];
+	const lines: string[] = ["mono will apply the following changes:", ""];
 	if (missing.length > 0) {
 		lines.push("Install via `pi install`:");
 		for (const m of missing) lines.push(`  • ${resolveInstallSpec(m.pkg)}  (required — provides ${m.provides})`);
@@ -77,14 +78,21 @@ function buildApplyHint(missing: SiblingPlugin[], legacyEntries: string[]): stri
 }
 
 export function registerSetupCommand(pi: ExtensionAPI): void {
-	pi.registerCommand("rpiv-setup", {
-		description: "Install rpiv-pi's sibling extension plugins",
+	const options: CommandOptions = {
+		description: "Install the sibling extension plugins of mono",
 		getArgumentCompletions: (prefix) =>
 			SETUP_YES_FLAG.startsWith(prefix.trim())
-				? [{ value: SETUP_YES_FLAG, label: SETUP_YES_FLAG, description: "Apply the changes with no confirmation" }]
+				? [
+						{
+							value: SETUP_YES_FLAG,
+							label: SETUP_YES_FLAG,
+							description: "Apply the changes with no confirmation",
+						},
+					]
 				: null,
 		handler: (args, ctx) => handleSetupCommand(args, ctx, pi),
-	});
+	};
+	registerCommandWithAliases(pi, { name: "mono-setup", aliases: ["rpiv-setup"] }, options);
 }
 
 async function handleSetupCommand(

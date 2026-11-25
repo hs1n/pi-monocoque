@@ -1,11 +1,12 @@
 /**
- * /rpiv-update-agents — apply-mode sync of bundled agents into ~/.pi/agent/agents/.
+ * /mono-update-agents (old name /rpiv-update-agents) — apply-mode sync of bundled agents into ~/.pi/agent/agents/.
  * Also cleans up legacy per-cwd agent directories.
  * Adds new, overwrites changed managed files, removes stale managed files.
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { cleanupPerCwdAgents, type SyncResult, summarizeCleanupSkips, syncBundledAgents } from "./agents.js";
+import { type CommandOptions, registerCommandWithAliases } from "./command-aliases.js";
 import { readLoadedSiblingSources } from "./loaded-siblings.js";
 import { invalidateModelsConfigCache } from "./models-config.js";
 
@@ -17,9 +18,9 @@ const msgSyncedWithErrors = (summary: string, errors: string[]) =>
 	`${summary} ${errors.length} error(s): ${errors.join("; ")}`;
 
 export function registerUpdateAgentsCommand(pi: ExtensionAPI): void {
-	pi.registerCommand("rpiv-update-agents", {
+	const options: CommandOptions = {
 		description:
-			"Sync rpiv-pi bundled agents into ~/.pi/agent/agents/: add new, update changed, remove stale. Also cleans up legacy per-project agent directories.",
+			"Sync the mono bundled agents into ~/.pi/agent/agents/: add new, update changed, remove stale. Also cleans up legacy per-project agent directories.",
 		handler: async (_args, ctx) => {
 			// Drop the session-scoped models.json cache so a mid-session edit to
 			// per-agent model/thinking overrides is re-read and injected into the
@@ -41,7 +42,8 @@ export function registerUpdateAgentsCommand(pi: ExtensionAPI): void {
 			const fullReport = parts.length > 0 ? `${parts.join(", ")}. ${syncReport}` : syncReport;
 			ctx.ui.notify(fullReport, result.errors.length + cleanup.errors.length > 0 ? "warning" : "info");
 		},
-	});
+	};
+	registerCommandWithAliases(pi, { name: "mono-update-agents", aliases: ["rpiv-update-agents"] }, options);
 }
 
 function formatSyncReport(result: SyncResult): string {

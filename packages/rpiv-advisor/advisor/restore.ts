@@ -90,7 +90,7 @@ export function restoreAdvisorState(ctx: ExtensionContext, pi: ExtensionAPI): vo
 	let effort = config.effort;
 	if (effort !== undefined && !EFFORT_ORDINAL.includes(effort)) {
 		console.warn(
-			`[rpiv-advisor] advisor.json: unknown effort "${effort}" — ignoring (valid values: ${EFFORT_ORDINAL.join(", ")})`,
+			`[mono-advisor] advisor.json: unknown effort "${effort}" — ignoring (valid values: ${EFFORT_ORDINAL.join(", ")})`,
 		);
 		effort = undefined;
 	}

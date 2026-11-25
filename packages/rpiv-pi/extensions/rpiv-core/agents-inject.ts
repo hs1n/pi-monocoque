@@ -130,7 +130,7 @@ export function injectModelFrontmatter(
 		const extensionsMergeFailed = enablement.extensions.length > 0 && mergedExtensions === undefined;
 		if (toolsMergeFailed || extensionsMergeFailed) {
 			console.warn(
-				`[rpiv-pi] agent enablement skipped for ${agentFile}: the ${toolsMergeFailed ? "tools" : "extensions"} frontmatter form is not mergeable (block sequence or sentinel value) — rewrite it as a ${toolsMergeFailed ? "single-line CSV scalar" : "flow sequence"} to receive the grant`,
+				`[mono] agent enablement skipped for ${agentFile}: the ${toolsMergeFailed ? "tools" : "extensions"} frontmatter form is not mergeable (block sequence or sentinel value) — rewrite it as a ${toolsMergeFailed ? "single-line CSV scalar" : "flow sequence"} to receive the grant`,
 			);
 		} else {
 			if (mergedTools !== undefined) keysToSet.push({ key: "tools", value: mergedTools });

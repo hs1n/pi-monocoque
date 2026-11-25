@@ -42,10 +42,11 @@ const empty = (overrides: Partial<ReturnType<typeof syncBundledAgents>> = {}) =>
 	...overrides,
 });
 
-describe("/rpiv-update-agents", () => {
+describe("/mono-update-agents", () => {
 	it("registers the command", () => {
 		const { pi, captured } = createMockPi();
 		registerUpdateAgentsCommand(pi);
+		expect(captured.commands.has("mono-update-agents")).toBe(true);
 		expect(captured.commands.has("rpiv-update-agents")).toBe(true);
 	});
 
@@ -54,7 +55,7 @@ describe("/rpiv-update-agents", () => {
 		const { pi, captured } = createMockPi();
 		registerUpdateAgentsCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-update-agents")?.handler("", ctx as never);
+		await captured.commands.get("mono-update-agents")?.handler("", ctx as never);
 		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("up-to-date"), "info");
 	});
 
@@ -63,7 +64,7 @@ describe("/rpiv-update-agents", () => {
 		const { pi, captured } = createMockPi();
 		registerUpdateAgentsCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-update-agents")?.handler("", ctx as never);
+		await captured.commands.get("mono-update-agents")?.handler("", ctx as never);
 		const report = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls[0][0];
 		expect(report).toContain("1 added");
 		expect(report).toContain("1 updated");
@@ -77,7 +78,7 @@ describe("/rpiv-update-agents", () => {
 		const { pi, captured } = createMockPi();
 		registerUpdateAgentsCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-update-agents")?.handler("", ctx as never);
+		await captured.commands.get("mono-update-agents")?.handler("", ctx as never);
 		const [, severity] = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls[0];
 		expect(severity).toBe("warning");
 	});
@@ -87,7 +88,7 @@ describe("/rpiv-update-agents", () => {
 		const { pi, captured } = createMockPi();
 		registerUpdateAgentsCommand(pi);
 		const ctx = createMockCtx({ hasUI: true });
-		await captured.commands.get("rpiv-update-agents")?.handler("", ctx as never);
+		await captured.commands.get("mono-update-agents")?.handler("", ctx as never);
 		expect(invalidateModelsConfigCache).toHaveBeenCalledTimes(1);
 		// Reset must precede sync — sync re-reads config and injects frontmatter.
 		expect(vi.mocked(invalidateModelsConfigCache).mock.invocationCallOrder[0]).toBeLessThan(
@@ -100,7 +101,7 @@ describe("/rpiv-update-agents", () => {
 		const { pi, captured } = createMockPi();
 		registerUpdateAgentsCommand(pi);
 		const ctx = createMockCtx({ hasUI: false });
-		await captured.commands.get("rpiv-update-agents")?.handler("", ctx as never);
+		await captured.commands.get("mono-update-agents")?.handler("", ctx as never);
 		expect(ctx.ui.notify).not.toHaveBeenCalled();
 	});
 });

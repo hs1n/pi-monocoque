@@ -14,7 +14,7 @@ const NAV_HINT = "↑↓ navigate • enter select • esc cancel";
 
 const HEADER_TITLE = "UI Language";
 const HEADER_PROSE =
-	"Choose the locale used for rpiv-* TUI strings (sentinel rows, hints, " +
+	"Choose the locale used for mono TUI strings (sentinel rows, hints, " +
 	"submit labels, preview text). LLM-facing copy stays English. Selection " +
 	"persists at ~/.config/rpiv-i18n/locale.json.";
 

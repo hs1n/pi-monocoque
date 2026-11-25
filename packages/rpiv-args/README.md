@@ -126,7 +126,7 @@ directory.
 ## Related
 
 - [@hs1n/rpiv-pi](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi): the
-  umbrella package. Its `/rpiv-setup` command installs `rpiv-args` with the other siblings.
+  umbrella package. Its `/mono-setup` command installs `rpiv-args` with the other siblings.
 
 ## License
 

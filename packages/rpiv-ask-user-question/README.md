@@ -108,7 +108,7 @@ The extension has no native dependencies, needs no compiler and no API keys, and
 ## Related
 
 - [`@hs1n/rpiv-i18n`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n): optional. When it is installed, the dialog text shows in your language, and you get `/languages`.
-- [`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi): the umbrella package. Its pipeline skills use `ask_user_question` as the developer checkpoint. `/rpiv-setup` offers to install this extension.
+- [`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi): the umbrella package. Its pipeline skills use `ask_user_question` as the developer checkpoint. `/mono-setup` offers to install this extension.
 
 ## License
 

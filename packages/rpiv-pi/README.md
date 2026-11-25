@@ -39,12 +39,12 @@ missing, one command installs it. It uses a local path for the siblings in this 
 for the third-party `Agent` dispatcher:
 
 ```
-/rpiv-setup
+/mono-setup
 ```
 
-The dialog shows each change and applies nothing until you confirm. With no UI, the command
-lists the changes and tells you to run `/rpiv-setup --yes`. That form applies them with no
-confirmation.
+The dialog shows each change and applies nothing until you confirm. With no UI, the command lists
+the changes and tells you to run `/mono-setup --yes`. That form applies them with no confirmation.
+The old names `/rpiv-setup`, `/rpiv-models` and `/rpiv-update-agents` still work as aliases.
 
 You also need a model in Pi. If `/login` works, you have one. If not, see [docs/models-config.md](./docs/models-config.md).
 
@@ -75,7 +75,7 @@ has the full list.
   is on disk, and the next stage starts from that file.
 - **Parallel dispatch where it helps**: the analysis and design skills use the `Agent` tool
   for parallel work. Thus the agent designs or reviews independent slices at the same time.
-- **Cheap models for simple stages**: `/rpiv-models` sets model and reasoning-effort
+- **Cheap models for simple stages**: `/mono-models` sets model and reasoning-effort
   overrides for each skill or subagent. It also finds typos in keys that would not apply.
 - **Your architecture docs, injected where they apply**: when you touch a file, rpiv-pi sends
   the nearest `AGENTS.md`, `CLAUDE.md` or `.rpiv/guidance/<sub>/architecture.md` to the
@@ -83,23 +83,23 @@ has the full list.
 
 ## Configuration
 
-`/rpiv-models` writes `~/.config/rpiv-pi/models.json` with mode `0600`. If
+`/mono-models` writes `~/.config/rpiv-pi/models.json` with mode `0600`. If
 `$XDG_CONFIG_HOME` is an absolute path, or a `~` or `~/…` path, the file is under
 `$XDG_CONFIG_HOME/rpiv-pi/`. The file is optional. If it is missing or has bad JSON, no
 overrides apply.
 
 | Command | What it does |
 | --- | --- |
-| `/rpiv-models` | Opens the picker. With no UI, it shows the config and the usage |
-| `/rpiv-models show` | Shows the current overrides |
-| `/rpiv-models set defaults <model> [effort]` | Sets the global default |
-| `/rpiv-models set agents <agent> <model> [effort]` | Sets the override for one subagent |
-| `/rpiv-models set skills <skill> <model> [effort]` | Sets the override for one skill |
-| `/rpiv-models unset defaults\|agents <agent>\|skills <skill>` | Removes an override |
+| `/mono-models` | Opens the picker. With no UI, it shows the config and the usage |
+| `/mono-models show` | Shows the current overrides |
+| `/mono-models set defaults <model> [effort]` | Sets the global default |
+| `/mono-models set agents <agent> <model> [effort]` | Sets the override for one subagent |
+| `/mono-models set skills <skill> <model> [effort]` | Sets the override for one skill |
+| `/mono-models unset defaults\|agents <agent>\|skills <skill>` | Removes an override |
 
 `<model>` is `provider/id`. If you do not give an effort, the override keeps the session
-effort. In print mode (`pi -p`), Pi discards notify messages. Then `/rpiv-setup --yes` and
-`/rpiv-models` apply valid arguments but show no output. RPC clients get the output.
+effort. In print mode (`pi -p`), Pi discards notify messages. Then `/mono-setup --yes` and
+`/mono-models` apply valid arguments but show no output. RPC clients get the output.
 
 ## Reference
 
@@ -118,7 +118,7 @@ effort. In print mode (`pi -p`), Pi discards notify messages. Then `/rpiv-setup 
 | --- | --- |
 | [Pi Agent](https://github.com/badlogic/pi-mono) 0.80.x or 1.x | The host. Install it globally, so `pi` is on your PATH |
 | A model provider | Pi `/login` or `~/.pi/agent/models.json`. See [docs/models-config.md](./docs/models-config.md) |
-| `@tintinweb/pi-subagents` (npm) | Supplies the `Agent` tool. Without it, the parallel-analysis skills cannot dispatch. `/rpiv-setup` installs it from npm |
+| `@tintinweb/pi-subagents` (npm) | Supplies the `Agent` tool. Without it, the parallel-analysis skills cannot dispatch. `/mono-setup` installs it from npm |
 | `git` *(optional)* | Branch, commit and user context. If git fails, rpiv-pi skips the injection, and nothing else changes |
 | Node.js 22+ | The runtime for Pi and the bundled scripts of rpiv-pi. No build step and no native dependency |
 
@@ -126,14 +126,14 @@ effort. In print mode (`pi -p`), Pi discards notify messages. Then `/rpiv-setup 
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| Session-start banner: *N sibling extension(s) missing* | Siblings are not installed | Run `/rpiv-setup`, then restart Pi |
-| Session-start banner: *bundled agents need attention* | A bundled agent changed, and you edited your copy on disk | Run `/rpiv-update-agents`. It overwrites the files that rpiv-pi manages. It does not change agents that you added |
-| `/rpiv-setup` fails on one package | Pi cannot reach the package directory or its npm dependency | Run `pi install <path>` for that package, then run `/rpiv-setup` again |
-| `/rpiv-models` reports *No models available* | Pi has no provider | Run `/login`, or add a provider to `~/.pi/agent/models.json` |
+| Session-start banner: *N sibling extension(s) missing* | Siblings are not installed | Run `/mono-setup`, then restart Pi |
+| Session-start banner: *bundled agents need attention* | A bundled agent changed, and you edited your copy on disk | Run `/mono-update-agents`. It overwrites the files that rpiv-pi manages. It does not change agents that you added |
+| `/mono-setup` fails on one package | Pi cannot reach the package directory or its npm dependency | Run `pi install <path>` for that package, then run `/mono-setup` again |
+| `/mono-models` reports *No models available* | Pi has no provider | Run `/login`, or add a provider to `~/.pi/agent/models.json` |
 
 ## Related
 
-`/rpiv-setup` installs the packages marked auto, from local paths in this checkout. The other
+`/mono-setup` installs the packages marked auto, from local paths in this checkout. The other
 packages are independent, under [`packages/`](https://github.com/hs1n/pi-monocoque/tree/main/packages).
 
 | Package | Role | Auto |

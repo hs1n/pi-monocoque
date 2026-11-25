@@ -110,7 +110,7 @@ export function loadJsonConfig<T>(path: string): T {
 		// with zero diagnostic surface — the user cannot tell "never saved" from
 		// "saved-but-unreadable." Warning is owner-only since the file lives in
 		// the user's HOME.
-		console.warn(`rpiv-config: invalid JSON at ${path}, using default ({}) — ${(err as Error).message}`);
+		console.warn(`mono-config: invalid JSON at ${path}, using default ({}) — ${(err as Error).message}`);
 		return {} as T;
 	}
 }

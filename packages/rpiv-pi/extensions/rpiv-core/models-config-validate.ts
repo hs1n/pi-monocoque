@@ -42,7 +42,7 @@ export function registerModelsConfigValidation(pi: ExtensionAPI): void {
 		warned = true;
 		for (const key of unknown) {
 			console.warn(
-				`[rpiv-pi] models.json: unknown key "${key}" — override will not apply (typo, or renamed agent/skill?)`,
+				`[mono] models.json: unknown key "${key}" — override will not apply (typo, or renamed agent/skill?)`,
 			);
 		}
 	});

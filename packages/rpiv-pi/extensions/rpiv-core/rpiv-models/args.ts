@@ -33,13 +33,13 @@ const SCOPE_NAMES = Object.keys(SCOPES);
 
 export const MSG_MODELS_USAGE = [
 	"Usage:",
-	"  /rpiv-models show",
-	"  /rpiv-models set defaults <model> [effort]",
-	"  /rpiv-models set agents <agent> <model> [effort]",
-	"  /rpiv-models set skills <skill> <model> [effort]",
-	"  /rpiv-models unset defaults",
-	"  /rpiv-models unset agents <agent>",
-	"  /rpiv-models unset skills <skill>",
+	"  /mono-models show",
+	"  /mono-models set defaults <model> [effort]",
+	"  /mono-models set agents <agent> <model> [effort]",
+	"  /mono-models set skills <skill> <model> [effort]",
+	"  /mono-models unset defaults",
+	"  /mono-models unset agents <agent>",
+	"  /mono-models unset skills <skill>",
 	"<model> is provider/id. [effort] is off or a reasoning level that the model supports.",
 	"If you do not give [effort], the override keeps the session effort.",
 ].join("\n");

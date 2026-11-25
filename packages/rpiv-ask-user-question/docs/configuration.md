@@ -47,7 +47,7 @@ second chance at the legacy path.
 Malformed JSON is not fatal. The loader warns on stderr and continues with defaults:
 
 ```
-rpiv-config: invalid JSON at <path>, using default ({}) — <parser message>
+mono-config: invalid JSON at <path>, using default ({}) — <parser message>
 ```
 
 Valid JSON that is not an object (a string, number, `null`, or an array) is rejected too,

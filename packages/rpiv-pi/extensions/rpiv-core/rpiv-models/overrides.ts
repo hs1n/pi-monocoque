@@ -32,7 +32,7 @@ export const SCOPE_RESET_ALL = "__reset_all__";
 // User-facing string constants (command prose; item builders stay pure)
 // ---------------------------------------------------------------------------
 
-export const MSG_REQUIRES_INTERACTIVE = "/rpiv-models requires an interactive UI session.";
+export const MSG_REQUIRES_INTERACTIVE = "/mono-models requires an interactive UI session.";
 export const MSG_SAVE_FAILED = "Failed to save models.json (disk error or permissions).";
 export const MSG_RESET_ALL = "All model overrides cleared.";
 export const MSG_RESET_ALL_TITLE = "Reset ALL model overrides?";

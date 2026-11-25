@@ -357,7 +357,7 @@ export class GitHubInterceptor implements UrlInterceptor {
 	private showGhHint(): void {
 		if (!this.ghHintShown) {
 			this.ghHintShown = true;
-			console.error("[rpiv-web-tools] Install `gh` CLI for better GitHub repo access including private repos.");
+			console.error("[mono-web-tools] Install `gh` CLI for better GitHub repo access including private repos.");
 		}
 	}
 

@@ -17,6 +17,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **Fork: the commands are now `/mono-setup`, `/mono-models` and `/mono-update-agents`.** The old names `/rpiv-setup`, `/rpiv-models` and `/rpiv-update-agents` still work as aliases. Each alias uses the same handler and the same argument completions. The session banners, the setup messages and the console prefixes say `mono`, not `rpiv-pi`. The config paths, the `.rpiv/` directory, the environment variables, the `--rpiv-debug` flag and the package names do not change.
+
 - **Fork: the fork install pins `@tintinweb/pi-subagents` at 0.26.3, not 0.21.0.** `scripts/fork-pi-install.sh` and the READMEs use the new pin. The test suite passes against 0.26.3. The peer range stays `*`.
 
 - **Fork: the package description counts the skills correctly.** It no longer names the `/wf` workflows, which 3.0.0 removed.

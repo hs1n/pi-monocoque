@@ -16,14 +16,14 @@ const CONFIG_PATH = join(process.env.HOME!, ".config", "rpiv-pi", "models.json")
 const stubSourceInfo = { path: "/stub/SKILL.md", baseDir: "/stub" };
 const COMMANDS = [
 	{ name: "skill:commit", description: "Commit changes", source: "skill", sourceInfo: stubSourceInfo },
-	{ name: "rpiv-models", description: "Configure models", source: "extension", sourceInfo: stubSourceInfo },
+	{ name: "mono-models", description: "Configure models", source: "extension", sourceInfo: stubSourceInfo },
 ];
 
 function setup() {
 	const { pi, captured } = createMockPi();
 	(pi as unknown as { getCommands: () => unknown[] }).getCommands = () => COMMANDS;
 	registerRpivModelsCommand(pi as unknown as ExtensionAPI);
-	const cmd = captured.commands.get("rpiv-models")!;
+	const cmd = captured.commands.get("mono-models")!;
 	return { cmd };
 }
 
@@ -60,7 +60,7 @@ beforeEach(() => {
 	vi.mocked(showFilterablePicker).mockReset();
 });
 
-describe("/rpiv-models set — valid arguments", () => {
+describe("/mono-models set — valid arguments", () => {
 	it.each([false, true])("writes defaults with no picker (hasUI=%s)", async (hasUI) => {
 		const ctx = await run("set defaults zai/glm-4-7", hasUI);
 		expect(stored().defaults).toBe("zai/glm-4-7");
@@ -87,7 +87,7 @@ describe("/rpiv-models set — valid arguments", () => {
 	});
 });
 
-describe("/rpiv-models unset — valid arguments", () => {
+describe("/mono-models unset — valid arguments", () => {
 	it("removes one override", async () => {
 		seed({ defaults: "zai/glm-4-7", skills: { commit: "zai/glm-4-7" } });
 		const ctx = await run("unset skills commit", false);
@@ -102,7 +102,7 @@ describe("/rpiv-models unset — valid arguments", () => {
 	});
 });
 
-describe("/rpiv-models show", () => {
+describe("/mono-models show", () => {
 	it("shows the current overrides", async () => {
 		seed({ defaults: "zai/glm-4-7" });
 		const ctx = await run("show", false);
@@ -116,7 +116,7 @@ describe("/rpiv-models show", () => {
 	});
 });
 
-describe("/rpiv-models — invalid arguments do not write", () => {
+describe("/mono-models — invalid arguments do not write", () => {
 	it.each([
 		["frobnicate", "Unknown subcommand: frobnicate"],
 		["show extra", "Too many arguments: extra"],
@@ -148,14 +148,14 @@ describe("/rpiv-models — invalid arguments do not write", () => {
 	});
 });
 
-describe("/rpiv-models — no arguments", () => {
+describe("/mono-models — no arguments", () => {
 	it("with no UI, shows the config and the usage, and opens no picker", async () => {
 		seed({ defaults: "zai/glm-4-7" });
 		const ctx = await run("   ", false);
 		const [text, level] = lastNotify(ctx);
 		expect(level).toBe("info");
 		expect(text).toContain('"defaults": "zai/glm-4-7"');
-		expect(text).toContain("/rpiv-models set defaults <model> [effort]");
+		expect(text).toContain("/mono-models set defaults <model> [effort]");
 		expect(showFilterablePicker).not.toHaveBeenCalled();
 	});
 
@@ -168,7 +168,7 @@ describe("/rpiv-models — no arguments", () => {
 	});
 });
 
-describe("/rpiv-models — argument completions", () => {
+describe("/mono-models — argument completions", () => {
 	const complete = (prefix: string) => setup().cmd.getArgumentCompletions?.(prefix);
 	const values = (prefix: string) => (complete(prefix) as { value: string }[] | null)?.map((i) => i.value) ?? null;
 
@@ -194,7 +194,7 @@ describe("/rpiv-models — argument completions", () => {
 			throw new Error("Extension runtime not initialized");
 		};
 		registerRpivModelsCommand(pi as unknown as ExtensionAPI);
-		const cmd = captured.commands.get("rpiv-models")!;
+		const cmd = captured.commands.get("mono-models")!;
 		expect(cmd.getArgumentCompletions?.("set skills c")).toBeNull();
 		expect(cmd.getArgumentCompletions?.("se")).toEqual([expect.objectContaining({ value: "set" })]);
 	});

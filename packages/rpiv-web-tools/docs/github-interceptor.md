@@ -103,7 +103,7 @@ use `gh api` for size checks, default branches, and the API view. When `gh` is
 absent it prints once to stderr:
 
 ```
-[rpiv-web-tools] Install `gh` CLI for better GitHub repo access including private repos.
+[mono-web-tools] Install `gh` CLI for better GitHub repo access including private repos.
 ```
 
 and falls back to `git clone --depth 1 --single-branch`.

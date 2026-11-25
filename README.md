@@ -51,15 +51,15 @@ checkout, the install script, opt-in packages such as `rpiv-btw`, and verificati
 
 ```
 /skill:discover <task>                                # interview → research → design → plan → implement
-/rpiv-models                                          # per-skill model + effort overrides
+/mono-models                                          # per-skill model + effort overrides
 /skill:implement .rpiv/artifacts/plans/<latest>.md    # run one stage at a time
 /skill:status                                         # the newest artifacts and the likely next skill
 ```
 
 The pipeline does not run a graph. Each skill is independent. Each skill writes a Markdown
 artifact under `.rpiv/artifacts/`, and the next skill reads it. For multi-stage work, the agent
-uses the Pi `Agent` and `SubagentWorkflow` tools. `/rpiv-setup` installs each missing sibling
-from a local path, because no registry copy exists.
+uses the Pi `Agent` and `SubagentWorkflow` tools. `/mono-setup` installs each missing sibling
+from a local path, because no registry copy exists. The old names `/rpiv-setup`, `/rpiv-models` and `/rpiv-update-agents` still work as aliases.
 
 ## Working on this repo
 

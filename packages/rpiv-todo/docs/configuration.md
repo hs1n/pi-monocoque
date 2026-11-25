@@ -20,7 +20,7 @@ The config file is optional. It is resolved in this order:
    legacy file instead.
 
 Both files missing means every default applies. Malformed JSON prints a
-`rpiv-config: invalid JSON at …` warning and is treated as `{}`. A JSON array or
+`mono-config: invalid JSON at …` warning and is treated as `{}`. A JSON array or
 a non-object value (`null`, a string, a number, a boolean) is silently treated as
 `{}` — no warning.
 

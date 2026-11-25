@@ -69,7 +69,7 @@ export default function (pi: ExtensionAPI): void {
 	});
 
 	pi.registerCommand(COMMAND_NAME, {
-		description: "Select UI language for rpiv-* TUI strings",
+		description: "Select UI language for mono TUI strings",
 		getArgumentCompletions: completeLocale,
 		handler: async (args, ctx) => {
 			const words = args

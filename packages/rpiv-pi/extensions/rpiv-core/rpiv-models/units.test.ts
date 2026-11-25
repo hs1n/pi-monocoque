@@ -1,6 +1,6 @@
 /**
  * Unit tests for the pure helpers + scope descriptors extracted during the
- * /rpiv-models split (overrides.ts, items.ts). The command handler is covered
+ * /mono-models split (overrides.ts, items.ts). The command handler is covered
  * by rpiv-models-command.test.ts; this file pins the building blocks directly.
  */
 

@@ -17,7 +17,7 @@ function makePi() {
 	let cmdHandler: ((args: string, ctx: ExtensionContext) => Promise<void>) | undefined;
 	const registerCommand = vi.fn(
 		(name: string, opts: { handler: (args: string, ctx: ExtensionContext) => Promise<void> }) => {
-			if (name === "rpiv-models") cmdHandler = opts.handler;
+			if (name === "mono-models") cmdHandler = opts.handler;
 		},
 	);
 	// Provide a minimal sourceInfo stub on each mock entry so a future read of
@@ -27,7 +27,7 @@ function makePi() {
 	const getCommands = vi.fn(() => [
 		{ name: "skill:commit", description: "Commit changes", source: "skill", sourceInfo: stubSourceInfo },
 		{ name: "skill:research", description: "Research a topic", source: "skill", sourceInfo: stubSourceInfo },
-		{ name: "rpiv-models", description: "Configure models", source: "extension", sourceInfo: stubSourceInfo },
+		{ name: "mono-models", description: "Configure models", source: "extension", sourceInfo: stubSourceInfo },
 	]);
 	return {
 		pi: { registerCommand, getCommands } as unknown as ExtensionAPI,
@@ -62,7 +62,7 @@ afterEach(() => {
 	vi.restoreAllMocks();
 });
 
-describe("/rpiv-models — guards", () => {
+describe("/mono-models — guards", () => {
 	it("shows the config and the usage when ctx.hasUI is false and there are no arguments", async () => {
 		const { pi, handler } = makePi();
 		registerRpivModelsCommand(pi);
@@ -84,7 +84,7 @@ describe("/rpiv-models — guards", () => {
 	});
 });
 
-describe("/rpiv-models — defaults flow", () => {
+describe("/mono-models — defaults flow", () => {
 	it("writes defaults entry via slash-canonical model key", async () => {
 		vi.mocked(showFilterablePicker).mockResolvedValueOnce("defaults").mockResolvedValueOnce("zai/glm-4-7");
 		const { pi, handler } = makePi();
@@ -99,7 +99,7 @@ describe("/rpiv-models — defaults flow", () => {
 	});
 });
 
-describe("/rpiv-models — skills flow (live registry)", () => {
+describe("/mono-models — skills flow (live registry)", () => {
 	it("pulls skill names from pi.getCommands() filtered by source==='skill'", async () => {
 		vi.mocked(showFilterablePicker)
 			.mockResolvedValueOnce("skills")
@@ -122,7 +122,7 @@ describe("/rpiv-models — skills flow (live registry)", () => {
 	});
 });
 
-describe("/rpiv-models — effort picker for reasoning models", () => {
+describe("/mono-models — effort picker for reasoning models", () => {
 	it("calls effort picker only when reasoning is true", async () => {
 		vi.mocked(showFilterablePicker)
 			.mockResolvedValueOnce("defaults")
@@ -138,7 +138,7 @@ describe("/rpiv-models — effort picker for reasoning models", () => {
 	});
 });
 
-describe("/rpiv-models — first-class off vs inherit", () => {
+describe("/mono-models — first-class off vs inherit", () => {
 	it("persists thinking:'off' when the off effort is chosen", async () => {
 		rmSync(CONFIG_PATH, { force: true });
 		vi.mocked(showFilterablePicker)
@@ -185,7 +185,7 @@ describe("/rpiv-models — first-class off vs inherit", () => {
 	});
 });
 
-describe("/rpiv-models — cache invalidation", () => {
+describe("/mono-models — cache invalidation", () => {
 	it("resets cache after successful save (next loadModelsConfig sees new value)", async () => {
 		mkdirSync(dirname(CONFIG_PATH), { recursive: true });
 		writeFileSync(CONFIG_PATH, JSON.stringify({ defaults: "anthropic/old" }), "utf-8");
@@ -202,7 +202,7 @@ describe("/rpiv-models — cache invalidation", () => {
 	});
 });
 
-describe("/rpiv-models — checkmark display", () => {
+describe("/mono-models — checkmark display", () => {
 	it("passes currentKey to buildModelItems when defaults override exists", async () => {
 		rmSync(CONFIG_PATH, { force: true });
 		mkdirSync(dirname(CONFIG_PATH), { recursive: true });
@@ -234,7 +234,7 @@ describe("/rpiv-models — checkmark display", () => {
 	});
 });
 
-describe("/rpiv-models — override checkmarks", () => {
+describe("/mono-models — override checkmarks", () => {
 	it("marks scopes that hold overrides on the scope picker (not empty scopes, not reset-all)", async () => {
 		rmSync(CONFIG_PATH, { force: true });
 		mkdirSync(dirname(CONFIG_PATH), { recursive: true });
@@ -321,7 +321,7 @@ describe("/rpiv-models — override checkmarks", () => {
 	});
 });
 
-describe("/rpiv-models — per-entry reset", () => {
+describe("/mono-models — per-entry reset", () => {
 	it("removes agents entry when reset sentinel is chosen", async () => {
 		rmSync(CONFIG_PATH, { force: true });
 		mkdirSync(dirname(CONFIG_PATH), { recursive: true });
@@ -411,7 +411,7 @@ describe("removeOverride (cascade cleanup)", () => {
 	});
 });
 
-describe("/rpiv-models — global reset", () => {
+describe("/mono-models — global reset", () => {
 	it("clears entire config when reset-all scope is chosen and confirmed", async () => {
 		rmSync(CONFIG_PATH, { force: true });
 		mkdirSync(dirname(CONFIG_PATH), { recursive: true });
@@ -456,7 +456,7 @@ describe("/rpiv-models — global reset", () => {
 	});
 });
 
-describe("/rpiv-models — save failure", () => {
+describe("/mono-models — save failure", () => {
 	it("notifies error AND does NOT reset cache on saveJsonConfig=false", async () => {
 		if (process.platform === "win32") return;
 
@@ -521,7 +521,7 @@ describe("applyOverride", () => {
 	});
 });
 
-describe("/rpiv-models — ESC navigates one level up", () => {
+describe("/mono-models — ESC navigates one level up", () => {
 	it("ESC at the model picker returns to the scope picker (re-shown, preselecting the prior scope)", async () => {
 		rmSync(CONFIG_PATH, { force: true });
 		// scope=defaults → model picker → ESC (back) → scope picker → ESC (exit).
@@ -600,7 +600,7 @@ describe("/rpiv-models — ESC navigates one level up", () => {
 	});
 });
 
-describe("/rpiv-models — committing returns to the parent list (not close)", () => {
+describe("/mono-models — committing returns to the parent list (not close)", () => {
 	it("after saving a keyed override, returns to the KEY list with the new ✓ (not the scope picker)", async () => {
 		rmSync(CONFIG_PATH, { force: true });
 		// skills → commit → model (non-reasoning) → SAVE → land back on the skill list → ESC out.

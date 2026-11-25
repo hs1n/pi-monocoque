@@ -33,11 +33,13 @@ tools.
 
 | Surface | Registered by | Notes |
 | --- | --- | --- |
-| `/rpiv-setup [--yes]` | always | With no UI, it lists the changes and the command that applies them. `--yes` applies with no confirmation |
-| `/rpiv-update-agents` | always | |
-| `/rpiv-models [show \| set … \| unset …]` | always | With no UI and no argument, it shows the current config and the usage |
+| `/mono-setup [--yes]` | always | With no UI, it lists the changes and the command that applies them. `--yes` applies with no confirmation |
+| `/mono-update-agents` | always | |
+| `/mono-models [show \| set … \| unset …]` | always | With no UI and no argument, it shows the current config and the usage |
 | `/skill:<name>` × 30 | Pi, from the manifest | |
 | `--rpiv-debug` flag | always | Shows the hidden injected messages below |
+
+The old names `/rpiv-setup`, `/rpiv-models` and `/rpiv-update-agents` still work as aliases.
 
 The extension subscribes to these session events: `session_start`, `session_compact`,
 `session_shutdown`, `tool_call` and `before_agent_start`. It also subscribes to `input` and
@@ -105,11 +107,11 @@ A sibling is **present** when one of these two checks finds it:
 
 The second check finds siblings that load with no settings entry of their own. Examples are a
 sibling inside another Pi package (a kit), a project install (`pi install -l`) or `pi -e`.
-These siblings do not cause the missing-siblings banner. `/rpiv-setup` does not install a second
+These siblings do not cause the missing-siblings banner. `/mono-setup` does not install a second
 copy, which would register the same tools again. The entry graph has no static sibling import.
 A test makes sure of this.
 
-`/rpiv-setup` installs each of these seven packages that is not declared and not loaded. It
+`/mono-setup` installs each of these seven packages that is not declared and not loaded. It
 installs the six packages of this repo by local path, and `@tintinweb/pi-subagents` from npm:
 
 | Package | Provides |
@@ -127,7 +129,7 @@ confirmation dialog, and applies nothing until you confirm. `--yes` skips the di
 removes legacy entries from `settings.json`: the unscoped `pi-subagents` and `rpiv-workflow`.
 
 No sibling is imported at runtime. The registration order is important in one place only. The
-session hooks, `/rpiv-update-agents` and `/rpiv-setup` always register, and they register
+session hooks, `/mono-update-agents` and `/mono-setup` always register, and they register
 first. Thus a clean install with no siblings still shows the missing-siblings banner and can
 repair itself.
 

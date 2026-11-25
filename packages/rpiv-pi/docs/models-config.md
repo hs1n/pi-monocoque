@@ -42,7 +42,7 @@ providers, for example Google Gemini.
 }
 ```
 
-If no provider is configured, `/rpiv-models` has no models to offer. It shows
+If no provider is configured, `/mono-models` has no models to offer. It shows
 `No models available (no API keys configured?).`
 
 ## Part 2: the `models.json` of rpiv-pi
@@ -64,15 +64,15 @@ rpiv-pi ignores an `XDG_CONFIG_HOME` that is unset, empty, only whitespace, rela
 **Reads fall back. Writes do not.** If the XDG path does not exist, rpiv-pi reads
 `~/.config/rpiv-pi/models.json`. If the XDG path exists, rpiv-pi uses it, also when its JSON
 is malformed. rpiv-pi shows a warning about a corrupt file. It does not hide it behind the
-legacy file. `/rpiv-models` always writes the XDG path.
+legacy file. `/mono-models` always writes the XDG path.
 
 rpiv-pi writes the file with mode `0600`. The `chmod` is best effort, and a failed `chmod` does
 not stop the save. Thus file systems that ignore permission bits (tmpfs, some network mounts,
 Windows) still save correctly.
 
 If the JSON is missing or malformed, rpiv-pi applies no overrides. It keeps the parsed config
-for the session. It reads the file again after a `/rpiv-models` save or a
-`/rpiv-update-agents` run.
+for the session. It reads the file again after a `/mono-models` save or a
+`/mono-update-agents` run.
 
 ### Schema
 
@@ -108,7 +108,7 @@ field and `off` are different. An absent field uses the session baseline. `off` 
 reasoning. For all other values, rpiv-pi shows a warning that lists the valid set:
 
 ```
-[rpiv-pi] models.json: unknown thinking level "<v>" — valid values: off, minimal, …, max
+[mono] models.json: unknown thinking level "<v>" — valid values: off, minimal, …, max
 ```
 
 ### Model key form
@@ -152,11 +152,11 @@ Your default is Opus. `/skill:commit` and `/skill:changelog` use the lower-cost 
 ```
 
 rpiv-pi writes agent overrides into the frontmatter of the agent file on disk. Thus they apply
-at the next sync of the file. Run `/rpiv-update-agents` to apply them during a session.
+at the next sync of the file. Run `/mono-update-agents` to apply them during a session.
 
-## The `/rpiv-models` command
+## The `/mono-models` command
 
-With a UI and no argument, `/rpiv-models` opens a picker: scope → key → model → effort → save.
+With a UI and no argument, `/mono-models` opens a picker: scope → key → model → effort → save.
 `esc` goes back one level. `esc` at the scope step closes the picker.
 
 - Each scope, also `defaults`, has **Reset to default** to remove an override.
@@ -170,9 +170,9 @@ With arguments, the command works with or without a UI:
 
 | Command | What it does |
 | --- | --- |
-| `/rpiv-models show` | Shows the current overrides |
-| `/rpiv-models set defaults\|agents <agent>\|skills <skill> <model> [effort]` | Saves an override. `<model>` is `provider/id`. `[effort]` is `off` or a level that the model supports |
-| `/rpiv-models unset defaults\|agents <agent>\|skills <skill>` | Removes an override |
+| `/mono-models show` | Shows the current overrides |
+| `/mono-models set defaults\|agents <agent>\|skills <skill> <model> [effort]` | Saves an override. `<model>` is `provider/id`. `[effort]` is `off` or a level that the model supports |
+| `/mono-models unset defaults\|agents <agent>\|skills <skill>` | Removes an override |
 
 With no `[effort]`, the override keeps the session effort. With no UI and no argument, the
 command shows the current config and the usage. If an argument is not valid, the command shows
