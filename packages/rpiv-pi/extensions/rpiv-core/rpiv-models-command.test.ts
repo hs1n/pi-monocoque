@@ -63,12 +63,14 @@ afterEach(() => {
 });
 
 describe("/rpiv-models — guards", () => {
-	it("errors when ctx.hasUI is false", async () => {
+	it("shows the config and the usage when ctx.hasUI is false and there are no arguments", async () => {
 		const { pi, handler } = makePi();
 		registerRpivModelsCommand(pi);
 		const ctx = makeCtx(false);
 		await handler()("", ctx);
-		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("interactive"), "error");
+		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("Usage:"), "info");
+		expect(showFilterablePicker).not.toHaveBeenCalled();
+		expect(existsSync(CONFIG_PATH)).toBe(false);
 	});
 
 	it("cancels gracefully when scope picker returns null", async () => {

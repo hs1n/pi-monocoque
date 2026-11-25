@@ -31,15 +31,20 @@ describe("/rpiv-setup — command shape", () => {
 	});
 });
 
-describe("/rpiv-setup — !hasUI", () => {
-	it("notifies error and exits without inspecting siblings or settings", async () => {
+describe("/rpiv-setup — !hasUI, no argument", () => {
+	it("lists the changes and the apply command, and does not change settings", async () => {
+		vi.mocked(findMissingSiblings).mockReturnValue([{ pkg: "npm:@x/a", matches: /./, provides: "A" }]);
+		vi.mocked(findLegacySiblings).mockReturnValue(["npm:pi-subagents"]);
 		const { pi, captured } = createMockPi();
 		registerSetupCommand(pi);
 		const ctx = createMockCtx({ hasUI: false });
 		await captured.commands.get("rpiv-setup")?.handler("", ctx as never);
-		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("interactive"), "error");
-		expect(findMissingSiblings).not.toHaveBeenCalled();
-		expect(findLegacySiblings).not.toHaveBeenCalled();
+		const [text, level] = (ctx.ui.notify as ReturnType<typeof vi.fn>).mock.calls.at(-1)!;
+		expect(level).toBe("info");
+		expect(text).toContain("npm:@x/a");
+		expect(text).toContain("npm:pi-subagents");
+		expect(text).toContain("/rpiv-setup --yes");
+		expect(ctx.ui.confirm).not.toHaveBeenCalled();
 		expect(pruneLegacySiblings).not.toHaveBeenCalled();
 		expect(spawnPiInstall).not.toHaveBeenCalled();
 	});

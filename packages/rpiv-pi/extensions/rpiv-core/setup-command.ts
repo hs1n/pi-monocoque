@@ -6,6 +6,11 @@
  * the rpiv-pi 0.12.x → 0.14.0 line). Both mutations are previewed in the
  * confirmation dialog and only executed after the user agrees.
  *
+ * Arguments:
+ *   /rpiv-setup        With a UI: preview, confirm, then apply.
+ *                      With no UI: list the changes and the command to apply them.
+ *   /rpiv-setup --yes  Apply the changes with no confirmation. Works with no UI.
+ *
  * Serial `pi install <pkg>` loop via spawnPiInstall (Windows-safe).
  * Reports succeeded/failed split; prompts the user to restart Pi on success.
  */
@@ -22,12 +27,15 @@ import { getPiAgentSettingsPath, toErrorMessage } from "./utils.js";
 const INSTALL_TIMEOUT_MS = 120_000;
 const STDERR_SNIPPET_CHARS = 300;
 
-const MSG_INTERACTIVE_ONLY = "/rpiv-setup requires interactive mode";
+export const SETUP_YES_FLAG = "--yes";
+const MSG_USAGE = `Usage: /rpiv-setup [${SETUP_YES_FLAG}]`;
+const MSG_APPLY_HINT = `Run \`/rpiv-setup ${SETUP_YES_FLAG}\` to apply these changes.`;
 const MSG_NOTHING_TO_DO = "All rpiv-pi sibling dependencies already installed.";
 const MSG_CANCELLED = "/rpiv-setup cancelled";
 const MSG_CONFIRM_TITLE = "Apply rpiv-pi setup changes?";
 const MSG_RESTART = "Restart your Pi session to load the newly-installed extensions.";
 
+const msgUnknownArg = (arg: string) => `Unknown argument: ${arg}. ${MSG_USAGE}`;
 const msgInstalling = (pkg: string) => `Installing ${pkg}…`;
 const msgInstalledLine = (pkgs: string[]) => `✓ Installed: ${pkgs.join(", ")}`;
 const msgFailedHeader = () => `✗ Failed:`;
@@ -40,7 +48,8 @@ type UI = {
 	confirm: (title: string, body: string) => Promise<boolean>;
 };
 
-function buildConfirmBody(missing: SiblingPlugin[], legacyEntries: string[]): string {
+/** Lines that list the pending installs and the legacy entries to remove. */
+function buildPlanLines(missing: SiblingPlugin[], legacyEntries: string[]): string[] {
 	const lines: string[] = ["rpiv-pi will apply the following changes:", ""];
 	if (missing.length > 0) {
 		lines.push("Install via `pi install`:");
@@ -53,26 +62,42 @@ function buildConfirmBody(missing: SiblingPlugin[], legacyEntries: string[]): st
 		for (const entry of legacyEntries) lines.push(`  • ${entry}`);
 		lines.push("");
 	}
-	lines.push(`Your \`${settingsPath}\` will be updated. Proceed?`);
+	return lines;
+}
+
+function buildConfirmBody(missing: SiblingPlugin[], legacyEntries: string[]): string {
+	const lines = buildPlanLines(missing, legacyEntries);
+	lines.push(`Your \`${getPiAgentSettingsPath()}\` will be updated. Proceed?`);
 	return lines.join("\n");
+}
+
+/** No UI and no argument: list the changes and the command that applies them. */
+function buildApplyHint(missing: SiblingPlugin[], legacyEntries: string[]): string {
+	return [...buildPlanLines(missing, legacyEntries), MSG_APPLY_HINT].join("\n");
 }
 
 export function registerSetupCommand(pi: ExtensionAPI): void {
 	pi.registerCommand("rpiv-setup", {
 		description: "Install rpiv-pi's sibling extension plugins",
+		getArgumentCompletions: (prefix) =>
+			SETUP_YES_FLAG.startsWith(prefix.trim())
+				? [{ value: SETUP_YES_FLAG, label: SETUP_YES_FLAG, description: "Apply the changes with no confirmation" }]
+				: null,
 		handler: (args, ctx) => handleSetupCommand(args, ctx, pi),
 	});
 }
 
 async function handleSetupCommand(
-	_args: string,
+	args: string,
 	ctx: { hasUI: boolean; ui: UI },
 	pi: Pick<ExtensionAPI, "getAllTools" | "getCommands">,
 ): Promise<void> {
-	if (!ctx.hasUI) {
-		ctx.ui.notify(MSG_INTERACTIVE_ONLY, "error");
+	const arg = args.trim();
+	if (arg !== "" && arg !== SETUP_YES_FLAG) {
+		ctx.ui.notify(msgUnknownArg(arg), "error");
 		return;
 	}
+	const skipConfirm = arg === SETUP_YES_FLAG;
 
 	const missing = findMissingSiblings(readLoadedSiblingSources(pi));
 	const legacyEntries = findLegacySiblings();
@@ -81,10 +106,16 @@ async function handleSetupCommand(
 		return;
 	}
 
-	const confirmed = await ctx.ui.confirm(MSG_CONFIRM_TITLE, buildConfirmBody(missing, legacyEntries));
-	if (!confirmed) {
-		ctx.ui.notify(MSG_CANCELLED, "info");
-		return;
+	if (!skipConfirm) {
+		if (!ctx.hasUI) {
+			ctx.ui.notify(buildApplyHint(missing, legacyEntries), "info");
+			return;
+		}
+		const confirmed = await ctx.ui.confirm(MSG_CONFIRM_TITLE, buildConfirmBody(missing, legacyEntries));
+		if (!confirmed) {
+			ctx.ui.notify(MSG_CANCELLED, "info");
+			return;
+		}
 	}
 
 	if (legacyEntries.length > 0) {
