@@ -1,5 +1,15 @@
 import { StringEnum } from "@earendil-works/pi-ai";
-import { type Static, Type } from "typebox";
+import { type Static, type TUnsafe, Type } from "typebox";
+
+// pi-ai >= 1.6 types `StringEnum` as a pi-schema `Schema`, which TypeBox's `Static` cannot
+// read, so the tool's `params` lost their literal unions. Wrapping it in `Type.Unsafe`
+// keeps the same provider-safe JSON (`{ type: "string", enum: [...] }`) and restores the type.
+function stringEnum<const T extends readonly string[]>(
+	values: T,
+	options?: Parameters<typeof StringEnum<T>>[1],
+): TUnsafe<T[number]> {
+	return Type.Unsafe<T[number]>(StringEnum(values, options));
+}
 
 // ---------------------------------------------------------------------------
 // Tool / command identity — verbatim string boundaries.
@@ -87,7 +97,7 @@ export interface TaskMutationParams {
 // ---------------------------------------------------------------------------
 
 export const TodoParamsSchema = Type.Object({
-	action: StringEnum(["create", "update", "list", "get", "delete", "clear"] as const),
+	action: stringEnum(["create", "update", "list", "get", "delete", "clear"] as const),
 	subject: Type.Optional(Type.String({ description: "Task subject line (required for create)" })),
 	description: Type.Optional(Type.String({ description: "Long-form task description" })),
 	activeForm: Type.Optional(
@@ -96,7 +106,7 @@ export const TodoParamsSchema = Type.Object({
 		}),
 	),
 	status: Type.Optional(
-		StringEnum(["pending", "in_progress", "completed", "deleted"] as const, {
+		stringEnum(["pending", "in_progress", "completed", "deleted"] as const, {
 			description:
 				"Set this task's status (update): one of pending, in_progress, completed, deleted. When action is list, filters returned tasks by this status.",
 		}),

@@ -106,6 +106,6 @@ describe("advisor request carries no executor tool declarations (#295)", () => {
 		const request = normalizeContext(context).messages; // what every provider builds its request from
 		expect(getCurrentTools(request)).toEqual([]);
 		// The executor's prompt text still reaches the advisor — only the declarations go.
-		expect(getCurrentSystemPrompt(request)).toContain("You are an expert coding assistant");
+		expect(getCurrentSystemPrompt(request)).toContain("You are a coding assistant running inside pi");
 	});
 });
