@@ -27,7 +27,7 @@ export const BUNDLED_SKILLS_DIR = join(PACKAGE_ROOT, "skills");
 /**
  * Enumerate skill-directory names under `dir`. Fail-soft: returns an empty
  * Set on any read failure (stripped install, EACCES, missing directory) AND
- * logs a `[rpiv-pi]`-prefixed warning so the failure is diagnosable. Without
+ * logs a `[mono]`-prefixed warning so the failure is diagnosable. Without
  * the log, downstream `validateDag` rejects every skill node as "unknown
  * bundled skill" and the user has no signal that the directory listing
  * itself failed.

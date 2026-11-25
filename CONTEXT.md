@@ -23,19 +23,19 @@ _Avoid_: the old scope, the original scope
 
 **sibling**:
 A Pi extension package that is registered in `extensions/rpiv-core/siblings.ts`. That registry
-is the single source of truth. One entry controls `/rpiv-setup`, the missing-sibling warnings
+is the single source of truth. One entry controls `/mono-setup`, the missing-sibling warnings
 and presence detection.
 _Avoid_: plugin, module, addon, dependency
 
 **opt-in sibling**:
 A package that has the lockstep version and the shared CI. It is not in `siblings.ts`, not in
-the `peerDependencies` of `rpiv-pi`, and not in the root `pi` manifest. Thus `/rpiv-setup` and a
+the `peerDependencies` of `rpiv-pi`, and not in the root `pi` manifest. Thus `/mono-setup` and a
 git install do not install it. Install it with `scripts/fork-pi-install.sh --with <name>`. At
 this time, `rpiv-btw` is the only one.
 _Avoid_: optional package, disabled plugin
 
 **legacy sibling**:
-A replaced package name in `LEGACY_SIBLINGS`. `/rpiv-setup` removes it from the settings. At
+A replaced package name in `LEGACY_SIBLINGS`. `/mono-setup` removes it from the settings. At
 this time, the legacy siblings are `pi-subagents` and `rpiv-workflow`.
 _Avoid_: deprecated sibling, old name
 

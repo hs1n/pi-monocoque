@@ -114,8 +114,8 @@ The changes on top of v2.13.8 are in three groups.
 - The fork throttles guidance injection. The tool path injects only the deepest guidance file.
   A repeated `session_start` does not inject again for a session that already has the context.
 - The guidance docs are split into rules that Pi injects and an on-demand `details.md`.
-- `/rpiv-setup` resolves the siblings of this repo to local paths. It accepts `--yes`, so it
-  works with no UI. `/rpiv-models`, `/advisor` and `/languages` also accept arguments.
+- `/mono-setup` resolves the siblings of this repo to local paths. It accepts `--yes`, so it
+  works with no UI. `/mono-models`, `/advisor` and `/languages` also accept arguments.
 - A session shows a warning when a skill copy with a higher precedence hides a bundled skill.
 - **`grilling` is the one copied Matt Pocock skill that this fork edits.** It copies its design
   tree into the Pi `todo` tool. Each decision is a task, each prerequisite is a `blockedBy`, and
