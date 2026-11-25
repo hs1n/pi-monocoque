@@ -20,10 +20,10 @@ import { setAdvisorEffort, setAdvisorModel } from "./state.js";
 
 /**
  * Module-local "already announced" latch. Pi fires `session_start` for every
- * session including programmatic spawns (workflow stages, batch ops, any
+ * session including programmatic spawns (subagents, batch ops, any
  * extension's `newSession` call). State mutation belongs on every fire;
- * the user-facing announcement does NOT — repeating it per stage in a
- * `/wf` run just spams the status line. The latch flips on the first
+ * the user-facing announcement does NOT — repeating it per spawned
+ * session just spams the status line. The latch flips on the first
  * notify and stays set until the module is reloaded (`/reload`) or the
  * process restarts. Test-resettable via `__resetAdvisorAnnounced()`.
  */

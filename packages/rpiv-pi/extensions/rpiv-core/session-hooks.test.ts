@@ -265,12 +265,10 @@ describe("session_start hook — notifications", () => {
 
 describe("session_start hook — startup-maintenance-once latch", () => {
 	// Pi fires session_start for every session including programmatic spawns
-	// (workflow stages, batch ops). Startup maintenance — agent sync, per-cwd
+	// (subagents, batch ops). Startup maintenance — agent sync, per-cwd
 	// cleanup, and the banner — latches on the first fire and is skipped for the
 	// rest of the module lifetime: the bundled source is immutable mid-process,
-	// so re-syncing on every stage spawn is pure waste (amplified N× by /wf).
-	// Replaces the older cross-package coupling to rpiv-workflow's child-session
-	// Symbol.
+	// so re-syncing on every spawned session is pure waste.
 
 	it("first session_start fires the cleanup/agent-sync/missing-siblings notifies", async () => {
 		vi.mocked(syncBundledAgents).mockReturnValueOnce({

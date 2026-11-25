@@ -7,11 +7,9 @@
  *   <cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills >
  *   ~/.pi/agent/skills > the installed package
  *
- * A same-named copy anywhere above the package wins, and nothing complains: the
- * built-in `/wf` graphs dispatch a skill BY NAME, so the graph keeps routing to
- * that name while a different body runs — and because `contract:` blocks are
- * harvested per skill, a copy that declares none leaves the graph validating
- * against nothing. `skills/matt-pocock/README.md` explains this at length and
+ * A same-named copy anywhere above the package wins, and nothing complains:
+ * skills and subagents invoke a skill BY NAME, so they keep calling that name
+ * while a different body runs. `skills/matt-pocock/README.md` explains this and
  * tells whoever updates the vendored set not to re-run the installer, because
  * the installer's lock still carries `research`, `implement` and `code-review`.
  * That is a rule a person has to remember, which is the failure mode.

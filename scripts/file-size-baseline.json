@@ -92,7 +92,6 @@
 		"packages/rpiv-pi/skills/code-review/_helpers/review-range.mjs": 439,
 		"packages/rpiv-pi/skills/code-review/_helpers/review-range.test.ts": 227,
 		"packages/rpiv-pi/skills/design/compaction-boundary.test.ts": 26,
-		"packages/rpiv-pi/skills/elaborate/_helpers/validate-workflow-invariant.mjs": 90,
 		"packages/rpiv-pi/skills/pr-triage/_helpers/pr-fetch.mjs": 357,
 		"packages/rpiv-pi/skills/research/progress-markers.test.ts": 78
 	}

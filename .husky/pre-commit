@@ -36,7 +36,7 @@ fi
 echo "Checking for skill-name collisions..."
 npm run check:skill-names
 if [ $? -ne 0 ]; then
-  echo "❌ A skill name exists in both skill sets — the /wf graphs dispatch by name (see scripts/check-skill-name-collisions.mjs)."
+  echo "❌ A skill name exists in both skill sets — Pi resolves skills by name, so one copy silently shadows the other (see scripts/check-skill-name-collisions.mjs)."
   exit 1
 fi
 
