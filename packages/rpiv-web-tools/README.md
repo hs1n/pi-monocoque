@@ -19,9 +19,8 @@ queries never leave your network.
 
 ## Install
 
-This package ships inside [`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque) — an
-11-package monorepo with **no registry route**, so there is no `@hs1n/rpiv-*` entry on npm.
-Install the repo as a Pi source:
+This package ships inside [`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque), an 11-package
+monorepo with **no registry route** (no `@hs1n/rpiv-*` entry on npm). Install the repo as a Pi source:
 
 ```sh
 pi install git:github.com/hs1n/pi-monocoque
@@ -34,10 +33,8 @@ third-party package and is installed separately:
 pi install npm:@tintinweb/pi-subagents@0.21.0
 ```
 
-[INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) covers the
-live-checkout install (`pi install <path>`, edits picked up by `/reload`) and the
-per-package form (`scripts/fork-pi-install.sh`).
-
+[INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) covers the live-checkout
+install (`pi install <path>`, edits picked up by `/reload`) and the per-package form (`scripts/fork-pi-install.sh`).
 
 ## Quick start
 

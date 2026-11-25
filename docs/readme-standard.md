@@ -182,8 +182,8 @@ entry, while `!`-prefixed entries are skipped by both of its checks.
 
 ## Internal packages
 
-`rpiv-config` and `test-utils` are not consumer installs. They get a short internal README
-instead — under 60 lines:
+`rpiv-config`, `rpiv-side-call` and `test-utils` are not consumer installs. They get a
+short internal README instead — under 60 lines:
 
 ```
 # <package name>

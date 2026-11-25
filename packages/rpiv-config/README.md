@@ -1,26 +1,14 @@
 # @hs1n/rpiv-config
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 Shared JSON config I/O for the `@hs1n/rpiv-*` packages — XDG-aware path resolution, loads
 that return `{}` instead of throwing, saves that report failure and chmod to `0600`, and
-TypeBox-driven defaults. It is an internal utility of the
-[pi-monocoque](https://github.com/hs1n/pi-monocoque) monorepo — nothing is published; the
-siblings resolve it through the workspace links. There is no CLI, and it registers nothing
-with [Pi Agent](https://github.com/badlogic/pi-mono).
+TypeBox-driven defaults. It is internal to the [pi-monocoque](https://github.com/hs1n/pi-monocoque)
+monorepo: nothing is published, there is no CLI, and it registers nothing with
+[Pi Agent](https://github.com/badlogic/pi-mono).
 
-## Install
+## What it provides
 
-Not published: `rpiv-config` is a workspace package inside
-[`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque), and its consumers resolve it
-through the monorepo's workspace links (`"@hs1n/rpiv-config": "^<lockstep version>"`), not
-from a registry.
-
-ESM only. The package ships TypeScript source — `exports` points at `./index.ts`, with no
-`main`, no `types`, and no compiled build — so you need a bundler or a TypeScript-aware runtime
-(`tsx`, Bun). Plain `node` cannot load it, and `--experimental-strip-types` refuses `.ts` files under `node_modules`.
-
-## Quick start
+Eleven exports, all stateless — no singletons, no caches, no import-time side effects.
 
 ```ts
 import { configPath, loadJsonConfig } from "@hs1n/rpiv-config";
@@ -28,10 +16,6 @@ import { configPath, loadJsonConfig } from "@hs1n/rpiv-config";
 const path = configPath("rpiv-todo"); // ~/.config/rpiv-todo/config.json
 const config = loadJsonConfig<{ theme?: string }>(path); // {} if the file is missing
 ```
-
-## What it provides
-
-Eleven exports, all stateless — no singletons, no caches, no import-time side effects.
 
 | Export | What it does |
 | --- | --- |
@@ -61,6 +45,14 @@ Eleven exports, all stateless — no singletons, no caches, no import-time side 
 | [`rpiv-ask-user-question`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-ask-user-question) | Config load, guidance fields |
 
 These are versioned in lockstep with this package.
+
+## Conventions
+
+- **Workspace links, not a registry.** Consumers declare `"@hs1n/rpiv-config": "^<lockstep version>"`
+  and npm workspaces resolve it inside the monorepo.
+- **TypeScript source, ESM only.** `exports` points at `./index.ts`, with no `main`, no `types`,
+  and no compiled build. You need a bundler or a TypeScript-aware runtime (`tsx`, Bun). Plain
+  `node` cannot load it, and `--experimental-strip-types` refuses `.ts` files under `node_modules`.
 
 ## License
 
