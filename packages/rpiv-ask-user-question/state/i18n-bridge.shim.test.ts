@@ -23,7 +23,8 @@
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { ROW_INTENT_META } from "./row-intent.js";
 
 const PACKAGE_DIR = dirname(dirname(fileURLToPath(import.meta.url)));
 const BRIDGE = resolve(PACKAGE_DIR, "state/i18n-bridge.ts");
@@ -97,5 +98,22 @@ describe("i18n soft-peer shim — runtime fallback contract", () => {
 		}
 		expect(scopeImpl("any.key", "literal fallback")).toBe("literal fallback");
 		expect(scopeImpl("sentinel.next", "Next")).toBe("Next");
+	});
+});
+
+describe("i18n soft-peer shim — bridge without the SDK", () => {
+	afterEach(() => {
+		vi.doUnmock("@hs1n/rpiv-i18n");
+		vi.resetModules();
+	});
+
+	it("bridge t() returns the inline English fallback when the SDK import fails", async () => {
+		vi.resetModules();
+		vi.doMock("@hs1n/rpiv-i18n", () => {
+			throw new Error("Cannot find module '@hs1n/rpiv-i18n'");
+		});
+		const bridge = await import("./i18n-bridge.js");
+		expect(bridge.t("any.key", "literal fallback")).toBe("literal fallback");
+		expect(bridge.displayLabel("next")).toBe(ROW_INTENT_META.next.label);
 	});
 });

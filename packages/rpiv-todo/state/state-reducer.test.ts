@@ -240,3 +240,77 @@ describe("isTransitionValid", () => {
 		expect(isTransitionValid("completed", "deleted")).toBe(true);
 	});
 });
+
+describe("applyTaskMutation — optional fields and lookup errors", () => {
+	it("create copies description, owner and metadata onto the new task", () => {
+		const metadata = { source: "plan" };
+		const result = applyTaskMutation(emptyState(), "create", {
+			subject: "write tests",
+			description: "cover the reducer",
+			owner: "agent-1",
+			metadata,
+		});
+		expect(result.state.tasks[0]).toEqual({
+			id: 1,
+			subject: "write tests",
+			status: "pending",
+			description: "cover the reducer",
+			owner: "agent-1",
+			metadata: { source: "plan" },
+		});
+		expect(result.state.tasks[0].metadata).not.toBe(metadata);
+	});
+
+	it("update rejects a missing id and an unknown id", () => {
+		const state = stateWith(task({ id: 1, subject: "x" }));
+		expect(applyTaskMutation(state, "update", { subject: "y" }).op).toEqual({
+			kind: "error",
+			message: "id required for update",
+		});
+		expect(applyTaskMutation(state, "update", { id: 9, subject: "y" }).op).toEqual({
+			kind: "error",
+			message: "#9 not found",
+		});
+	});
+
+	it("update rejects addBlockedBy that names an unknown or deleted task", () => {
+		const state = stateWith(task({ id: 1, subject: "a" }), task({ id: 2, subject: "gone", status: "deleted" }));
+		expect(applyTaskMutation(state, "update", { id: 1, addBlockedBy: [7] }).op).toEqual({
+			kind: "error",
+			message: "addBlockedBy: #7 not found",
+		});
+		expect(applyTaskMutation(state, "update", { id: 1, addBlockedBy: [2] }).op).toEqual({
+			kind: "error",
+			message: "addBlockedBy: #2 is deleted",
+		});
+	});
+
+	it("update does not duplicate a dependency that is already present", () => {
+		const state = stateWith(task({ id: 1, subject: "dep" }), task({ id: 2, subject: "x", blockedBy: [1] }));
+		const result = applyTaskMutation(state, "update", { id: 2, addBlockedBy: [1] });
+		expect(result.state.tasks[1].blockedBy).toEqual([1]);
+	});
+
+	it("update sets activeForm, owner and metadata on a task that had none", () => {
+		const state = stateWith(task({ id: 1, subject: "x" }));
+		const result = applyTaskMutation(state, "update", {
+			id: 1,
+			activeForm: "Writing",
+			owner: "agent-2",
+			metadata: { k: "v" },
+		});
+		expect(result.state.tasks[0]).toMatchObject({ activeForm: "Writing", owner: "agent-2", metadata: { k: "v" } });
+	});
+
+	it("get rejects a missing id and an unknown id", () => {
+		const state = stateWith(task({ id: 1, subject: "x" }));
+		expect(applyTaskMutation(state, "get", {}).op).toEqual({ kind: "error", message: "id required for get" });
+		expect(applyTaskMutation(state, "get", { id: 5 }).op).toEqual({ kind: "error", message: "#5 not found" });
+	});
+
+	it("delete rejects a missing id and an unknown id", () => {
+		const state = stateWith(task({ id: 1, subject: "x" }));
+		expect(applyTaskMutation(state, "delete", {}).op).toEqual({ kind: "error", message: "id required for delete" });
+		expect(applyTaskMutation(state, "delete", { id: 5 }).op).toEqual({ kind: "error", message: "#5 not found" });
+	});
+});

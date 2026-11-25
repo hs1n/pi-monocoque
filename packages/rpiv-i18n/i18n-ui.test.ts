@@ -140,3 +140,50 @@ describe("showLanguagePicker — keyboard flow (real pi-tui keybindings)", () =>
 		expect(r).toBe("only");
 	});
 });
+
+// Wraps each styled span as <color>text</color>, so a test can see which
+// select-list theme slot styled a line.
+const taggingTheme = {
+	fg: (c: string, s: string) => `<${c}>${s}</${c}>`,
+	bg: (_c: string, s: string) => s,
+	bold: (s: string) => s,
+	strikethrough: (s: string) => s,
+};
+
+function renderWith(items: SelectItem[]): Promise<string[]> {
+	return new Promise((resolve) => {
+		const custom = (factory: unknown) => {
+			const f = factory as (
+				tui: { requestRender: () => void },
+				theme: typeof taggingTheme,
+				kb: undefined,
+				done: (v: unknown) => void,
+			) => RenderableComponent;
+			const component = f({ requestRender: () => {} }, taggingTheme, undefined, () => {});
+			resolve(component.render(80));
+			return new Promise(() => {});
+		};
+		void showLanguagePicker({ ui: { custom } } as never, items);
+	});
+}
+
+describe("showLanguagePicker — select-list theme slots", () => {
+	it("styles the description of an unselected row as muted", async () => {
+		const lines = await renderWith([
+			{ label: "English", value: "en", description: "default" },
+			{ label: "Deutsch", value: "de", description: "German" },
+		]);
+		expect(lines.some((l) => l.includes("<muted>") && l.includes("German"))).toBe(true);
+	});
+
+	it("styles the scroll indicator as dim when items exceed the visible rows", async () => {
+		const many = Array.from({ length: 12 }, (_, i) => ({ label: `Locale ${i}`, value: `l${i}` }));
+		const lines = await renderWith(many);
+		expect(lines.some((l) => l.includes("<dim>") && l.includes("(1/12)"))).toBe(true);
+	});
+
+	it("styles the empty-list message as a warning", async () => {
+		const lines = await renderWith([]);
+		expect(lines.some((l) => l.includes("<warning>") && l.includes("No matching"))).toBe(true);
+	});
+});

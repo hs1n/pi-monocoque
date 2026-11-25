@@ -11,23 +11,98 @@
  * direct `todo list`.
  */
 
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { execFile } from "node:child_process";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { fauxAssistantMessage, fauxProvider, fauxToolCall, type JsonObject } from "@earendil-works/pi-ai";
-import {
-	type AgentSession,
-	createAgentSession,
-	createCodemodeExtension,
-	DefaultResourceLoader,
-	ModelRuntime,
-	SessionManager,
-	SettingsManager,
-} from "@earendil-works/pi-coding-agent";
+import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const PACKAGE_DIR = fileURLToPath(new URL(".", import.meta.url));
+const PI_AI_ENTRY = import.meta.resolve("@earendil-works/pi-ai");
+const PI_ENTRY = import.meta.resolve("@earendil-works/pi-coding-agent");
+const execFileAsync = promisify(execFile);
+
+type JsonObject = Record<string, unknown>;
+type Turn = { name: string; args: JsonObject };
+
+// The sessions run in a CHILD process. Pi loads rpiv-todo with its own TS loader;
+// inside the vitest worker, v8 coverage merged that run with vitest's run of the
+// same files and dropped their per-file coverage (state-reducer.ts read 75%
+// instead of 89%). The child is not instrumented, so the merge stays clean.
+const DRIVER_SOURCE = `
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
+const input = JSON.parse(process.argv[2]);
+const { fauxAssistantMessage, fauxProvider, fauxToolCall } = await import(input.piAiEntry);
+const { createAgentSession, createCodemodeExtension, DefaultResourceLoader, ModelRuntime, SessionManager, SettingsManager } =
+	await import(input.piEntry);
+const { agentDir, cwd, sessionDir } = input;
+const faux = fauxProvider({ provider: "faux", models: [{ id: "scripted" }] });
+const runtime = await ModelRuntime.create({
+	authPath: join(agentDir, "auth.json"),
+	modelsPath: join(agentDir, "models.json"),
+});
+runtime.registerNativeProvider(faux.provider);
+
+async function openSession(sessionManager) {
+	const settingsManager = SettingsManager.create(cwd, agentDir);
+	const resourceLoader = new DefaultResourceLoader({
+		cwd,
+		agentDir,
+		settingsManager,
+		additionalExtensionPaths: [input.packageDir],
+		extensionFactories: [{ name: "codemode", factory: createCodemodeExtension() }],
+	});
+	await resourceLoader.reload();
+	const { session } = await createAgentSession({
+		cwd,
+		agentDir,
+		modelRuntime: runtime,
+		resourceLoader,
+		settingsManager,
+		sessionManager,
+		model: faux.getModel(),
+	});
+	await session.bindExtensions({}); // fires session_start → rpiv-todo replays the branch
+	return session;
+}
+
+async function closeSession(session) {
+	await session.extensionRunner.emit({ type: "session_shutdown", reason: "quit" });
+	session.dispose();
+}
+
+const toolCall = (t) => fauxAssistantMessage(fauxToolCall(t.name, t.args));
+
+const first = await openSession(SessionManager.create(cwd, sessionDir));
+for (const turn of input.turns) {
+	faux.setResponses([toolCall(turn), fauxAssistantMessage("done")]);
+	await first.prompt("go");
+}
+const file = first.sessionFile;
+await closeSession(first);
+if (!file) throw new Error("session was not persisted");
+
+const resumed = await openSession(SessionManager.open(file, sessionDir));
+let text = "<no todo result>";
+try {
+	faux.setResponses([toolCall({ name: "todo", args: { action: "list" } }), fauxAssistantMessage("ok")]);
+	await resumed.prompt("list");
+	const listed = resumed.sessionManager
+		.getBranch()
+		.filter((e) => e.type === "message" && e.message.role === "toolResult" && e.message.toolName === "todo")
+		.at(-1);
+	if (listed?.type === "message" && listed.message.role === "toolResult") {
+		text = listed.message.content.map((c) => (c.type === "text" ? c.text : "")).join("");
+	}
+} finally {
+	await closeSession(resumed);
+}
+writeFileSync(input.output, JSON.stringify({ text }));
+process.exit(0);
+`;
 
 describe("todo calls made through codemode survive session replay (#290)", () => {
 	let home: string;
@@ -35,10 +110,8 @@ describe("todo calls made through codemode survive session replay (#290)", () =>
 	let cwd: string;
 	let sessionDir: string;
 	let prevOffline: string | undefined;
-	const faux = fauxProvider({ provider: "faux", models: [{ id: "scripted" }] });
-	let runtime: ModelRuntime;
 
-	beforeEach(async () => {
+	beforeEach(() => {
 		home = mkdtempSync(join(tmpdir(), "rpiv-todo-codemode-"));
 		agentDir = join(home, "agent");
 		cwd = join(home, "cwd");
@@ -53,11 +126,6 @@ describe("todo calls made through codemode survive session replay (#290)", () =>
 		);
 		prevOffline = process.env.PI_OFFLINE;
 		process.env.PI_OFFLINE = "1";
-		runtime = await ModelRuntime.create({
-			authPath: join(agentDir, "auth.json"),
-			modelsPath: join(agentDir, "models.json"),
-		});
-		runtime.registerNativeProvider(faux.provider);
 	});
 
 	afterEach(() => {
@@ -66,61 +134,26 @@ describe("todo calls made through codemode survive session replay (#290)", () =>
 		rmSync(home, { recursive: true, force: true });
 	});
 
-	async function openSession(sessionManager: SessionManager): Promise<AgentSession> {
-		const settingsManager = SettingsManager.create(cwd, agentDir);
-		const resourceLoader = new DefaultResourceLoader({
-			cwd,
-			agentDir,
-			settingsManager,
-			additionalExtensionPaths: [PACKAGE_DIR],
-			extensionFactories: [{ name: "codemode", factory: createCodemodeExtension() }],
-		});
-		await resourceLoader.reload();
-		const { session } = await createAgentSession({
-			cwd,
-			agentDir,
-			modelRuntime: runtime,
-			resourceLoader,
-			settingsManager,
-			sessionManager,
-			model: faux.getModel(),
-		});
-		await session.bindExtensions({}); // fires session_start → rpiv-todo replays the branch
-		return session;
-	}
-
-	async function closeSession(session: AgentSession): Promise<void> {
-		await session.extensionRunner.emit({ type: "session_shutdown", reason: "quit" });
-		session.dispose();
-	}
-
-	const toolCall = (name: string, args: JsonObject) => fauxAssistantMessage(fauxToolCall(name, args));
+	const toolCall = (name: string, args: JsonObject): Turn => ({ name, args });
 	const codemode = (code: string) => toolCall("codemode", { code });
 
 	/** Run each turn's scripted tool calls, close, reopen from disk, and return a direct `todo list`. */
-	async function listAfterResume(turns: ReturnType<typeof toolCall>[]): Promise<string> {
-		const first = await openSession(SessionManager.create(cwd, sessionDir));
-		for (const step of turns) {
-			faux.setResponses([step, fauxAssistantMessage("done")]);
-			await first.prompt("go");
-		}
-		const file = first.sessionFile;
-		await closeSession(first);
-		if (!file) throw new Error("session was not persisted");
-
-		const resumed = await openSession(SessionManager.open(file, sessionDir));
-		try {
-			faux.setResponses([toolCall("todo", { action: "list" }), fauxAssistantMessage("ok")]);
-			await resumed.prompt("list");
-			const listed = resumed.sessionManager
-				.getBranch()
-				.filter((e) => e.type === "message" && e.message.role === "toolResult" && e.message.toolName === "todo")
-				.at(-1);
-			if (listed?.type !== "message" || listed.message.role !== "toolResult") return "<no todo result>";
-			return listed.message.content.map((c) => (c.type === "text" ? c.text : "")).join("");
-		} finally {
-			await closeSession(resumed);
-		}
+	async function listAfterResume(turns: Turn[]): Promise<string> {
+		const driver = join(home, "session-driver.mjs");
+		const output = join(home, "listed.json");
+		writeFileSync(driver, DRIVER_SOURCE);
+		const input = {
+			piAiEntry: PI_AI_ENTRY,
+			piEntry: PI_ENTRY,
+			packageDir: PACKAGE_DIR,
+			agentDir,
+			cwd,
+			sessionDir,
+			turns,
+			output,
+		};
+		await execFileAsync(process.execPath, [driver, JSON.stringify(input)], { env: process.env });
+		return (JSON.parse(readFileSync(output, "utf-8")) as { text: string }).text;
 	}
 
 	it("restores tasks created and updated only through codemode", async () => {
