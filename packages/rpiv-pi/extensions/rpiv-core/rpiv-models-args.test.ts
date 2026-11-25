@@ -188,6 +188,17 @@ describe("/rpiv-models — argument completions", () => {
 		expect(values(`unset agents ${agent}`)).toContain(`unset agents ${agent}`);
 	});
 
+	it("returns null for skill names when getCommands throws before the runtime binds", () => {
+		const { pi, captured } = createMockPi();
+		(pi as unknown as { getCommands: () => unknown[] }).getCommands = () => {
+			throw new Error("Extension runtime not initialized");
+		};
+		registerRpivModelsCommand(pi as unknown as ExtensionAPI);
+		const cmd = captured.commands.get("rpiv-models")!;
+		expect(cmd.getArgumentCompletions?.("set skills c")).toBeNull();
+		expect(cmd.getArgumentCompletions?.("se")).toEqual([expect.objectContaining({ value: "set" })]);
+	});
+
 	it("returns null when nothing matches or no completion applies", () => {
 		expect(values("zzz")).toBeNull();
 		expect(values("show ")).toBeNull();

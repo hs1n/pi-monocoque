@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -36,6 +36,7 @@ beforeEach(() => {
 
 afterEach(() => {
 	rmSync(dir, { recursive: true, force: true });
+	rmSync(`${dir}-outside`, { recursive: true, force: true });
 });
 
 describe("artifact-index.mjs", () => {
@@ -81,5 +82,72 @@ describe("artifact-index.mjs", () => {
 		for (let i = 1; i <= 5; i++) write(`reviews/2026-01-0${i}_09-00-00_r${i}.md`);
 		const r = rows(run("--limit", "2"));
 		expect(r.map((c) => c[0])).toEqual(["2026-01-05 09:00:00", "2026-01-04 09:00:00"]);
+	});
+
+	it("prints `missing` when the root is a file (exit 0)", () => {
+		write("not-a-dir", "x");
+		const file = join(dir, "not-a-dir");
+		const out = execFileSync("node", [HELPER, "--root", file], { encoding: "utf-8" });
+		expect(out.trim().split("\n")).toEqual([`root: ${file}`, "missing"]);
+	});
+
+	// Root can read a chmod 000 file, so the test has no meaning as root.
+	it.skipIf(process.getuid?.() === 0)("lists an unreadable file and keeps the other rows", () => {
+		write("plans/2026-01-02_09-00-00_locked.md", "---\nstatus: ready\n---\n");
+		write("plans/2026-01-01_09-00-00_open.md", "---\nstatus: draft\n---\n");
+		const locked = join(dir, "plans/2026-01-02_09-00-00_locked.md");
+		chmodSync(locked, 0o000);
+		try {
+			const r = rows(run());
+			expect(r.map((c) => c[3])).toEqual(["unreadable", "draft"]);
+		} finally {
+			chmodSync(locked, 0o644);
+		}
+	});
+
+	it("reads the frontmatter of a file that is larger than the read limit", () => {
+		write("plans/2026-01-01_09-00-00_big.md", `---\ntopic: big\nstatus: ready\n---\n${"x".repeat(64 * 1024)}\n`);
+		expect(rows(run("big")).map((c) => c[3])).toEqual(["ready"]);
+	});
+
+	it("reads only the start of a file, not the full file", () => {
+		// The `status:` line is after the first 8 KB, so a bounded read does not see it.
+		write(
+			"plans/2026-01-01_09-00-00_deep.md",
+			`---\ntopic: deep\nnote: ${"x".repeat(16 * 1024)}\nstatus: ready\n---\n`,
+		);
+		expect(rows(run("deep")).map((c) => c[3])).toEqual(["-"]);
+	});
+
+	it("skips symlinked buckets and files, and counts them", () => {
+		write("plans/2026-01-01_09-00-00_real.md");
+		const outside = `${dir}-outside`;
+		mkdirSync(join(outside, "bucket"), { recursive: true });
+		writeFileSync(join(outside, "2026-01-02_09-00-00_link.md"), "");
+		symlinkSync(join(outside, "2026-01-02_09-00-00_link.md"), join(dir, "plans/2026-01-02_09-00-00_link.md"));
+		symlinkSync(join(outside, "bucket"), join(dir, "research"));
+		const lines = run().trim().split("\n");
+		expect(lines.at(-1)).toBe("skipped symlinks: 2");
+		expect(lines.slice(2, -1).map((l) => l.split("\t")[4])).toEqual(["plans/2026-01-01_09-00-00_real.md"]);
+	});
+
+	it("prints no symlink line when there is no symlink", () => {
+		write("plans/2026-01-01_09-00-00_real.md");
+		expect(run()).not.toContain("skipped symlinks");
+	});
+
+	it.each([
+		[["--limit", "--root", "x"], "error: --limit needs a value"],
+		[["--limit", "abc"], 'error: --limit needs a positive integer, not "abc"'],
+		[["--limit", "0"], 'error: --limit needs a positive integer, not "0"'],
+		[["--limit"], "error: --limit needs a value"],
+	])("prints an error line for a bad flag value %j (exit 0)", (argv, error) => {
+		const out = execFileSync("node", [HELPER, ...argv], { cwd: dir, encoding: "utf-8" });
+		expect(out.trim().split("\n")).toEqual([error]);
+	});
+
+	it("prints an error line when --root has no value (exit 0)", () => {
+		const out = execFileSync("node", [HELPER, "--root", "--limit", "2"], { cwd: dir, encoding: "utf-8" });
+		expect(out.trim()).toBe("error: --root needs a value");
 	});
 });

@@ -71,6 +71,18 @@ function namesFor(scope: string, pi: ExtensionAPI): string[] {
 	return [];
 }
 
+/**
+ * Names for a completion. Before the runtime binds, pi.getCommands() can throw.
+ * A completion must not throw, so this gives no names in that case.
+ */
+function completionNamesFor(scope: string, pi: ExtensionAPI): string[] {
+	try {
+		return namesFor(scope, pi);
+	} catch {
+		return [];
+	}
+}
+
 /** Parse `<scope> [<name>]` from the start of `tokens`. */
 function parseTarget(tokens: string[], pi: ExtensionAPI): TargetResult {
 	const [scope, ...after] = tokens;
@@ -157,7 +169,7 @@ export function getModelsArgCompletions(prefix: string, pi: ExtensionAPI): Autoc
 	if (words.length === 0) candidates = SUBCOMMANDS;
 	else if (words[0] === SUB_SET || words[0] === SUB_UNSET) {
 		if (words.length === 1) candidates = SCOPE_NAMES;
-		else if (words.length === 2) candidates = namesFor(words[1], pi);
+		else if (words.length === 2) candidates = completionNamesFor(words[1], pi);
 	}
 	const head = words.length > 0 ? `${words.join(" ")} ` : "";
 	const items = candidates.filter((c) => c.startsWith(last)).map((c) => ({ value: `${head}${c}`, label: c }));

@@ -2,7 +2,7 @@
 name: status
 description: Show where the rpiv pipeline work stands and which skill to run next, from the Markdown artifacts already in .rpiv/artifacts/. Lists the newest artifacts per topic with stage, date, and path, then names the likely next /skill:<name> and the reason. Read-only — never writes or edits a file. Use when the user asks "where am I", "what is the next step", "what stage is this feature at", or wants a summary of the rpiv artifacts. Not for git status.
 argument-hint: "[topic]"
-allowed-tools: Read, Glob, Grep, Bash(node *)
+allowed-tools: Read, Glob, Grep, Bash(node *_helpers/artifact-index.mjs*)
 shell-timeout: 10
 ---
 
@@ -25,15 +25,24 @@ node "${SKILL_DIR}/_helpers/artifact-index.mjs"
 The Metadata block shows the index without the filter, because `$ARGUMENTS` does not reach the render step. **If `$ARGUMENTS` is not empty**, run the helper again with the topic. Use its output for the rest of this skill:
 
 ```
-node "${SKILL_DIR}/_helpers/artifact-index.mjs" "<topic>"
+node "${SKILL_DIR}/_helpers/artifact-index.mjs" '<topic>'
 ```
+
+Obey these rules for this command:
+
+1. Put the topic in single quotes, as shown.
+2. Remove each single quote (`'`) from the topic before you put it in the command.
+3. Do not add other text, flags, or commands to this line.
+4. Do not run a different command. This is the only command that this skill runs.
 
 The helper output has this shape:
 
 - Line 1 is `root: <path>`.
-- `missing` — the `.rpiv/artifacts/` directory does not exist.
+- `missing` — the `.rpiv/artifacts/` directory does not exist, or it is not a directory.
 - `empty` — no Markdown artifact matches.
-- Else a header line and one tab-separated row per artifact: `date`, `bucket`, `stage`, `status`, `path`. The newest row is first. Each bucket shows its 3 newest artifacts. `status` is the frontmatter `status:` value, or `-`.
+- `error: <text>` — the helper got a bad flag value. Tell the user the text. Stop.
+- Else a header line and one tab-separated row per artifact: `date`, `bucket`, `stage`, `status`, `path`. The newest row is first. Each bucket shows its 3 newest artifacts. `status` is the frontmatter `status:` value, or `-`. `unreadable` means that the helper cannot read the file.
+- A last line `skipped symlinks: <n>` can follow `empty` or the rows. The helper does not follow symlinks. Tell the user the count.
 
 ## Steps
 
