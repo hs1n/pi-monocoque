@@ -19,7 +19,7 @@
 # Usage:
 #   scripts/fork-pi-install.sh              # global (~/.pi/agent/settings.json)
 #   scripts/fork-pi-install.sh -l           # project-local (./.pi/settings.json)
-#   scripts/fork-pi-install.sh --with btw,voice,warp,telemetry
+#   scripts/fork-pi-install.sh --with btw
 #   scripts/fork-pi-install.sh --dry-run
 #
 set -euo pipefail
@@ -38,7 +38,7 @@ while [ "$#" -gt 0 ]; do
 		-l | --local) SCOPE=(-l) ;;
 		--with)
 			shift
-			[ "$#" -gt 0 ] || { echo "error: --with needs a value, e.g. --with btw,voice" >&2; exit 2; }
+			[ "$#" -gt 0 ] || { echo "error: --with needs a value, e.g. --with btw" >&2; exit 2; }
 			OPTINS="${OPTINS:+$OPTINS,}$1"
 			;;
 		--dry-run) DRY_RUN=1 ;;

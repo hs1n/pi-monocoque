@@ -31,7 +31,7 @@ pi install npm:@tintinweb/pi-subagents@0.26.3
 ```
 
 [INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) gives the
-live-checkout install (`pi install <path>`) and `scripts/fork-pi-install.sh` (one package at a time).
+live-checkout install (`pi install <path>`) and `scripts/fork-pi-install.sh` (one Pi entry per package).
 
 ## Quick start
 
@@ -58,13 +58,13 @@ You can also set the advisor with arguments, with or without a UI:
 
 | Command | What it does |
 | --- | --- |
-| `/advisor <provider>/<model-id> [effort]` | Sets the reviewer. `[effort]` is `off` or a level that the model supports. With no effort, the model default applies |
+| `/advisor <provider>/<model-id> [effort]` | Sets the reviewer. `[effort]` is `off` or a level that the model supports. No effort and `off` save the same state: the advisor sends no reasoning option. For a model with no reasoning, the command rejects each effort, `off` too |
 | `/advisor off` | Turns the advisor off |
 | `/advisor` with no UI | Shows the current setting and the usage |
 
-If an argument is not valid, the command shows an error that lists the valid values, and it
-changes nothing. In print mode (`pi -p`), Pi discards notify messages. Thus the command applies
-valid arguments but shows no output. RPC clients get the output.
+If an argument is not valid, the command shows an error, and it changes nothing. An unknown
+model or effort error also lists the valid values. In print mode (`pi -p`), Pi discards notify
+messages. Thus the command applies valid arguments but shows no output. RPC clients get the output.
 
 ## What you get
 

@@ -9,7 +9,8 @@ context holds them two times.
 
 - **Before you change identity, names or provenance, read `FORK_NOTICE.md`.** This repo is a
   fork, not upstream. `rpiv`, `juicesharp` and the `@juicesharp` scope name the artifacts of
-  upstream. Nothing here can show itself as upstream. Do not send issues to upstream.
+  upstream. Do not make anything in this repo look like the work of upstream. Do not send issues
+  to upstream.
 - **Before you name a concept or write a doc, read `CONTEXT.md`.** Some words have a narrower
   meaning here than in Pi or in the upstream docs: `sibling`, `pipeline` vs `workflow`, `stage`
   vs the `### Phase` of a plan, `guidance` vs `details`, and `thoughts/`. Nothing injects
@@ -47,8 +48,8 @@ The repo has one context: one root `CONTEXT.md`, and decisions under `docs/adr/`
 
 ## Checks that will fail your commit
 
-The pre-commit hook runs these four checks. Know them before you commit, so you do not need a
-second attempt.
+The pre-commit hook runs these five checks. It also runs Biome and `tsc` through `npm run check`.
+Know the checks before you commit, so you do not need a second attempt.
 
 - `npm run check:decision-codes`: a committed `.ts` file must not cite a decision code in
   parentheses, such as `(c2r3)`. State the contract in the comment.
@@ -60,3 +61,5 @@ second attempt.
 - `npm run check:unused-deps`: the package that imports a dependency declares it. A manifest
   must not declare a package that its own sources do not import. Registered siblings and
   host-provided names are exceptions.
+- `npm run check:skill-names`: a skill in `skills/matt-pocock/` must not have the name of a skill
+  in `packages/rpiv-pi/skills/`. Pi resolves a skill by its name, so one copy hides the other.

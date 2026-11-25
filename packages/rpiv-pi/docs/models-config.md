@@ -170,12 +170,12 @@ With arguments, the command works with or without a UI:
 
 | Command | What it does |
 | --- | --- |
-| `/rpiv-models show` | Shows the current overrides and the usage |
+| `/rpiv-models show` | Shows the current overrides |
 | `/rpiv-models set defaults\|agents <agent>\|skills <skill> <model> [effort]` | Saves an override. `<model>` is `provider/id`. `[effort]` is `off` or a level that the model supports |
 | `/rpiv-models unset defaults\|agents <agent>\|skills <skill>` | Removes an override |
 
 With no `[effort]`, the override keeps the session effort. With no UI and no argument, the
 command shows the current config and the usage. If an argument is not valid, the command shows
-an error that lists the valid values, and it changes nothing. In print mode (`pi -p`), Pi
-discards notify messages. Thus a valid command applies but shows no output. RPC clients get
-the output.
+an error and the usage, and it changes nothing. An unknown scope, name, effort or subcommand
+error also lists the valid values. In print mode (`pi -p`), Pi discards notify messages. Thus a
+valid command applies but shows no output. RPC clients get the output.

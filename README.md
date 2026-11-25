@@ -29,7 +29,7 @@ pi install npm:@tintinweb/pi-subagents@0.26.3
 Restart Pi, or run `/reload` in a running session. To develop against a live checkout, run
 `pi install /path/to/pi-monocoque`. Pi records the path and does not copy it, so your edits
 apply on `/reload`. [INSTALL-FORK.md](./INSTALL-FORK.md) gives all the install routes: live
-checkout, one package, opt-in packages such as `rpiv-btw`, and verification.
+checkout, the install script, opt-in packages such as `rpiv-btw`, and verification.
 
 ## Packages
 
@@ -65,15 +65,15 @@ from a local path, because no registry copy exists.
 
 ```sh
 npm install
-npm run check        # host-provided-dep guard + Biome + tsc
+npm run check        # host-provided-deps and unused-deps guards + Biome + tsc
 npx vitest run       # 152 files / 2600+ tests
 npm run coverage     # what the pre-push hook runs
 ```
 
 - No build step: the packages ship raw `.ts`, and Pi loads them directly.
 - The root has one Vitest runner, one Biome config and one `tsconfig.base.json`.
-- Husky checks commits (`check:decision-codes` → `check:file-sizes` → `check`). It runs full
-  coverage before a push.
+- Husky checks commits (`check:decision-codes` → `check:file-sizes` → `check:skill-names` →
+  `check`). It runs full coverage before a push.
 - One source sets the lockstep version. Bump the root `package.json`, then run
   `npm run versions:sync`. It writes the version to all 11 packages. CI runs
   `npm run versions:check`.

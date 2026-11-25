@@ -77,8 +77,8 @@ with credentials that work (`/login`).
 
 ## Requirements
 
-- **An interactive terminal.** `/btw` does not run without a UI. It is not available in
-  `pi --print` or RPC.
+- **An interactive terminal.** In `pi --print`, `/btw` shows an error and stops. In RPC, Pi
+  does not open the overlay, so `/btw` waits for the overlay and does not return.
 - **An active primary model with credentials that resolve.** All providers work.
 
 ## Troubleshooting

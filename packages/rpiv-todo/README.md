@@ -29,7 +29,7 @@ pi install npm:@tintinweb/pi-subagents@0.26.3
 ```
 
 [INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) gives the
-live-checkout install (`pi install <path>`) and `scripts/fork-pi-install.sh` (one package at a time).
+live-checkout install (`pi install <path>`) and `scripts/fork-pi-install.sh` (one Pi entry per package).
 
 ## Quick start
 

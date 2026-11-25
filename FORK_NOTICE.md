@@ -31,7 +31,7 @@ The copy lets a clone reproduce the setup without a dependency on an unversioned
 because that is the only condition of the license.
 
 One file in that set **is** changed. `grilling/SKILL.md` has a paragraph from this fork that
-copies its design tree into the Pi `todo` tool. Thus, an update must copy the other 21 files
+copies its design tree into the Pi `todo` tool. Thus, an update must copy the other 21 skills
 verbatim and then apply that one edit again. Do not copy the full set without this check. The
 `README.md` of that directory lists the parts that were not copied, why they must stay out, and
 the drift record.

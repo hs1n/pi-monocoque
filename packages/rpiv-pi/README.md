@@ -30,7 +30,7 @@ pi install npm:@tintinweb/pi-subagents@0.26.3
 ```
 
 [INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) gives the
-live-checkout install (`pi install <path>`) and `scripts/fork-pi-install.sh` (one package at a time).
+live-checkout install (`pi install <path>`) and `scripts/fork-pi-install.sh` (one Pi entry per package).
 
 ## Quick start
 
@@ -61,8 +61,9 @@ Now run a pipeline. Each skill is independent and reads the artifact of the prev
 If you tell the agent to run more than one stage, it dispatches them with `Agent` or
 `SubagentWorkflow`. No fixed graph exists, so you can skip a stage, change the order, or run
 two designs in parallel. Each stage writes into `.rpiv/artifacts/<bucket>/`, and the next stage
-finds its input there. `/skill:status` is read-only. It lists the newest artifact in each
-bucket and names the likely next skill. [docs/skills.md](./docs/skills.md) has the full list.
+finds its input there. `/skill:status` is read-only. It lists the 3 newest artifacts in each
+bucket, groups them by topic, and names the likely next skill. [docs/skills.md](./docs/skills.md)
+has the full list.
 
 ## What you get
 

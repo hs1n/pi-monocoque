@@ -8,7 +8,7 @@ entries for it. Select one of these three install routes:
 | --- | --- |
 | To use it | `pi install git:github.com/hs1n/pi-monocoque` |
 | To develop it (`/reload` applies your edits) | `pi install /path/to/pi-monocoque` |
-| Only some packages, or opt-in packages such as `rpiv-btw` | `scripts/fork-pi-install.sh [--with btw]` |
+| Each package as a separate entry, plus opt-in packages such as `rpiv-btw` | `scripts/fork-pi-install.sh [--with btw]` |
 
 Each route also needs the third-party package that supplies the `Agent` tool of the pipeline.
 That package is not in this repo:
@@ -79,11 +79,13 @@ pi install /path/to/pi-monocoque             # the same root pi manifest
 `pi install` records the path and does not copy it. `/reload` applies your edits with no new
 install. To remove it, run `pi remove /path/to/pi-monocoque`.
 
-### Install one package at a time
+### Install each package from its path
 
-`scripts/fork-pi-install.sh` installs the siblings that the `SIBLINGS` registry of `rpiv-pi`
-expects (`packages/rpiv-pi/extensions/rpiv-core/siblings.ts`). It installs each sibling from its
-package path. Use it when you do **not** want the full set:
+`scripts/fork-pi-install.sh` installs `rpiv-pi` and each sibling in the `SIBLINGS` registry of
+`rpiv-pi` (`packages/rpiv-pi/extensions/rpiv-core/siblings.ts`). It always installs the seven
+packages that the root manifest loads. It installs each package from its package path, as a
+separate Pi entry. `--with` adds an opt-in package. Use the script when you want an opt-in
+package, such as `rpiv-btw`:
 
 ```bash
 scripts/fork-pi-install.sh                 # global
