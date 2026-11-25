@@ -1,87 +1,87 @@
 # Skills reference
 
-Every skill `@hs1n/rpiv-pi` ships, what it consumes, what it writes, and
-whether the model may reach for it on its own.
+This page lists each skill that `@hs1n/rpiv-pi` ships. For each skill, it gives the input, the
+output, and if the model can start the skill itself.
 
 ## How to read these tables
 
-- **Invoke** — `/skill:<name>` from inside a Pi session.
-- **Auto** — ✓ means the model may select the skill by itself from your prompt.
-  22 of the 29 skills set `disable-model-invocation: true` and are marked —;
-  those run *only* on an explicit `/skill:<name>`. A short
-  stage index is injected at session start so the model still knows they exist and
-  can suggest one.
-- **Writes** — the artifact bucket under `.rpiv/artifacts/`. "side-effect" means the
-  skill changes the repo (code, commits, docs) rather than emitting an artifact.
+- **Invoke**: run `/skill:<name>` in a Pi session.
+- **Auto**: ✓ means that the model can select the skill itself from your prompt. 22 of the 30
+  skills set `disable-model-invocation: true` and show —. These skills run *only* when you type
+  `/skill:<name>`. At session start, rpiv-pi injects a short index of the stage skills. Thus the
+  model knows that they exist and can recommend one.
+- **Writes**: the artifact bucket under `.rpiv/artifacts/`. "side-effect" means that the skill
+  changes the repo (code, commits, docs) and does not write an artifact.
 
-Each skill names its upstream artifact in prose; there is no machine-readable chain
-declaration, so a stage's input is whatever the previous stage wrote.
+Each skill names its input artifact in prose. There is no machine-readable chain declaration.
+Thus the input of a stage is the output of the previous stage.
 
 ## Intent and research
 
 | Skill | Auto | Consumes | Writes | What it does |
 | --- | :---: | --- | --- | --- |
-| `discover` | — | free text, or an existing artifact path | `discover/` | Interviews you one question at a time and synthesizes a Feature Requirements Document. The first question is intent-only, before any codebase probe; later ones ground in what the probe found. Its Decisions block flows through `research` into `design`. |
-| `research` | — | free text, or a `discover` artifact | `research/` | Dispatches `scope-tracer` to formulate trace-quality questions, answers them with parallel analysis agents, and synthesizes a research document. |
-| `explore` | — | a `research` artifact | `solutions/` | Compares solution approaches with pros, cons, trade-offs, and a recommendation. Use when several implementations are valid. |
-| `slice` | — | a `research` artifact | `slices/` | Cuts the work into independent vertical slices, each separately designable, with a machine-readable `slices:` frontmatter array. Also runs in re-slice mode to structurally re-cut a map that failed a readiness gate. |
+| `discover` | — | free text, or an existing artifact path | `discover/` | Asks you one question at a time, then writes a Feature Requirements Document. The first question is about intent only, before the codebase probe. The later questions use what the probe found. Its Decisions block goes through `research` into `design`. |
+| `research` | — | free text, or a `discover` artifact | `research/` | Sends `scope-tracer` to write trace-quality questions. Parallel analysis agents answer them. Then it writes a research document. |
+| `explore` | — | a `research` artifact | `solutions/` | Compares solution approaches with advantages, disadvantages, trade-offs and a recommendation. Use it when more than one implementation is valid. |
+| `slice` | — | a `research` artifact | `slices/` | Divides the work into independent vertical slices that you can design separately. It writes a machine-readable `slices:` frontmatter array. In re-slice mode, it divides a slice map again after the map fails a readiness check. |
 
 ## Design
 
 | Skill | Auto | Consumes | Writes | What it does |
 | --- | :---: | --- | --- | --- |
-| `design` | — | `research` or `solutions`; `--resume` accepts an in-progress `design` | `designs/` | Decomposes a feature into vertical slices, generates and verifies one slice per session, and emits architecture decisions, slice breakdown, and file map. After each approved non-final slice, its exact payload is written to the artifact and re-read to confirm the match and the skill stops with a fresh-session `--resume` command so conversational compaction never carries approved code. |
-| `design-slice` | — | `slices` (+ upstream `design`) | `designs/` | Designs exactly ONE slice in isolation — decisions, file map, key interfaces, integration points, success criteria. A fanout unit, not standalone. |
-| `design-review` | — | every per-slice `design` + the `slices` map | in-place edits | One consolidated developer checkpoint over a whole design fanout: accept or adjust the proposed shape, adjustments applied surgically and cascaded to dependent slices. |
-| `synthesize` | — | N `designs` (or N `subplans`) | `plans/`, `subplans/` | Merges independent per-slice designs into one coherent phased plan, reconciling overlaps and ordering phases by slice dependency. Runs hierarchically for large slice maps via `--as-subplan`. |
+| `design` | — | `research` or `solutions`. `--resume` accepts a `design` that is in progress | `designs/` | Divides a feature into vertical slices. It generates and checks one slice in each session. It writes architecture decisions, a slice breakdown and a file map. After you approve a slice that is not the last one, it writes the slice to the artifact and reads it back to confirm it. Then it stops and gives a `--resume` command for a new session. Thus compaction never carries approved code. |
+| `design-slice` | — | `slices` (+ the upstream `design`) | `designs/` | Designs exactly ONE slice in isolation: decisions, file map, key interfaces, integration points and success criteria. Another skill runs it. It does not run alone. |
+| `design-review` | — | each per-slice `design` + the `slices` map | in-place edits | One developer checkpoint for all the slice designs. You accept or adjust the proposed shape. It applies each adjustment to the slice and to the slices that depend on it. |
+| `synthesize` | — | N `designs` (or N `subplans`) | `plans/`, `subplans/` | Merges independent slice designs into one phased plan. It removes overlaps and puts the phases in slice-dependency order. For large slice maps, it runs in levels with `--as-subplan`. |
 
 ## Planning
 
 | Skill | Auto | Consumes | Writes | What it does |
 | --- | :---: | --- | --- | --- |
-| `plan` | — | a `design` artifact | `plans/` | Converts a design into parallelized atomic phases with explicit success criteria. Prefer it when a straightforward phased breakdown is enough. |
-| `blueprint` | — | `research` or `solutions` (optional) | `plans/` | Fuses design + plan in one pass: vertical-slice decomposition with developer micro-checkpoints between phases, emitting an implement-ready plan. Lighter subagent fan-out than `design` — it trusts the research artifact's integration and precedent sections. |
-| `acceptance` | — | the verbatim `goal` brief (+ a `research` artifact for evidence grounding) | `acceptance/` | Derives the executable acceptance inventory from the goal — ID'd observable outcomes, each with a runnable evidence command where one can be derived — frozen BEFORE planning so the standard of completion cannot inherit the plan's scope. The completeness grade anchors on it; validate executes it. Runs between research and planning. |
-| `quick-plan` | — | a `research` artifact (+ the verbatim `goal` brief and an `acceptance` inventory when one exists) | `plans/` | One lightweight plan for a small, well-understood task: at most a single targeted `codebase-pattern-finder` dispatch, then a single `status: ready` phased plan — no slice decomposition, no risk flags, no questions; goal asks it doesn't cover are explicitly deferred under `## Out of Scope`. |
-| `elaborate` | — | a `plan` artifact | `elaborations/` | Writes implement-ready code into ONE phase of a synthesized plan. A fanout unit; the results are stitched back into the plan. |
-| `revise` | — | a `plan` (+ optional `reviews`) | `plans/` | Surgically updates an existing plan after review feedback, a mid-implement blocker, or a scope change — preserving structure instead of rewriting. |
-| `amend` | — | one artifact + its `grade` verdicts | same artifact | Fixes only the failing dimensions a grade panel flagged and re-emits the artifact in place. Single-pass, no subagents; a gate's revise stage. |
+| `plan` | — | a `design` artifact | `plans/` | Changes a design into parallel atomic phases with explicit success criteria. Use it when a simple phased breakdown is sufficient. |
+| `blueprint` | — | `research` or `solutions` (optional) | `plans/` | Does design and plan in one pass. It divides the work into vertical slices, with a short developer checkpoint between phases. It writes a plan that is ready for `implement`. It uses fewer subagents than `design`, because it uses the integration and precedent sections of the research artifact. |
+| `acceptance` | — | the goal brief, verbatim (+ a `research` artifact as evidence) | `acceptance/` | Writes the acceptance inventory from the goal. Each item is an observable outcome with an ID and, where possible, a command that proves it. It runs between research and planning, before a plan exists. Thus the plan cannot make the standard of completion smaller. `grade` uses it for completeness, and `validate` runs it. |
+| `quick-plan` | — | a `research` artifact (+ the goal brief and an `acceptance` inventory, when they exist) | `plans/` | Writes one small plan for a small task that you understand well. It sends a maximum of one `codebase-pattern-finder` agent. It writes one `status: ready` phased plan, with no slices, no risk flags and no questions. It lists the goal items that it does not cover under `## Out of Scope`. |
+| `elaborate` | — | a `plan` artifact | `elaborations/` | Writes implement-ready code for ONE phase of a synthesized plan. The results go back into the plan. |
+| `revise` | — | a `plan` (+ optional `reviews`) | `plans/` | Updates a plan after review feedback, a blocker during `implement`, or a scope change. It keeps the structure and does not write the plan again. |
+| `amend` | — | one artifact + its `grade` verdicts | the same artifact | Repairs only the dimensions that failed in `grade`, and writes the artifact again in place. It does one pass and uses no subagents. |
 
 ## Execution and verification
 
 | Skill | Auto | Consumes | Writes | What it does |
 | --- | :---: | --- | --- | --- |
-| `implement` | — | a `plan` artifact | code changes | Executes a plan phase by phase, verifying each phase against its success criteria before moving on. |
-| `validate` | — | a `plan` + the working tree | `validation/` | Runs each phase's success criteria against the working tree and reports a `pass` / `fail` verdict. |
-| `remediate` | — | a `plan` + its failing `validation` | side-effect | The `validate` repair arm's body: re-runs each failed `verify-at-implement` risk ruling's own prescribed procedure and each structured `blockers:` entry's failing command, applies the minimal fix grounded in the failing report, and confirms it passes. Run it after a failing `validate`, never as a first pass. |
-| `code-review` | ✓ | the working tree, a branch, or a PR | `reviews/` | Parallel specialist agents audit the diff, compare against peer code, and verify claims. Emits `blockers_count` plus severity-tagged findings. Scope argument accepts `staged`, `working`, a hash, `A..B`, or a branch; empty scope defaults to feature-branch vs default-branch. |
-| `architecture-review` | — | a file, directory, or module path | `architecture-reviews/` | Top-down, layer-by-layer audit with a uniform 10-dimension checklist per layer, triaged through a developer checkpoint. Emits a phased polish plan `blueprint` can consume per phase. Language-agnostic. |
-| `grade` | — | one artifact + one dimension name | `verdicts/` | Judges ONE artifact along ONE named quality dimension and writes a verdict JSON. It only judges — no fixes. A panel member, not standalone. |
-| `commit` | ✓ | a dirty working tree | git commits | Groups staged and unstaged changes into one or more logical commits with descriptive messages. |
+| `implement` | — | a `plan` artifact | code changes | Does a plan one phase at a time. It checks each phase against its success criteria before the next phase. |
+| `validate` | — | a `plan` + the working tree | `validation/` | Runs the success criteria of each phase against the working tree. It reports a `pass` / `fail` verdict. |
+| `remediate` | — | a `plan` + its failing `validation` | side-effect | Repairs the failures that `validate` found. For each failed `verify-at-implement` risk ruling, it runs that ruling's procedure again. For each `blockers:` entry, it runs the failing command again. It applies the smallest repair and confirms that the check passes. Run it only after `validate` fails. |
+| `code-review` | ✓ | the working tree, a branch or a PR | `reviews/` | Parallel specialist agents examine the diff, compare it with peer code and check claims. It writes `blockers_count` and findings with severity tags. The scope argument accepts `staged`, `working`, a hash, `A..B` or a branch. With no scope, it compares the feature branch with the default branch. |
+| `architecture-review` | — | a file, directory or module path | `architecture-reviews/` | Examines the code one layer at a time, from the top, with the same 10-dimension checklist for each layer. A developer checkpoint sorts the findings. It writes a phased plan that `blueprint` can use one phase at a time. It works with all languages. |
+| `grade` | — | one artifact + one dimension name | `verdicts/` | Judges ONE artifact for ONE quality dimension and writes a verdict JSON. It only judges. It makes no repairs. Another skill runs it. |
+| `lens-grade` | — | one target (an artifact or the working-tree diff) + one lens and a rubric | a JSON verdict in `--out <dir>` | Judges ONE target through ONE lens against a pass/fail rubric. It does not edit, does not run the code and uses no subagents. Run one instance for each lens, in parallel. |
+| `commit` | ✓ | a working tree with changes | git commits | Puts staged and unstaged changes into one or more logical commits, with descriptive messages. |
 
 ## Repository utilities
 
 | Skill | Auto | Consumes | Writes | What it does |
 | --- | :---: | --- | --- | --- |
-| `pr-triage` | ✓ | a PR number, URL, or the current branch | `triage/` | Read-only triage of a GitHub PR: disposition (Review / Request changes / Hold / Decline), a security tier (0–2), and convention drift. Never checks out or mutates the working tree. |
-| `create-handoff` | ✓ | the current session | `handoffs/` | Compacts the current task, decisions, in-flight changes, and open questions into one file a fresh session can pick up. |
-| `resume-handoff` | ✓ | a `handoff` document | continues work | Reads the handoff, verifies repo, branch, and state, and continues from where the previous session stopped. |
-| `annotate-guidance` | ✓ | the source tree | `.rpiv/guidance/**/architecture.md` | Generates architecture guidance in a shadow tree alongside the source. rpiv-pi injects these automatically — see [architecture.md](./architecture.md). |
-| `changelog` | ✓ | git history + the working tree | `CHANGELOG.md` edits | Regenerates the `[Unreleased]` section of every affected changelog in Keep a Changelog style from Conventional Commit prefixes. Monorepo-aware and idempotent. |
-| `frontend-design` | — | the project's style system | injected guidance | Injects tailored visual design guidance for web frontend work. Auto-adapts: empty scan → 2-question micro-interview; established design system → scan-only injection. |
+| `status` | ✓ | `.rpiv/artifacts/` (+ an optional `[topic]`) | nothing | Read-only. Lists the newest artifacts for each topic, with stage, date and path. Then it names the likely next `/skill:<name>` and gives the reason. It is not for git status. |
+| `pr-triage` | ✓ | a PR number, a URL or the current branch | `triage/` | Read-only triage of a GitHub PR. It gives a disposition (Review / Request changes / Hold / Decline), a security tier (0–2) and the convention drift. It never checks out or changes the working tree. |
+| `create-handoff` | ✓ | the current session | `handoffs/` | Writes the current task, decisions, changes in progress and open questions into one file. A new session can continue from that file. |
+| `resume-handoff` | ✓ | a `handoff` document | continues the work | Reads the handoff and checks the repo, the branch and the state. Then it continues from where the previous session stopped. |
+| `annotate-guidance` | ✓ | the source tree | `.rpiv/guidance/**/architecture.md` | Writes architecture guidance in a shadow tree next to the source. rpiv-pi injects these files automatically. See [architecture.md](./architecture.md). |
+| `changelog` | ✓ | git history + the working tree | `CHANGELOG.md` edits | Writes the `[Unreleased]` section of each changed changelog again, in Keep a Changelog style, from Conventional Commit prefixes. It knows about monorepos, and you can run it again with the same result. |
+| `frontend-design` | — | the style system of the project | injected guidance | Injects visual design guidance for web frontend work. If the scan finds nothing, it asks 2 questions. If the project has a design system, it uses only the scan. |
 
 ## Artifact buckets
 
-Everything lands under `.rpiv/artifacts/` in the project you are working in:
+All artifacts go under `.rpiv/artifacts/` in the project that you work in:
 
 ```
 .rpiv/artifacts/
-├── goal/                   discover/            research/
-├── acceptance/             solutions/           slices/
-├── designs/                elaborations/        plans/
-├── subplans/               verdicts/            reviews/
-├── validation/             architecture-reviews/
-└── triage/                 handoffs/
+├── discover/               research/            solutions/
+├── slices/                 designs/             elaborations/
+├── plans/                  subplans/            acceptance/
+├── verdicts/               reviews/             validation/
+└── architecture-reviews/   triage/              handoffs/
 ```
 
-The directory is created lazily by the first skill that writes into it.
+The first skill that writes into the directory creates it.

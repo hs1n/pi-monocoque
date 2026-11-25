@@ -1,59 +1,54 @@
 # @hs1n/rpiv-pi
 
-[![npm version](https://img.shields.io/npm/v/@hs1n/rpiv-pi.svg)](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 <div align="center">
   <a href="https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi">
     <img src="https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-pi/docs/cover.png" alt="rpiv-pi cover art showing the six-stage skill pipeline: discover, research, design, plan, implement, validate" width="70%">
   </a>
 </div>
 
-Turn "build this feature" into a run of named stages — discover → research → design →
-plan → implement → validate → code-review → commit — each one writing a reviewable
-Markdown artifact under `.rpiv/artifacts/` that the next stage consumes. rpiv-pi adds 30
-skills and 15 specialist subagents to [Pi Agent](https://github.com/badlogic/pi-mono), and
-lets the agent orchestrate them with Pi's own `Agent` and `SubagentWorkflow` tools. It is
-for developers who want structured, reviewable multi-stage work instead of one very long
-chat turn.
+rpiv-pi changes "build this feature" into a sequence of named stages: discover → research →
+design → plan → implement → validate → code-review → commit. Each stage writes a Markdown
+artifact under `.rpiv/artifacts/` that you can review, and the next stage reads it. rpiv-pi
+adds 30 skills and 15 specialist subagents to [Pi Agent](https://github.com/badlogic/pi-mono).
+The agent runs them with the Pi `Agent` and `SubagentWorkflow` tools. Use it when you want
+structured multi-stage work that you can review, not one very long chat turn.
 
 ## Install
 
-`rpiv-pi` ships inside [`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque), a
-11-package monorepo with **no registry route** — there is no `@hs1n/rpiv-*` entry on npm.
-Install the repo as a Pi source:
+`rpiv-pi` is in [`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque), an 11-package
+monorepo. Nothing is published to npm. Install the repo as a Pi source:
 
 ```sh
 pi install git:github.com/hs1n/pi-monocoque
 ```
 
-Restart Pi, or `/reload` in a running session. The pipeline's `Agent` tool comes from a
-third-party package and is installed separately:
+Restart Pi, or run `/reload` in a running session. The `Agent` tool of the pipeline comes from
+a third-party package. Install it separately:
 
 ```sh
-pi install npm:@tintinweb/pi-subagents@0.21.0
+pi install npm:@tintinweb/pi-subagents@0.26.3
 ```
 
-[INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) covers the
-live-checkout install (`pi install <path>`, edits picked up by `/reload`) and the
-per-package form (`scripts/fork-pi-install.sh`).
+[INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) gives the
+live-checkout install (`pi install <path>`) and `scripts/fork-pi-install.sh` (one package at a time).
 
 ## Quick start
 
-rpiv-pi registers no tools of its own — it drives the ones its sibling extensions
-provide. If any are missing, one command installs them (by local path here; from npm for
-the third-party `Agent` dispatcher):
+rpiv-pi registers no tools. It uses the tools of its sibling extensions. If a sibling is
+missing, one command installs it. It uses a local path for the siblings in this repo, and npm
+for the third-party `Agent` dispatcher:
 
 ```
 /rpiv-setup
 ```
 
-The dialog previews every change and applies nothing until you confirm.
+The dialog shows each change and applies nothing until you confirm. With no UI, the command
+lists the changes and tells you to run `/rpiv-setup --yes`. That form applies them with no
+confirmation.
 
-You also need a model configured in Pi. If `/login` already works you are set;
-otherwise see [docs/models-config.md](./docs/models-config.md).
+You also need a model in Pi. If `/login` works, you have one. If not, see [docs/models-config.md](./docs/models-config.md).
 
-Now run a pipeline. Every skill stands alone and takes the previous stage's artifact:
+Now run a pipeline. Each skill is independent and reads the artifact of the previous stage:
 
 ```
 /skill:discover "add a --json flag to the export command"
@@ -63,84 +58,90 @@ Now run a pipeline. Every skill stands alone and takes the previous stage's arti
 /skill:validate .rpiv/artifacts/plans/<latest>.md
 ```
 
-Ask the agent to run several stages and it dispatches them with `Agent` /
-`SubagentWorkflow`; nothing is a fixed graph, so you can skip a stage, reorder them, or run
-two designs side by side. Each stage writes into `.rpiv/artifacts/<bucket>/`, which is how
-the next one finds its input — see [docs/skills.md](./docs/skills.md) for the full list.
+If you tell the agent to run more than one stage, it dispatches them with `Agent` or
+`SubagentWorkflow`. No fixed graph exists, so you can skip a stage, change the order, or run
+two designs in parallel. Each stage writes into `.rpiv/artifacts/<bucket>/`, and the next stage
+finds its input there. `/skill:status` is read-only. It lists the newest artifact in each
+bucket and names the likely next skill. [docs/skills.md](./docs/skills.md) has the full list.
 
 ## What you get
 
-- **Reviewable artifacts instead of one long turn** — every skill writes timestamped
-  Markdown into `.rpiv/artifacts/<bucket>/`, so you can read, edit, or reject a design
-  before a line of code is written.
-- **Stages that stand alone** — each skill is one `/skill:<name>` invocation that reads the
-  previous artifact and writes its own. No run state, no resume point: what a stage produced
+- **Artifacts that you can review, not one long turn**: each skill writes timestamped
+  Markdown into `.rpiv/artifacts/<bucket>/`. You can read, edit or reject a design before
+  the agent writes code.
+- **Independent stages**: each skill is one `/skill:<name>` command. It reads the previous
+  artifact and writes its own. No run state and no resume point exist. The output of a stage
   is on disk, and the next stage starts from that file.
-- **Parallel dispatch where it pays** — the analysis and design skills fan out with the
-  `Agent` tool, so independent slices are designed or reviewed at the same time.
-- **Cheap models for cheap stages** — `/rpiv-models` sets model and reasoning-effort
-  overrides per skill or per subagent, with a typo-catcher for keys that would otherwise
-  silently never apply.
-- **Your architecture docs, injected where they matter** — touch a file and the nearest
-  `AGENTS.md`, `CLAUDE.md`, or `.rpiv/guidance/<sub>/architecture.md` at each depth is
-  sent to the model, once per session, hidden from your transcript.
+- **Parallel dispatch where it helps**: the analysis and design skills use the `Agent` tool
+  for parallel work. Thus the agent designs or reviews independent slices at the same time.
+- **Cheap models for simple stages**: `/rpiv-models` sets model and reasoning-effort
+  overrides for each skill or subagent. It also finds typos in keys that would not apply.
+- **Your architecture docs, injected where they apply**: when you touch a file, rpiv-pi sends
+  the nearest `AGENTS.md`, `CLAUDE.md` or `.rpiv/guidance/<sub>/architecture.md` to the
+  model. It sends each file one time per session, and your transcript does not show it.
 
 ## Configuration
 
-`/rpiv-models` writes `~/.config/rpiv-pi/models.json` (or `$XDG_CONFIG_HOME/rpiv-pi/…`
-when that is set to an absolute path, or a `~` / `~/…` path, which is tilde-expanded
-first), with mode `0600`. The file is optional — missing or malformed JSON degrades to
-no overrides.
+`/rpiv-models` writes `~/.config/rpiv-pi/models.json` with mode `0600`. If
+`$XDG_CONFIG_HOME` is an absolute path, or a `~` or `~/…` path, the file is under
+`$XDG_CONFIG_HOME/rpiv-pi/`. The file is optional. If it is missing or has bad JSON, no
+overrides apply.
 
-| Setting | What it does | Default |
-| --- | --- | --- |
-| `/rpiv-models` | Pick model + reasoning effort for the global default, a subagent, or a skill | no overrides |
+| Command | What it does |
+| --- | --- |
+| `/rpiv-models` | Opens the picker. With no UI, it shows the config and the usage |
+| `/rpiv-models show` | Shows the current overrides |
+| `/rpiv-models set defaults <model> [effort]` | Sets the global default |
+| `/rpiv-models set agents <agent> <model> [effort]` | Sets the override for one subagent |
+| `/rpiv-models set skills <skill> <model> [effort]` | Sets the override for one skill |
+| `/rpiv-models unset defaults\|agents <agent>\|skills <skill>` | Removes an override |
+
+`<model>` is `provider/id`. If you do not give an effort, the override keeps the session
+effort. In print mode (`pi -p`), Pi discards notify messages. Then `/rpiv-setup --yes` and
+`/rpiv-models` apply valid arguments but show no output. RPC clients get the output.
 
 ## Reference
 
-- [docs/skills.md](./docs/skills.md) — all 30 skills: what each consumes, what it writes,
-  and which ones the model may pick on its own.
-- [docs/models-config.md](./docs/models-config.md) — giving Pi a provider, then the
-  complete `models.json` schema, cascade, and worked examples.
-- [docs/bundled-agents.md](./docs/bundled-agents.md) — the 15 bundled subagents and how the on-disk sync
-  decides what to overwrite.
-- [docs/architecture.md](./docs/architecture.md) — what gets registered, guidance and
-  git-context injection, sibling coupling, and uninstall.
+- [docs/skills.md](./docs/skills.md): all 30 skills, what each one reads and writes, and
+  which ones the model can select itself.
+- [docs/models-config.md](./docs/models-config.md): how to give Pi a provider, and the full
+  `models.json` schema, cascade and examples.
+- [docs/bundled-agents.md](./docs/bundled-agents.md): the 15 bundled subagents, and how the
+  sync on disk decides what to overwrite.
+- [docs/architecture.md](./docs/architecture.md): what rpiv-pi registers, guidance and git
+  context injection, sibling coupling, and uninstall.
 
 ## Requirements
 
 | Requirement | Why |
 | --- | --- |
-| [Pi Agent](https://github.com/badlogic/pi-mono) 0.80.x or 1.x | The host. Install it globally so `pi` is on your PATH |
-| A model provider | Pi's own `/login` or `~/.pi/agent/models.json` — see [docs/models-config.md](./docs/models-config.md) |
-| [`@tintinweb/pi-subagents`](https://www.npmjs.com/package/@tintinweb/pi-subagents) | Supplies the `Agent` tool. Without it the parallel-analysis skills cannot dispatch. Installed by `/rpiv-setup` (from npm) |
-| `git` *(optional)* | Branch, commit, and user context. If it fails, injection is skipped and nothing else changes |
-| Node.js 22+ | Runtime for Pi and rpiv-pi's bundled scripts |
-
-You need no build step and no native dependency.
+| [Pi Agent](https://github.com/badlogic/pi-mono) 0.80.x or 1.x | The host. Install it globally, so `pi` is on your PATH |
+| A model provider | Pi `/login` or `~/.pi/agent/models.json`. See [docs/models-config.md](./docs/models-config.md) |
+| `@tintinweb/pi-subagents` (npm) | Supplies the `Agent` tool. Without it, the parallel-analysis skills cannot dispatch. `/rpiv-setup` installs it from npm |
+| `git` *(optional)* | Branch, commit and user context. If git fails, rpiv-pi skips the injection, and nothing else changes |
+| Node.js 22+ | The runtime for Pi and the bundled scripts of rpiv-pi. No build step and no native dependency |
 
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| Session-start banner: *N sibling extension(s) missing* | Sibling plugins not installed | Run `/rpiv-setup`, then restart Pi |
-| Session-start banner: *bundled agents need attention* | A bundled agent changed upstream and your on-disk copy was edited | Run `/rpiv-update-agents` — it overwrites rpiv-managed files, and never touches agents you added yourself |
-| `/rpiv-setup` or `/rpiv-models` says it requires interactive mode | Running headless | Install manually with `pi install <path>` (third-party packages: their npm name), or hand-edit `models.json` |
-| `/rpiv-setup` fails on one package | The package's directory or its npm dependency is unreachable | Retry that package with `pi install <path>`, then re-run `/rpiv-setup` |
-| `/rpiv-models` reports *No models available* | Pi has no provider configured | Run `/login`, or add a provider to `~/.pi/agent/models.json` |
+| Session-start banner: *N sibling extension(s) missing* | Siblings are not installed | Run `/rpiv-setup`, then restart Pi |
+| Session-start banner: *bundled agents need attention* | A bundled agent changed, and you edited your copy on disk | Run `/rpiv-update-agents`. It overwrites the files that rpiv-pi manages. It does not change agents that you added |
+| `/rpiv-setup` fails on one package | Pi cannot reach the package directory or its npm dependency | Run `pi install <path>` for that package, then run `/rpiv-setup` again |
+| `/rpiv-models` reports *No models available* | Pi has no provider | Run `/login`, or add a provider to `~/.pi/agent/models.json` |
 
 ## Related
 
-`/rpiv-setup` installs the ones marked auto (local paths from this checkout); the rest are
-standalone packages under [`packages/`](https://github.com/hs1n/pi-monocoque/tree/main/packages).
+`/rpiv-setup` installs the packages marked auto, from local paths in this checkout. The other
+packages are independent, under [`packages/`](https://github.com/hs1n/pi-monocoque/tree/main/packages).
 
 | Package | Role | Auto |
 | --- | --- | :---: |
 | [`@hs1n/rpiv-args`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-args) | `$1` / `$ARGUMENTS` placeholders in skill bodies | ✓ |
-| [`@hs1n/rpiv-ask-user-question`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-ask-user-question) | Structured questionnaires back to you | ✓ |
-| [`@hs1n/rpiv-todo`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-todo) | Live task overlay surviving `/reload` | ✓ |
-| [`@hs1n/rpiv-advisor`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-advisor) | Escalate to a stronger reviewer model | ✓ |
-| [`@hs1n/rpiv-web-tools`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-web-tools) | Web search + fetch with pluggable providers | ✓ |
+| [`@hs1n/rpiv-ask-user-question`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-ask-user-question) | Structured questionnaires to you | ✓ |
+| [`@hs1n/rpiv-todo`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-todo) | Live task overlay that stays after `/reload` | ✓ |
+| [`@hs1n/rpiv-advisor`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-advisor) | Sends a step to a stronger reviewer model | ✓ |
+| [`@hs1n/rpiv-web-tools`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-web-tools) | Web search and fetch, with providers that you can change | ✓ |
 | [`@hs1n/rpiv-i18n`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n) | Localization SDK for the rpiv TUI strings | ✓ |
 
 ## License

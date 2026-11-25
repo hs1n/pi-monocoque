@@ -1,107 +1,115 @@
 # @hs1n/rpiv-ask-user-question
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 <div align="center">
   <a href="https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-ask-user-question">
     <img src="https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-ask-user-question/docs/cover.png" alt="rpiv-ask-user-question cover: a tabbed terminal questionnaire asking Which real development task are we planning right now?, with numbered options — Bug fix, New feature, Refactor — each under a one-line description, and a footer of key hints" width="50%">
   </a>
 </div>
 
-Let the model ask you instead of guessing. This extension gives [Pi Agent](https://github.com/badlogic/pi-mono) one tool — `ask_user_question` — that opens a terminal dialog of up to four questions with written-out options, and hands your choices back as structured data. Install it if you would rather spend fifteen seconds picking than an hour undoing a wrong assumption.
+The model asks you, and does not guess. This extension gives [Pi Agent](https://github.com/badlogic/pi-mono) one tool, `ask_user_question`. The tool opens a terminal dialog with a maximum of four questions and written options. It sends your choices back as structured data. Install it if you prefer fifteen seconds of selection to an hour of work on a wrong assumption.
 
 ## Install
 
-This package ships inside [`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque) — an
-11-package monorepo with **no registry route**, so there is no `@hs1n/rpiv-*` entry on npm.
-Install the repo as a Pi source:
+This package is in [`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque), an 11-package
+monorepo. Nothing is published to npm. Install the repo as a Pi source:
 
 ```sh
 pi install git:github.com/hs1n/pi-monocoque
 ```
 
-Restart Pi, or `/reload` in a running session. The pipeline's `Agent` tool comes from a
-third-party package and is installed separately:
+Restart Pi, or run `/reload` in a running session. The `Agent` tool of the pipeline comes from
+a third-party package. Install it separately:
 
 ```sh
-pi install npm:@tintinweb/pi-subagents@0.21.0
+pi install npm:@tintinweb/pi-subagents@0.26.3
 ```
 
-[INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) covers the
-live-checkout install (`pi install <path>`, edits picked up by `/reload`) and the
-per-package form (`scripts/fork-pi-install.sh`).
-
+[INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) gives the
+live-checkout install (`pi install <path>`) and `scripts/fork-pi-install.sh` (one package at a time).
 
 ## Quick start
 
-Nothing to set up — the tool is live as soon as Pi restarts. Hand the model a task with a real decision buried in it:
+You do not need to set anything up. The tool is live when Pi restarts. Give the model a task that contains a real decision:
 
 > Add caching to the API client.
 
-Rather than picking a strategy on your behalf, the model calls `ask_user_question` and a dialog takes over the bottom of your terminal. Move with `↑`/`↓`, choose with `Enter`, press `n` to attach a note to a question or a global note from the Submit tab, or land on `Type something.` to answer in your own words. In a multi-select question, typed custom text is selected automatically and submitted together with checked options. While typing, `Shift+Enter` adds a line, `Ctrl+G` opens Pi's configured external editor, and `Ctrl+U` clears the draft; browsing another option and returning keeps what you wrote. `Esc` abandons the questionnaire entirely.
+The model does not select a strategy for you. It calls `ask_user_question`, and a dialog opens at the bottom of your terminal. These are the keys:
 
-When the questionnaire begins waiting in an interactive TTY, it emits one standard terminal BEL (`\x07`). Your terminal configuration determines whether that appears as an audible alert, a visual alert, or nothing; redirected and non-TTY output is untouched.
+| Key | What it does |
+| --- | --- |
+| `↑` / `↓` | Move between options |
+| `Enter` | Select an option |
+| `n` | Add a note to a question, or a global note on the Submit tab |
+| `Type something.` row | Answer in your own words |
+| `Shift+Enter` | Add a line while you type |
+| `Ctrl+G` | Open the external editor that is configured in Pi |
+| `Ctrl+U` | Clear the draft |
+| `Esc` | Stop the questionnaire |
+
+In a multi-select question, the dialog selects your custom text automatically and sends it with the checked options. If you go to a different option and come back, your text stays.
+
+When the questionnaire starts to wait in an interactive TTY, it sends one standard terminal BEL (`\x07`). Your terminal configuration sets whether that is an audible alert, a visual alert or nothing. Redirected output and non-TTY output do not change.
 
 ![Single question in the dialog: the tab strip reads Feature Type, Design Tab, Testing, Release, Submit; the question Which real development task are we planning right now? sits above four numbered options — Bug fix (Recommended), New feature, Refactor, Perf tuning — each with a one-line description, followed by the appended Type something. row](https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-ask-user-question/docs/single-question.jpg)
 
-When the model asks several things at once, `Tab` moves between them and a Submit tab reviews everything before it goes back:
+When the model asks more than one question, `Tab` moves between them. A Submit tab shows all your answers before they go back:
 
 ![Submit tab of a four-question dialog: a Review your answers list showing Feature Type set to Bug fix and Testing set to Unit tests plus Integration tests, a warning naming Design Tab and Release as still unanswered, a picker offering Submit answers or Cancel, and a dim bottom key-hint row including n to add a note](https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-ask-user-question/docs/submit-tab.jpg)
 
 ## What you get
 
-- **Typed options instead of a wall of prose** — each question carries 2-4 authored choices, and every choice comes with a description of what it means or what it costs you.
-- **You can always answer in your own words**. A `Type something.` row is appended to every question. On multi-select questions, it keeps checked options and custom text in the same answer. The row widens to the full pane while you type, keeps its multiline draft visible while you browse, and supports Pi's `Shift+Enter` newline and `Ctrl+G` external-editor flows.
-- **Compare real artifacts, not just labels** — an option can carry a markdown `preview` (ASCII mockup, code, diagram, config) that renders in a bordered box beside the option list.
-- **One interruption, not five** — up to four questions arrive in a single tabbed dialog, and the Submit tab lists your answers and names anything still blank before you commit.
-- **Notes on any answer — or on all of them** — `n` opens a multiline note editor on any question tab, and on the Submit tab it opens one global note for the whole questionnaire. Per-question notes reach the model as `user notes: <text>`, the global note as `global note: <text>`; neither marks a question answered.
-- **Keep reading while you answer** — the question opens below the transcript, and `PageUp`/`PageDown` or the mouse wheel keep scrolling the conversation; `Ctrl+]` shrinks the dialog to one line when you want more room, then brings it back with your answers intact.
-- **Works outside the terminal too** — in RPC and ACP hosts such as the VS Code pendant or Zed the questionnaire walks through the host's native dialogs (notes are terminal-only and do not carry over), and in non-interactive runs the tool is removed from the model's tool list instead of failing every call.
+- **Typed options, not long prose**: each question has 2-4 written choices. Each choice has a description of what it means or what it costs.
+- **You can always answer in your own words**: each question has a `Type something.` row at the end. In multi-select questions, this row keeps the checked options and the custom text in the same answer. The row uses the full pane width while you type. Your multiline draft stays visible while you look at other options. The row supports the Pi `Shift+Enter` newline and the `Ctrl+G` external editor.
+- **Compare real artifacts, not only labels**: an option can have a Markdown `preview` (ASCII mockup, code, diagram or config). The preview shows in a box beside the option list.
+- **One interruption, not five**: a maximum of four questions come in one dialog with tabs. Before you submit, the Submit tab lists your answers and names each blank question.
+- **Notes on one answer or on all answers**: on a question tab, `n` opens a multiline note editor. On the Submit tab, it opens one global note for the full questionnaire. The model gets a question note as `user notes: <text>` and the global note as `global note: <text>`. A note does not mark a question as answered.
+- **Read while you answer**: the question opens below the transcript. `PageUp`/`PageDown` and the mouse wheel scroll the conversation. `Ctrl+]` makes the dialog one line high when you need more space. The same key opens it again, and your answers stay.
+- **It also works outside the terminal**: RPC and ACP hosts include the VS Code pendant and Zed. In these hosts, the questionnaire uses the native dialogs of the host. Notes work only in the terminal. In non-interactive runs, the extension removes the tool from the tool list of the model, so no call fails.
 
 ## Configuration
 
-Optional. Settings live in `~/.config/rpiv-ask-user-question/config.json`; the file is read, never written.
+This is optional. The settings are in `~/.config/rpiv-ask-user-question/config.json`. The extension reads the file and never writes it.
 
 | Setting | What it does | Default |
 | --- | --- | --- |
-| `collapseKey` | Key that collapses and expands the dialog. Accepts Pi keybinding ids such as `alt+o`; `"off"` disables the shortcut. | `"ctrl+]"` |
-| `guidance.description` | Full replacement for the tool description the model sees. A non-empty string replaces the built-in text entirely — no merging. | built-in description |
-| `guidance.promptSnippet` | One-line description of the tool in the system prompt — tune how eagerly the model asks. | built-in snippet |
-| `guidance.promptGuidelines` | Usage guidelines given to the model, as a list of strings. | 4 built-in guidelines |
+| `collapseKey` | The key that collapses and expands the dialog. It accepts Pi keybinding ids such as `alt+o`. `"off"` turns off the shortcut. | `"ctrl+]"` |
+| `guidance.description` | A full replacement for the tool description that the model sees. A non-empty string replaces all the built-in text. There is no merge. | built-in description |
+| `guidance.promptSnippet` | The one-line description of the tool in the system prompt. Use it to change how often the model asks. | built-in snippet |
+| `guidance.promptGuidelines` | Usage guidelines for the model, as a list of strings. | 4 built-in guidelines |
 
 ```json
 { "collapseKey": "alt+o" }
 ```
 
-Malformed JSON falls back to the defaults with a warning; an individual unusable value is silently dropped back to its default. Never an error.
+If the JSON is malformed, the extension uses the defaults and shows a warning. If one value is not usable, the extension uses its default with no message. It never shows an error.
 
 ## Reference
 
-- [Tool schema](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-ask-user-question/docs/tool-schema.md) — parameters, limits, reserved labels, validation errors, the result envelope, and the `rpiv:ask-user:prompt` event.
-- [Keyboard and layout](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-ask-user-question/docs/keyboard.md) — every key, the rows the dialog appends, notes, collapse mode, and how previews and overflow adapt to terminal size.
-- [Configuration](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-ask-user-question/docs/configuration.md) — file lookup and `XDG_CONFIG_HOME`, the `collapseKey` grammar, the `guidance.*` prompt overrides, and how invalid values are handled.
-- [Hosts and runtime behavior](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-ask-user-question/docs/hosts.md) — terminal vs RPC vs non-interactive, what degrades in each, and the load-failure envelopes.
-- [Localization](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-ask-user-question/docs/localization.md) — the nine shipped languages, how the locale is chosen, and how to add one.
+- [Tool schema](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-ask-user-question/docs/tool-schema.md): parameters, limits, reserved labels, validation errors, the result envelope and the `rpiv:ask-user:prompt` event.
+- [Keyboard and layout](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-ask-user-question/docs/keyboard.md): each key, the rows that the dialog adds, notes, collapse mode, and how previews and overflow change with the terminal size.
+- [Configuration](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-ask-user-question/docs/configuration.md): file lookup and `XDG_CONFIG_HOME`, the `collapseKey` grammar, the `guidance.*` prompt overrides, and invalid values.
+- [Hosts and runtime behavior](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-ask-user-question/docs/hosts.md): terminal, RPC and non-interactive runs, what each one cannot do, and the load-failure envelopes.
+- [Localization](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-ask-user-question/docs/localization.md): the ten shipped languages, how the extension selects the locale, and how to add one.
 
 ## Requirements
 
 - Node.js 22 or newer.
-- Pi Agent, with an interactive terminal or an RPC/ACP host. Non-interactive runs never see the tool.
-- A terminal at least 100 columns wide for side-by-side previews; narrower terminals stack the preview under the options.
+- Pi Agent, with an interactive terminal or an RPC/ACP host. Non-interactive runs do not get the tool.
+- A terminal with a minimum width of 100 columns for previews beside the options. In a narrower terminal, the preview shows under the options.
 
-No native dependencies, no compiler, no API keys — the extension makes no model calls of its own.
+The extension has no native dependencies, needs no compiler and no API keys, and makes no model calls.
 
 ## Troubleshooting
 
-**The model says the questionnaire UI failed to load and asks its questions as chat text.** The dialog's modules were replaced on disk while Pi was running, usually by a package-manager install touching the store. Repair the install if it is broken, then restart Pi; the failure is not recoverable inside the running process.
+**The model says that the questionnaire UI did not load, and it asks its questions as chat text.** Something replaced the modules of the dialog on disk while Pi was running. Usually, a package-manager install changed the store. If the install is broken, repair it. Then restart Pi. The running process cannot recover from this failure.
 
-**`Ctrl+]` does nothing.** On keyboard layouts where `]` sits on the shifted layer (Latin American among them) the default is unreachable. Set `collapseKey` to something you can type, for example `"alt+o"`.
+**`Ctrl+]` does nothing.** On some keyboard layouts, such as Latin American, `]` needs the Shift key, so you cannot type the default. Set `collapseKey` to a key that you can type, for example `"alt+o"`.
 
 ## Related
 
-- [`@hs1n/rpiv-i18n`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n) — optional; installing it renders the dialog chrome in your language and adds `/languages`.
-- [`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi) — the umbrella package whose workflow skills use `ask_user_question` as their developer checkpoint. `/rpiv-setup` offers to install this extension.
+- [`@hs1n/rpiv-i18n`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-i18n): optional. When it is installed, the dialog text shows in your language, and you get `/languages`.
+- [`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi): the umbrella package. Its pipeline skills use `ask_user_question` as the developer checkpoint. `/rpiv-setup` offers to install this extension.
 
 ## License
 
-MIT — see [LICENSE](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-ask-user-question/LICENSE).
+MIT. See [LICENSE](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-ask-user-question/LICENSE).

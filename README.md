@@ -1,49 +1,50 @@
 # pi-monocoque
 
-A monorepo of [Pi Agent](https://github.com/badlogic/pi-mono) extensions: the `rpiv-pi`
-skill pipeline and the tools it composes. Eleven packages, lockstep versions, installed
-into Pi as a Pi source.
+pi-monocoque is a monorepo of [Pi Agent](https://github.com/badlogic/pi-mono) extensions.
+It holds the `rpiv-pi` skill pipeline and the tools that the pipeline uses. It has eleven
+packages with lockstep versions. You install it into Pi as a Pi source.
 
-**This is a personal fork** of [juicesharp/rpiv-mono](https://github.com/juicesharp/rpiv-mono),
-maintained by [@hs1n](https://github.com/hs1n) and **frozen at that project's v2.13.8** —
-there is no upstream remote and no merge path; later upstream work is not adopted here. It is
-not affiliated with, endorsed by, or supported by the upstream author. What the fork changes
-— and what it owes upstream under MIT — is in [FORK_NOTICE.md](./FORK_NOTICE.md); upstream's
-own README is preserved at [docs/upstream/README.md](./docs/upstream/README.md).
+**This repo is a personal fork** of the rpiv-mono project by Sergii Guslystyi.
+[@hs1n](https://github.com/hs1n) maintains it. The fork started from upstream v2.13.8, and it is
+now at 3.0.0. The fork has no upstream remote and no merge path. It does not adopt later upstream
+work. The upstream author does not endorse or support this fork.
+
+[FORK_NOTICE.md](./FORK_NOTICE.md) lists the changes and the MIT obligations to upstream. The
+upstream README is kept at [docs/upstream/README.md](./docs/upstream/README.md).
 
 ## Install
 
-There is **no registry route**: nothing here is published to npm, and `pi install
-git:...` works only because the monorepo root declares a `pi` manifest (seven extensions +
-the skill trees) that Pi reads after cloning.
+Nothing in this repo is published to npm. `pi install git:...` works because the monorepo root
+declares a `pi` manifest. The manifest lists seven extensions and the skill trees. Pi reads it
+after the clone.
 
 ```sh
 # the whole set, as a Pi source
 pi install git:github.com/hs1n/pi-monocoque
 
-# the Agent dispatcher rpiv-pi's parallel skills need (third-party, from npm)
-pi install npm:@tintinweb/pi-subagents@0.21.0
+# the Agent dispatcher that the parallel skills of rpiv-pi need (third-party, from npm)
+pi install npm:@tintinweb/pi-subagents@0.26.3
 ```
 
-Restart Pi, or `/reload` in a running session. To develop against a live checkout instead,
-`pi install /path/to/pi-monocoque` — paths are recorded, not copied, so edits arrive on
-`/reload`. Full matrix (live checkout, per-package install, opt-ins like `rpiv-btw`,
-verification): [INSTALL-FORK.md](./INSTALL-FORK.md).
+Restart Pi, or run `/reload` in a running session. To develop against a live checkout, run
+`pi install /path/to/pi-monocoque`. Pi records the path and does not copy it, so your edits
+apply on `/reload`. [INSTALL-FORK.md](./INSTALL-FORK.md) gives all the install routes: live
+checkout, one package, opt-in packages such as `rpiv-btw`, and verification.
 
 ## Packages
 
 | Package | Role |
 | --- | --- |
-| [`rpiv-pi`](./packages/rpiv-pi) | The pipeline: 30 skills, 15 named subagents, model management. Registers zero tools. |
-| [`rpiv-ask-user-question`](./packages/rpiv-ask-user-question) | `ask_user_question` — a structured questionnaire instead of a guess. |
-| [`rpiv-todo`](./packages/rpiv-todo) | `todo` tool + `/todos` + a live overlay that survives `/reload` and compaction. |
-| [`rpiv-advisor`](./packages/rpiv-advisor) | `advisor` — escalate any step to a stronger reviewer model. |
-| [`rpiv-web-tools`](./packages/rpiv-web-tools) | `web_search` / `web_fetch` with pluggable providers. |
-| [`rpiv-args`](./packages/rpiv-args) | `$1` / `$ARGUMENTS` placeholders and `` !`cmd` `` substitution in skill bodies. |
-| [`rpiv-i18n`](./packages/rpiv-i18n) | Localization SDK for the sibling extensions (includes `zh-TW`). |
-| [`rpiv-btw`](./packages/rpiv-btw) | `/btw` — a side conversation that never touches the transcript. Opt-in: not in the root manifest. |
-| [`rpiv-config`](./packages/rpiv-config) | Shared XDG-aware JSON config I/O for the siblings. Not a Pi extension. |
-| [`rpiv-side-call`](./packages/rpiv-side-call) | Shared host-version-tolerant side-call surface: which host path a side call takes, and the callable it dispatches through. Not a Pi extension. |
+| [`rpiv-pi`](./packages/rpiv-pi) | The pipeline: 30 skills, 15 named subagents, model management. It registers no tools. |
+| [`rpiv-ask-user-question`](./packages/rpiv-ask-user-question) | `ask_user_question`: a structured questionnaire, so the agent asks and does not guess. |
+| [`rpiv-todo`](./packages/rpiv-todo) | The `todo` tool, `/todos`, and a live overlay that stays after `/reload` and compaction. |
+| [`rpiv-advisor`](./packages/rpiv-advisor) | `advisor`: sends a step to a stronger reviewer model. |
+| [`rpiv-web-tools`](./packages/rpiv-web-tools) | `web_search` and `web_fetch`, with providers that you can change. |
+| [`rpiv-args`](./packages/rpiv-args) | `$1` and `$ARGUMENTS` placeholders and `` !`cmd` `` substitution in skill bodies. |
+| [`rpiv-i18n`](./packages/rpiv-i18n) | The localization SDK for the sibling extensions (it includes `zh-TW`). |
+| [`rpiv-btw`](./packages/rpiv-btw) | `/btw`: a side conversation that does not change the transcript. Opt-in: it is not in the root manifest. |
+| [`rpiv-config`](./packages/rpiv-config) | Shared JSON config I/O for the siblings, with XDG paths. It is not a Pi extension. |
+| [`rpiv-side-call`](./packages/rpiv-side-call) | The shared side-call surface. It selects the host path for a side call and gives the function that runs it. It is not a Pi extension. |
 | `test-utils` | Shared test fixtures. Private, workspace-only. |
 
 ## Using the pipeline
@@ -51,38 +52,42 @@ verification): [INSTALL-FORK.md](./INSTALL-FORK.md).
 ```
 /skill:discover <task>                                # interview → research → design → plan → implement
 /rpiv-models                                          # per-skill model + effort overrides
-/skill:implement .rpiv/artifacts/plans/<latest>.md    # drive one stage at a time
+/skill:implement .rpiv/artifacts/plans/<latest>.md    # run one stage at a time
+/skill:status                                         # the newest artifacts and the likely next skill
 ```
 
-Nothing here runs a graph. Each skill stands alone and writes a Markdown artifact under
-`.rpiv/artifacts/` that the next one reads; multi-stage work is orchestrated by the agent with
-Pi's own `Agent` and `SubagentWorkflow` tools. `/rpiv-setup` installs any sibling that is
-missing — by local path, since there is no registry copy to fetch.
+The pipeline does not run a graph. Each skill is independent. Each skill writes a Markdown
+artifact under `.rpiv/artifacts/`, and the next skill reads it. For multi-stage work, the agent
+uses the Pi `Agent` and `SubagentWorkflow` tools. `/rpiv-setup` installs each missing sibling
+from a local path, because no registry copy exists.
 
 ## Working on this repo
 
 ```sh
 npm install
 npm run check        # host-provided-dep guard + Biome + tsc
-npx vitest run       # 259 files / 6350+ tests
+npx vitest run       # 152 files / 2600+ tests
 npm run coverage     # what the pre-push hook runs
 ```
 
-- No build step: packages ship raw `.ts`, and Pi loads them directly.
-- One Vitest runner, one Biome config, one `tsconfig.base.json` at the root.
-- Husky gates commits (`check:decision-codes` → `check:file-sizes` → `check`) and pushes
-  (full coverage).
-- Versions are lockstep from one source: bump the root `package.json`, then `npm run versions:sync`
-  (it stamps all 11 packages); `npm run versions:check` verifies in CI.
-- Agent-facing architecture notes live under [`.rpiv/guidance/`](./.rpiv/guidance) and are
-  injected per directory as you work.
+- No build step: the packages ship raw `.ts`, and Pi loads them directly.
+- The root has one Vitest runner, one Biome config and one `tsconfig.base.json`.
+- Husky checks commits (`check:decision-codes` → `check:file-sizes` → `check`). It runs full
+  coverage before a push.
+- One source sets the lockstep version. Bump the root `package.json`, then run
+  `npm run versions:sync`. It writes the version to all 11 packages. CI runs
+  `npm run versions:check`.
+- Agent architecture notes are in [`.rpiv/guidance/`](./.rpiv/guidance). Pi injects them for
+  each directory that you work in.
 
-Deeper docs: [docs/upstream/](./docs/upstream) (upstream's narrative, kept verbatim),
-[INSTALL-FORK.md](./INSTALL-FORK.md), [FORK_NOTICE.md](./FORK_NOTICE.md),
-[packages/rpiv-pi/docs/](./packages/rpiv-pi/docs) (skills, models, agents).
+More docs:
+
+- [docs/upstream/](./docs/upstream): the upstream text, kept verbatim.
+- [INSTALL-FORK.md](./INSTALL-FORK.md) and [FORK_NOTICE.md](./FORK_NOTICE.md).
+- [packages/rpiv-pi/docs/](./packages/rpiv-pi/docs): skills, models and agents.
 
 ## License
 
-MIT. Upstream's copyright notices and license texts are kept unmodified — see
-[LICENSE](./LICENSE) and `packages/*/LICENSE`. Upstream authorship is recorded in the
-`contributors` field of each manifest as well.
+MIT. The fork keeps the upstream copyright notices and license texts unchanged. See
+[LICENSE](./LICENSE) and `packages/*/LICENSE`. The `contributors` field of each manifest also
+records upstream authorship.

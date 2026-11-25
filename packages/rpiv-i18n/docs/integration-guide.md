@@ -213,7 +213,7 @@ a missing `files[]` entry or a wrong namespace. Smoke-test against a live shell:
 ```sh
 # from your extension's directory
 pi install ./                                  # register the package directory
-pi install npm:@hs1n/rpiv-i18n           # if not already installed
+pi install git:github.com/hs1n/pi-monocoque  # if rpiv-i18n is not installed
 pi                                             # launch the session
 > /languages                                   # pick a non-English locale
 > <invoke a command from your extension>       # confirm the strings flip

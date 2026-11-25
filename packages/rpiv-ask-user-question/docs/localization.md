@@ -8,7 +8,7 @@ The extension works standalone: install only this package and you get the full d
 English. Localization needs one more install:
 
 ```sh
-pi install npm:@hs1n/rpiv-i18n
+pi install git:github.com/hs1n/pi-monocoque
 ```
 
 Restart your Pi session. If you installed through

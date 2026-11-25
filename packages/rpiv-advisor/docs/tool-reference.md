@@ -123,8 +123,9 @@ The filter scores against both the visible label (`Name  (provider)`) and the
 underlying `provider/modelId` value, ranking contiguous runs and word-boundary
 matches higher — so `op4` and `anthropic` both narrow the list.
 
-`/advisor` requires an interactive TTY. Without one it notifies
-`/advisor requires interactive mode` and returns.
+`/advisor` with no argument opens the picker when a UI exists. Without a UI, it
+shows the current advisor and the usage. `/advisor <provider/model-id> [effort]`
+and `/advisor off` work with or without a UI.
 
 ## Host compatibility
 

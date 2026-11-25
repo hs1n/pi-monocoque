@@ -1,54 +1,62 @@
 # pi-monocoque
 
-A standalone fork of `juicesharp/rpiv-mono`, shipping the `@hs1n/rpiv-*` Pi extensions as a
-Pi source. This file is a pointer index, not a manual: the rules for working here are
-injected per session from `.rpiv/guidance/`, and restating them here spends context twice.
+This repo is an independent fork of `juicesharp/rpiv-mono`. It ships the `@hs1n/rpiv-*` Pi
+extensions as a Pi source. This file is an index of pointers, not a manual. rpiv-core injects the
+rules for this repo from `.rpiv/guidance/` in each session. If this file repeats them, the
+context holds them two times.
 
 ## Before your first edit
 
-- **Changing identity, naming, or provenance → read `FORK_NOTICE.md`.** This is a fork, not
-  upstream. `rpiv`, `juicesharp` and the `@juicesharp` scope all name upstream's artifacts;
-  nothing here may present itself as upstream's, and upstream's issues are not ours to file.
-- **Naming a concept, or writing a doc → read `CONTEXT.md`.** Several words mean something
-  narrower here than in Pi or in upstream's docs — `sibling`, `pipeline` vs `workflow`,
-  `stage` vs a plan's `### Phase`, `guidance` vs `details`, `thoughts/`. It is deliberately
-  not auto-injected, so nothing else will hand it to you.
-- **Running a command, or unsure where something lives → read `.rpiv/guidance/architecture.md`.**
-  It carries the conventions and the rows whose *shape* matters; the guard-by-guard command
-  table is `.rpiv/guidance/scripts/architecture.md`, the layout tree and the new-package
-  checklist are `.rpiv/guidance/details.md`, and the test contract is
-  `.rpiv/guidance/test/architecture.md`. rpiv-core injects it at
-  session start when loaded; reading it from disk is the fallback for when it was not. Each
-  package and subsystem has a neighbouring `architecture.md` under `.rpiv/guidance/`, plus a
-  `details.md` beside it that is deliberately NOT injected — read those when you need the
-  module map rather than the rules.
-- **Installing this into Pi → read `INSTALL-FORK.md`.** There is no publish path, so an
-  instruction of the form `npm install @hs1n/rpiv-*` resolves nowhere here.
+- **Before you change identity, names or provenance, read `FORK_NOTICE.md`.** This repo is a
+  fork, not upstream. `rpiv`, `juicesharp` and the `@juicesharp` scope name the artifacts of
+  upstream. Nothing here can show itself as upstream. Do not send issues to upstream.
+- **Before you name a concept or write a doc, read `CONTEXT.md`.** Some words have a narrower
+  meaning here than in Pi or in the upstream docs: `sibling`, `pipeline` vs `workflow`, `stage`
+  vs the `### Phase` of a plan, `guidance` vs `details`, and `thoughts/`. Nothing injects
+  `CONTEXT.md`, so you must read it yourself.
+- **Before you run a command, or when you do not know where something is, read
+  `.rpiv/guidance/architecture.md`.** It has the conventions and the rows whose *shape* is
+  important. Other files have the details:
+  - the command table, one row per guard: `.rpiv/guidance/scripts/architecture.md`
+  - the layout tree and the new-package checklist: `.rpiv/guidance/details.md`
+  - the test contract: `.rpiv/guidance/test/architecture.md`
+
+  When rpiv-core is loaded, it injects `.rpiv/guidance/architecture.md` at session start. If it
+  did not, read the file from disk. Each package and subsystem has an `architecture.md` under
+  `.rpiv/guidance/`. Each also has a `details.md` beside it, and rpiv-core does NOT inject that
+  file. Read `details.md` when you need the module map, not the rules.
+- **Before you install this repo into Pi, read `INSTALL-FORK.md`.** The repo has no publish
+  path. Thus an npm install of an `@hs1n/rpiv-*` package name fails here.
 
 ## Agent skills
 
 ### Issue tracker
 
-Issues and specs live as markdown under `.scratch/`, committed rather than ignored. See `docs/agents/issue-tracker.md`.
+Issues and specs are Markdown files under `.scratch/`. They are committed, not ignored. See
+`docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-Five canonical triage roles, kept at their default strings. See `docs/agents/triage-labels.md`.
+The repo has five canonical triage roles, with their default strings. See
+`docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-Single-context — one root `CONTEXT.md`, decisions under `docs/adr/`. See `docs/agents/domain.md`.
+The repo has one context: one root `CONTEXT.md`, and decisions under `docs/adr/`. See
+`docs/agents/domain.md`.
 
 ## Checks that will fail your commit
 
-The pre-commit hook runs all four; knowing them up front is cheaper than the round trip.
+The pre-commit hook runs these four checks. Know them before you commit, so you do not need a
+second attempt.
 
-- `npm run check:decision-codes` — no parenthesized decision-code citation such as `(c2r3)`
-  in a committed `.ts`. State the contract in the comment instead.
-- `npm run check:host-provided-deps` — no host-provided package (`typebox`, the
-  `@earendil-works/pi-*` trio) in an install-time dependency field; they are peer-pinned
-  `"*"`, because an installed copy puts two live copies of one module in a single process.
-- `npm run check:file-sizes` — `packages/rpiv-pi` sits on a size-growth ratchet. Split the
-  file rather than raising the baseline as a reflex.
-- `npm run check:unused-deps` — whoever imports declares. A manifest may not claim a package
-  its own sources never import (registered siblings and host-provided names are exempt).
+- `npm run check:decision-codes`: a committed `.ts` file must not cite a decision code in
+  parentheses, such as `(c2r3)`. State the contract in the comment.
+- `npm run check:host-provided-deps`: an install-time dependency field must not hold a
+  host-provided package (`typebox` or the three `@earendil-works/pi-*` packages). They are
+  peer-pinned to `"*"`. An installed copy puts two live copies of one module in one process.
+- `npm run check:file-sizes`: `packages/rpiv-pi` has a ratchet on file growth. Split the file.
+  Do not raise the baseline as the first fix.
+- `npm run check:unused-deps`: the package that imports a dependency declares it. A manifest
+  must not declare a package that its own sources do not import. Registered siblings and
+  host-provided names are exceptions.

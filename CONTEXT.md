@@ -1,168 +1,175 @@
 # pi-monocoque
 
-A standalone fork of `rpiv-mono` that ships the `@hs1n/rpiv-*` Pi extension family as a Pi
-source. Several words below mean something narrower here than they do in Pi itself or in
-upstream's docs, so this file is the tie-breaker. Deep detail lives in
-`.rpiv/guidance/**` (auto-injected) and `FORK_NOTICE.md` (provenance); this file only
-fixes vocabulary.
+pi-monocoque is an independent fork of `rpiv-mono`. It ships the `@hs1n/rpiv-*` family of Pi
+extensions as a Pi source. Some words below have a narrower meaning here than in Pi or in the
+upstream docs. When two meanings conflict, this file decides. `.rpiv/guidance/**` has the
+details (rpiv-core injects it), and `FORK_NOTICE.md` has the provenance. This file only sets
+the vocabulary.
 
 ## Language
 
 ### Provenance
 
 **upstream**:
-`juicesharp/rpiv-mono`, frozen at v2.13.8 (`2d88b79c`). The `upstream` remote was removed
-after the final sync — there is no merge path.
+`juicesharp/rpiv-mono`, stopped at v2.13.8 (`2d88b79c`). The maintainer removed the `upstream`
+remote after the final sync. No merge path exists.
 _Avoid_: origin, parent repo, source
 
 **@juicesharp**:
-Upstream's npm scope. It identifies upstream's artifacts and is not ours to use.
+The npm scope of upstream. It identifies the artifacts of upstream. This fork must not use it.
 _Avoid_: the old scope, the original scope
 
 ### Packages
 
 **sibling**:
-A Pi extension package registered in `extensions/rpiv-core/siblings.ts`. That registry is
-the single source of truth: one entry drives `/rpiv-setup`, missing-sibling warnings, and
-presence detection.
+A Pi extension package that is registered in `extensions/rpiv-core/siblings.ts`. That registry
+is the single source of truth. One entry controls `/rpiv-setup`, the missing-sibling warnings
+and presence detection.
 _Avoid_: plugin, module, addon, dependency
 
 **opt-in sibling**:
-A package that rides lockstep and shared CI but is absent from `siblings.ts`, from
-`rpiv-pi`'s `peerDependencies`, and from the root `pi` manifest — so neither `/rpiv-setup`
-nor a git install reaches it. Installed via `scripts/fork-pi-install.sh --with <name>`.
-Today that is `rpiv-btw` alone.
+A package that has the lockstep version and the shared CI. It is not in `siblings.ts`, not in
+the `peerDependencies` of `rpiv-pi`, and not in the root `pi` manifest. Thus `/rpiv-setup` and a
+git install do not install it. Install it with `scripts/fork-pi-install.sh --with <name>`. At
+this time, `rpiv-btw` is the only one.
 _Avoid_: optional package, disabled plugin
 
 **legacy sibling**:
-A superseded package name tracked in `LEGACY_SIBLINGS` and pruned on upgrade.
+A replaced package name in `LEGACY_SIBLINGS`. `/rpiv-setup` removes it from the settings. At
+this time, the legacy siblings are `pi-subagents` and `rpiv-workflow`.
 _Avoid_: deprecated sibling, old name
 
 **host-provided**:
-A package Pi ships and aliases to its own copy at load time — `typebox`, the
-`@earendil-works/pi-*` trio, and the legacy `@mariozechner/*` spellings. Always
-`peerDependencies: "*"`, never `dependencies`: an installed copy puts two live copies of
-one module in a single process.
+A package that Pi ships and maps to its own copy at load time: `typebox`, the three
+`@earendil-works/pi-*` packages and the legacy `@mariozechner/*` names. Always declare it in
+`peerDependencies: "*"`, never in `dependencies`. An installed copy puts two live copies of one
+module in one process.
 _Avoid_: bundled, vendored, built-in
 
 **lockstep**:
-Every `packages/*/package.json` shares the root `package.json`'s `version`, which is the only
-place it is edited — `sync-versions.js` writes it everywhere else (`--check` verifies).
-Nothing is published, so the version is a marker, not a release.
+Each `packages/*/package.json` has the same `version` as the root `package.json`. You edit the
+version only in the root. `sync-versions.js` writes it to all other manifests, and `--check`
+verifies them. Nothing is published, so the version is a marker, not a release.
 _Avoid_: semver, independently versioned
 
 ### Side calls
 
 **side call**:
-A one-off model call an extension makes outside the main transcript — its own prompt, no
-tools, nothing written back. `rpiv-advisor` and `rpiv-btw` are the two surfaces that make
-one; `rpiv-side-call` is the shared module that resolves how to make one across host
-versions.
-_Avoid_: sidecall, sub-call, secondary request, side conversation (`/btw`'s overlay is its UI, not the call)
+A single model call that an extension makes outside the main transcript. It has its own prompt
+and no tools, and it writes nothing back. `rpiv-advisor` and `rpiv-btw` are the two surfaces
+that make side calls. `rpiv-side-call` is the shared module that selects how to make a side call
+on each host version.
+_Avoid_: sidecall, sub-call, secondary request, side conversation (the `/btw` overlay is its UI, not the call)
 
 ### Skill ownership
 
-Three skill sources are installed here — `skills/matt-pocock/` (Matt Pocock's engineering skills,
-vendored into this repo and shipped through the root `pi` manifest), `skills/skill-master/` (a
-Pi-native fork of Anthropic's `skill-creator`, also shipped through the manifest, and edited rather
-than vendored verbatim — as is one file of the matt-pocock set, `grilling/SKILL.md`), and
-`packages/rpiv-pi/skills/` — and three names exist in the matt-pocock and rpiv-pi sets: `research`,
-`implement`, `code-review`. **Nothing collides today**, because the vendored set leaves those three
-out. That omission is load-bearing, not hygiene, and it is the first thing to re-check when
-refreshing the vendored copy.
+This repo installs three skill sources:
+
+- `skills/matt-pocock/`: the engineering skills of Matt Pocock. The repo has a copy, and the
+  root `pi` manifest ships it. The fork edits one file of the set, `grilling/SKILL.md`.
+- `skills/skill-master/`: a Pi-native fork of the `skill-creator` skill by Anthropic. The root
+  manifest ships it. The fork edits it and does not keep it verbatim.
+- `packages/rpiv-pi/skills/`.
+
+Three names exist in both the matt-pocock set and the rpiv-pi set: `research`, `implement` and
+`code-review`. **No collision occurs at this time**, because the copied set does not include
+these three. This omission is necessary, not only clean. When you refresh the copied set, check
+it first.
 
 **research**, **implement**, **code-review**:
-**Neither side may be swapped for the other.** User-level skills outrank the installed
-package — `<cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills > ~/.pi/agent/skills >
-installed package (this fork)` (`scripts/fork-own-skill.mjs`). The vendored set rides at the
-**lowest** rank, as part of the installed package, so it is authoritative only while no copy of
-the same name sits higher. Putting `research`, `implement` or `code-review` into `~/.agents/skills`
-or a project `.agents/skills` shadows rpiv-pi's body with a different one — matt's skills describe
-a different method for the same name, and nothing reconciles the two.
+**Do not replace one side with the other.** User-level skills have a higher precedence than the
+installed package. The order is `<cwd>/.agents/skills > <cwd>/.pi/skills > ~/.agents/skills >
+~/.pi/agent/skills > installed package (this fork)` (`scripts/fork-own-skill.mjs`). The copied
+set has the **lowest** precedence, because it is part of the installed package. Thus it is
+correct only while no copy with the same name has a higher precedence. If you put `research`,
+`implement` or `code-review` into `~/.agents/skills` or into a project `.agents/skills`, that
+body hides the rpiv-pi body. The skills of Matt Pocock describe a different method with the same
+name, and nothing makes the two agree.
 
-The three names are also the reason the vendored set omits them: a copy at any higher
-precedence wins `/skill:<name>` silently, which is the only dispatch path a stage has.
-`npm run check:skill-names` guards the repo, and `session_start` warns when a copy outside
-the package shadows a bundled skill.
+This is also why the copied set does not include the three names. A copy at a higher precedence
+wins `/skill:<name>` with no warning, and `/skill:<name>` is the only path that dispatches a
+skill. `npm run check:skill-names` guards the repo. At `session_start`, rpiv-core shows a warning
+when a copy outside the package hides a bundled skill.
 _Avoid_: restoring matt's `research` / `implement` / `code-review`, deleting rpiv-pi's, treating the collision as a taste question
 
 **the rest of matt's set** (`grill-with-docs`, `to-spec`, `to-tickets`, `triage`,
 `wayfinder`, `tdd`, `prototype`, `handoff`, `codebase-design`, `domain-modeling`,
 `writing-for-agents`):
-Matt's, and nothing in this repo dispatches them by name. They are the human-driven half of
-the flow, reached by `/skill:<name>` and by the agent's own routing.
+These are the skills of Matt Pocock. Nothing in this repo dispatches them by name. They are the
+part of the flow that a person controls. You start them with `/skill:<name>`, or the agent
+selects them.
 _Avoid_: assuming they are interchangeable with the pipeline stages above
 
 ### Guidance
 
 **guidance**:
-A `.rpiv/guidance/**/architecture.md` file — a shadow tree mirroring the source layout,
-injected into the session by rpiv-core's guidance engine. Not the same as a root
-`AGENTS.md`, which Pi's own resource loader injects.
+A `.rpiv/guidance/**/architecture.md` file. These files make a shadow tree that copies the
+source layout. The guidance engine of rpiv-core injects them into the session. A guidance file
+is not the same as a root `AGENTS.md`. The resource loader of Pi injects the root `AGENTS.md`.
 _Avoid_: architecture doc, CLAUDE.md, context file
 
 **details**:
-A `details.md` beside a guidance file. Deliberately NOT injected — read it on demand when
-you need the module map or the per-file enumeration.
+A `details.md` file beside a guidance file. rpiv-core does NOT inject it. Read it when you need
+the module map or the list of files.
 _Avoid_: appendix, deep dive, reference
 
 **the ladder**:
-Per directory depth, the first existing of `AGENTS.md > CLAUDE.md >
-.rpiv/guidance/<sub>/architecture.md`. Depth 0 checks the shadow tree only, because Pi
-already loads a root `AGENTS.md`/`CLAUDE.md`.
+At each directory depth, the first file that exists from `AGENTS.md > CLAUDE.md >
+.rpiv/guidance/<sub>/architecture.md`. At depth 0, the ladder checks only the shadow tree,
+because Pi already loads a root `AGENTS.md` or `CLAUDE.md`.
 _Avoid_: precedence, resolution order
 
 ### Multi-stage work
 
 **pipeline**:
-The developer-driven RPIV stage sequence (`discover → research → design → plan →
-implement → validate`), invoked by `/skill:<name>`. Human-paced; no runner involved.
-Multi-stage work beyond one skill is orchestrated by the agent with Pi's own `Agent` and
-`SubagentWorkflow` tools, not by a declared graph.
+The RPIV stage sequence that the developer controls (`discover → research → design → plan →
+implement → validate`). You start each stage with `/skill:<name>`. A person sets the pace, and
+no runner is used. For multi-stage work across more than one skill, the agent uses the Pi
+`Agent` and `SubagentWorkflow` tools. No declared graph controls it.
 _Avoid_: workflow, flow, process
 
 ### Tickets
 
 **ticket**:
-One work item, one file: `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in
-dependency order. Written by `to-tickets`; the **spec** they are sliced from is written first by
-`to-spec`. Field spellings are pinned in `docs/agents/issue-tracker.md`, and that file wins over
-a skill's own embedded template.
+One work item in one file: `.scratch/<feature-slug>/issues/<NN>-<slug>.md`. The numbers start at
+`01`, in dependency order. `to-tickets` writes the tickets. First, `to-spec` writes the **spec**
+that the tickets come from. `docs/agents/issue-tracker.md` sets the field names. If that file
+and the template in a skill do not agree, the file is correct.
 _Avoid_: issue (that names a GitHub tracker item, and this repo has no tracker that stores one)
 
 **spec**:
-`.scratch/<feature-slug>/spec.md` — the problem statement a set of tickets is sliced from,
-synthesized by `to-spec` from the conversation rather than from an interview.
+`.scratch/<feature-slug>/spec.md`: the problem statement that a set of tickets comes from.
+`to-spec` writes it from the conversation, not from an interview.
 _Avoid_: plan (a plan is an `.rpiv/artifacts/plans/` artifact, a pipeline output, and uncommitted)
 
 **tracker**:
-Where tickets live. Here that is local markdown under `.scratch/`, recorded in
-`docs/agents/issue-tracker.md`. Not GitHub: issues are disabled on this repo, and a committed
-file survives a clone.
+The location of the tickets. Here, that is local Markdown under `.scratch/`, as
+`docs/agents/issue-tracker.md` records. It is not GitHub. Issues are disabled on this repo, and
+a committed file stays in each clone.
 _Avoid_: backlog, queue, GitHub issues
 
 **.scratch/**:
-The ticket artifact root, and deliberately **not** gitignored — a ticket is meant to outlive the
-session and travel with a clone. That is the opposite posture from **.rpiv/artifacts/**, which is
-ignored and local-only. The two roots are easy to confuse and the difference is load-bearing:
-pipeline artifacts are scratch, tickets are durable.
+The root for ticket artifacts. It is intentionally **not** in `.gitignore`, because a ticket
+must stay after the session and go with each clone. **.rpiv/artifacts/** is the opposite: Git
+ignores it, and it stays local. Do not confuse the two roots. Pipeline artifacts are temporary,
+and tickets are permanent.
 _Avoid_: treating `.scratch/` as scratch space, adding it to `.gitignore`
 
 ### Conventions
 
 **decision code**:
-A parenthesized plan/phase citation such as `(c2r3)`. Banned in committed `.ts` —
-comments state the contract in place instead.
+A plan or phase citation in parentheses, such as `(c2r3)`. Committed `.ts` files must not have
+one. A comment states the contract in place.
 _Avoid_: plan code, ticket id, reference
 
 **ratchet**:
-`scripts/file-size-baseline.json` over `packages/rpiv-pi`. Baselined files may only grow
-by a small allowance per regeneration cycle; new files must fit a class cap. Every raise
-is a visible baseline diff.
+`scripts/file-size-baseline.json`, which applies to `packages/rpiv-pi`. A file in the baseline
+can grow only by a small allowance in each regeneration cycle. A new file must fit a class
+limit. Each increase shows as a diff of the baseline.
 _Avoid_: budget, threshold, line cap
 
 **thoughts/**:
-The upstream-era artifact root (`thoughts/shared/…`), migrated to `.rpiv/artifacts/`.
-Nothing writes it any more; `.gitignore`, `biome.json` and `goal-baseline.ts`'s scope
-bookkeeping still tolerate it for trees that predate the move.
+The artifact root from the upstream era (`thoughts/shared/…`). Its contents moved to
+`.rpiv/artifacts/`. Nothing writes it now. `.gitignore` and `biome.json` still accept it, for
+trees from before the move.
 _Avoid_: thoughts/shared, using it for new artifacts

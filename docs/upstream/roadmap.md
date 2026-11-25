@@ -1,5 +1,11 @@
 # Roadmap
 
+> [!NOTE]
+> This file is the upstream record. The fork keeps it as upstream wrote it, and does not
+> update it. In 3.0.0, the fork removed the `/wf` workflow runtime and the `rpiv-workflow`
+> package. Text below about `/wf`, workflows or lanes does not apply to this fork. See
+> [ADR 0005](../adr/0005-the-typed-workflow-runtime-is-removed.md).
+
 Keeping an experienced driver in the loop while the work moves at LLM speed. Companion to the [README's Roadmap](./README.md#roadmap) — no dates, no version targets. Items move down the list as they ship.
 
 ## What's Done

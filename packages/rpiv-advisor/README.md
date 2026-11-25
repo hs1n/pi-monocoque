@@ -1,7 +1,5 @@
 # @hs1n/rpiv-advisor
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 <div align="center">
   <a href="https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-advisor">
     <picture>
@@ -10,89 +8,98 @@
   </a>
 </div>
 
-Let the model you're working with hand its whole conversation to a second, stronger model and get back a plan, a correction, or a stop signal — then keep going. `rpiv-advisor` adds the zero-parameter `advisor` tool and the `/advisor` picker to [Pi Agent](https://github.com/badlogic/pi-mono), so you can drive a session with a fast model and keep a stronger reviewer one call away.
+Your working model can send its full conversation to a second, stronger model. The stronger
+model sends back a plan, a correction or a stop signal, and the work continues. `rpiv-advisor`
+adds the `advisor` tool (no parameters) and the `/advisor` command to
+[Pi Agent](https://github.com/badlogic/pi-mono). Thus you can use a fast model and keep a
+stronger reviewer one call away.
 
 ## Install
 
-This package ships inside [`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque) — an
-11-package monorepo with **no registry route**, so there is no `@hs1n/rpiv-*` entry on npm.
-Install the repo as a Pi source:
+This package is in [`hs1n/pi-monocoque`](https://github.com/hs1n/pi-monocoque), an 11-package
+monorepo. Nothing is published to npm. Install the repo as a Pi source:
 
 ```sh
 pi install git:github.com/hs1n/pi-monocoque
 ```
 
-Restart Pi, or `/reload` in a running session. The pipeline's `Agent` tool comes from a
-third-party package and is installed separately:
+Restart Pi, or run `/reload` in a running session. The `Agent` tool of the pipeline comes from
+a third-party package. Install it separately:
 
 ```sh
-pi install npm:@tintinweb/pi-subagents@0.21.0
+pi install npm:@tintinweb/pi-subagents@0.26.3
 ```
 
-[INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) covers the
-live-checkout install (`pi install <path>`, edits picked up by `/reload`) and the
-per-package form (`scripts/fork-pi-install.sh`).
-
+[INSTALL-FORK.md](https://github.com/hs1n/pi-monocoque/blob/main/INSTALL-FORK.md) gives the
+live-checkout install (`pi install <path>`) and `scripts/fork-pi-install.sh` (one package at a time).
 
 ## Quick start
 
-Nothing happens until you pick a reviewer. Run:
+The advisor does nothing until you select a reviewer. Run:
 
 ```
 /advisor
 ```
 
-You get a picker over every model Pi already has credentials for — start typing
-to filter it by model name, provider, or `provider/id`. Pick one, and if it
-supports reasoning you get a second picker for its effort level (`high` is
-recommended). Pi confirms with `Advisor: <model>, <effort>`, and the `advisor`
-tool goes live for this and every future session.
+A picker shows each model that Pi has credentials for. Type to filter by model name, provider
+or `provider/id`. Select a model. If the model supports reasoning, a second picker shows its
+effort levels (`high` is recommended). Pi shows `Advisor: <model>, <effort>`. The `advisor` tool
+is then live for this session and for all future sessions.
 
-If the model you want isn't in the list, its provider isn't authenticated yet —
-run Pi's `/login` for that provider, then re-run `/advisor`.
+If a model is not in the list, its provider is not authenticated. Run the Pi `/login` command
+for that provider, then run `/advisor` again.
 
 ![The /advisor picker: a bordered panel titled "Advisor Tool" above a scrollable list of the models Pi has credentials for, with the current selection highlighted](https://raw.githubusercontent.com/hs1n/pi-monocoque/main/packages/rpiv-advisor/docs/advisor.jpg)
 
-From there the executor model calls `advisor()` on its own when it needs stronger
-judgment. To turn it back off, run `/advisor` and choose **No advisor**.
+The executor model then calls `advisor()` itself when it needs better judgment. To turn the
+advisor off, run `/advisor off`, or run `/advisor` and select **No advisor**.
+
+You can also set the advisor with arguments, with or without a UI:
+
+| Command | What it does |
+| --- | --- |
+| `/advisor <provider>/<model-id> [effort]` | Sets the reviewer. `[effort]` is `off` or a level that the model supports. With no effort, the model default applies |
+| `/advisor off` | Turns the advisor off |
+| `/advisor` with no UI | Shows the current setting and the usage |
+
+If an argument is not valid, the command shows an error that lists the valid values, and it
+changes nothing. In print mode (`pi -p`), Pi discards notify messages. Thus the command applies
+valid arguments but shows no output. RPC clients get the output.
 
 ## What you get
 
-- **A second opinion without leaving the session** — the executor calls
-  `advisor()` mid-turn, reads the reviewer's answer as the tool result, and
-  resumes. Nothing is injected into your transcript, and the default prompt
-  guidelines tell the executor to restate the advisor's key guidance in its
-  next visible reply, so you are not left with only a collapsed tool card.
-- **Nothing to type or paste** — the tool takes zero parameters. The whole
-  conversation branch is serialised and forwarded automatically: the task, every
-  tool call made, every result seen. That whole branch is billed against the
-  reviewer model on every call, so escalations are not free.
-- **The reviewer sees what survived compaction** — the branch is built from Pi's
-  resolved LLM context, so compaction and branch summaries are forwarded instead
-  of a stale raw replay.
-- **Any model can be the reviewer** — every model you're authenticated for is in
-  the `/advisor` picker, found by fuzzy-typing. No provider is privileged.
-- **Pick once, it stays picked** — model and effort persist to `advisor.json`
-  and are re-applied at every session start.
-- **Skip it when you're already on a strong model** — list executor models in
-  `disabledForModels` to strip the tool for them, optionally only at or above a
-  reasoning-effort threshold. It strips and re-adds live as you switch model or
-  effort mid-session.
-- **Off costs nothing** — with no model selected the tool is stripped from the
-  active set, so its prompt text never enters the system prompt at all.
+- **A second opinion in the same session**: the executor calls `advisor()` during a turn. It
+  reads the answer as the tool result and continues. Nothing goes into your transcript. The
+  default prompt guidelines tell the executor to repeat the key guidance in its next visible
+  reply. Thus you see more than a collapsed tool card.
+- **Nothing to type or paste**: the tool has no parameters. It serializes and sends the full
+  conversation branch: the task, each tool call and each result. Each call bills that full
+  branch to the reviewer model, so each call has a cost.
+- **The reviewer sees the context after compaction**: the extension builds the branch from the
+  resolved LLM context of Pi. Thus it sends compaction and branch summaries, not an old raw
+  replay.
+- **Any model can be the reviewer**: each model that you are authenticated for is in the
+  `/advisor` picker, and fuzzy typing finds it. No provider has priority.
+- **Your selection stays**: the extension saves the model and effort to `advisor.json`, and
+  applies them again at each session start.
+- **Skip it when you already use a strong model**: list executor models in
+  `disabledForModels` to remove the tool for them. You can also remove it only at or above an
+  effort level. The extension removes and adds the tool live when you change model or effort.
+- **Off costs nothing**: with no model selected, the extension removes the tool from the active
+  set. Thus its prompt text does not go into the system prompt.
 
 ## Configuration
 
-Settings live in `~/.config/rpiv-advisor/advisor.json` (or
-`$XDG_CONFIG_HOME/rpiv-advisor/advisor.json` when that variable is set to an
-absolute path). `/advisor` creates the file and chmods it to `0600`; a failed
-write leaves your previous selection untouched and tells you so.
+The settings are in `~/.config/rpiv-advisor/advisor.json`. If `$XDG_CONFIG_HOME` is an
+absolute path, the file is `$XDG_CONFIG_HOME/rpiv-advisor/advisor.json`. `/advisor` creates
+the file and sets its mode to `0600`. If a write fails, your previous selection stays, and the
+command tells you.
 
 | Key | What it does | Default |
 | --- | --- | --- |
-| `modelKey` | The reviewer model, as `"provider/modelId"`. Written by `/advisor`. | absent — advisor off |
-| `effort` | Reasoning effort for the reviewer: `minimal`, `low`, `medium`, `high`, `xhigh`, `max`. Written by `/advisor`; only levels supported by the selected model are offered. | absent — no reasoning sent |
-| `disabledForModels` | Executor models the advisor is stripped for. Plain strings block at any effort; `{ "model": "…", "minEffort": "…" }` blocks only at or above that effort. | `[]` |
+| `modelKey` | The reviewer model, as `"provider/modelId"`. `/advisor` writes it. | absent: advisor off |
+| `effort` | Reasoning effort for the reviewer: `minimal`, `low`, `medium`, `high`, `xhigh`, `max`. `/advisor` writes it and offers only the levels that the model supports. | absent: no reasoning sent |
+| `disabledForModels` | Executor models that do not get the tool. A plain string blocks at all efforts. `{ "model": "…", "minEffort": "…" }` blocks only at or above that effort. | `[]` |
 
 ```json
 {
@@ -105,36 +112,32 @@ write leaves your previous selection untouched and tells you so.
 }
 ```
 
-`/advisor` only rewrites `modelKey` and `effort`, so hand-edited keys —
-`disabledForModels` and the `guidance` overrides — survive every save.
+`/advisor` writes only `modelKey` and `effort`. Thus the keys that you edit by hand
+(`disabledForModels` and the `guidance` overrides) stay after each save.
 
 ## Reference
 
-- [Configuration](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-advisor/docs/configuration.md) — config file resolution, every key, blocklist matching rules, guidance overrides, and the full notification catalogue.
-- [`advisor` tool reference](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-advisor/docs/tool-reference.md) — schema, result envelope, failure paths, what gets sent to the reviewer, lifecycle hooks, and picker keys.
+- [Configuration](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-advisor/docs/configuration.md): config file resolution, each key, blocklist rules, guidance overrides and all notifications.
+- [`advisor` tool reference](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-advisor/docs/tool-reference.md): schema, result envelope, failure paths, the data sent to the reviewer, lifecycle hooks and picker keys.
 
 ## Requirements
 
-- A [Pi Agent](https://github.com/badlogic/pi-mono) host — the extension loads
-  through Pi's extension manifest. No native dependencies.
-- An authenticated provider for the **reviewer** model, resolved through Pi's
-  model registry.
-- An interactive terminal for `/advisor`.
+- A [Pi Agent](https://github.com/badlogic/pi-mono) host. The extension loads through the
+  Pi extension manifest. It has no native dependencies.
+- An authenticated provider for the **reviewer** model, through the Pi model registry.
 
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| The `/advisor` picker offers only **No advisor** | No provider is authenticated in Pi | Run Pi's `/login` for a provider, then re-run `/advisor` |
-| `Advisor (<model>) has no API key available.` comes back as the tool result | Credentials for the reviewer's provider no longer resolve | Re-authenticate that provider with `/login` |
-| `/advisor requires interactive mode` | Running under `pi --print …` or RPC | Run Pi interactively |
+| The `/advisor` picker shows only **No advisor** | No provider is authenticated in Pi | Run the Pi `/login` command for a provider, then run `/advisor` again |
+| The tool result is `Advisor (<model>) has no API key available.` | Pi cannot find the credentials for the provider of the reviewer | Authenticate that provider again with `/login` |
 
 ## Related
 
-- [`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi) —
-  the umbrella package; its `code-review` skill calls `advisor()` when this
-  package is installed.
+- [`@hs1n/rpiv-pi`](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-pi): the
+  umbrella package. Its `code-review` skill calls `advisor()` when this package is installed.
 
 ## License
 
-MIT — see [LICENSE](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-advisor/LICENSE).
+MIT. See [LICENSE](https://github.com/hs1n/pi-monocoque/blob/main/packages/rpiv-advisor/LICENSE).

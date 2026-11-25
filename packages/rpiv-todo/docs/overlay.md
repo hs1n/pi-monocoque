@@ -125,6 +125,6 @@ schema descriptions — stays English by design.
 The SDK is a soft optional peer, loaded through a dynamic import at module init.
 When it is absent, every call site returns its inline English literal and the
 extension stays online: no warning, no crash. Install it at any time with
-`pi install npm:@hs1n/rpiv-i18n` and restart the session. To add or
+`pi install git:github.com/hs1n/pi-monocoque` and restart the session. To add or
 override a translation, drop a `locales/<code>.json` file mirroring `en.json` —
 see the `@hs1n/rpiv-i18n` README's "Contributing translations" section.

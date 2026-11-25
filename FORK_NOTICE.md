@@ -1,167 +1,186 @@
 # Fork notice
 
-This repository is a **personal fork** of **rpiv-mono**, maintained by [@hs1n](https://github.com/hs1n).
-It is **not affiliated with, endorsed by, or supported by** the upstream author.
+This repository is a **personal fork** of **rpiv-mono**. [@hs1n](https://github.com/hs1n)
+maintains it. The upstream author **does not endorse or support** this fork, and the fork has
+no affiliation with the upstream author.
 
 | | |
 | --- | --- |
-| Upstream | https://github.com/juicesharp/rpiv-mono |
+| Upstream | `juicesharp/rpiv-mono` on GitHub |
 | Upstream author | Sergii Guslystyi ([@juicesharp](https://github.com/juicesharp), [rpiv-pi.com](https://rpiv-pi.com)) |
 | This fork | https://github.com/hs1n/pi-monocoque |
 | Forked from | `main` @ `d74b1c99830a565f3df3f37e0a36616d17ffc574` (v2.11.x) |
-| Upstream merged through | `main` @ `2d88b79c` — v2.13.8, 2026-10-12 (final sync; the remote was removed afterwards) |
-| License | MIT — see [`LICENSE`](./LICENSE) and `packages/*/LICENSE` |
+| Upstream merged through | `main` @ `2d88b79c`: v2.13.8, 2026-10-12 (the final sync; the remote was removed after it) |
+| Current version | 3.0.0 |
+| License | MIT. See [`LICENSE`](./LICENSE) and `packages/*/LICENSE` |
 
 ## License and attribution
 
-Upstream is MIT licensed. The MIT terms are the only condition on reuse, and they are
-satisfied here by **keeping every upstream copyright notice and license text unmodified**:
+Upstream uses the MIT license. The MIT terms are the only condition on reuse. This fork
+satisfies them because it **keeps each upstream copyright notice and license text unchanged**:
 
 - `LICENSE` (root)
-- `packages/*/LICENSE` — **9 files today**, 12 at the fork point. The three that went were
-  `rpiv-site`, `rpiv-voice` and `rpiv-warp`, deleted along with their packages;
-  `rpiv-telemetry`, `rpiv-config` and `test-utils` have never carried one.
+- `packages/*/LICENSE`: **8 files today**, and 12 at the fork point. The fork deleted four of
+  them with their packages: `rpiv-site`, `rpiv-voice`, `rpiv-warp` and (in 3.0.0)
+  `rpiv-workflow`. `rpiv-telemetry`, `rpiv-config` and `test-utils` never had one.
 
-A **second, unrelated MIT grant** covers `skills/matt-pocock/` — Matt Pocock's engineering
-skills, vendored into this repo from [`mattpocock/skills`](https://github.com/mattpocock/skills)
-so that a clone reproduces the setup instead of depending on an unversioned directory under
-`$HOME`. Those files are neither upstream's nor this fork's; their `LICENSE` travels with them
-because that is the licence's only condition. One file in that set **is** modified:
-`grilling/SKILL.md` gained this fork's paragraph mirroring its design tree into Pi's `todo` tool,
-so an update should re-copy the other 21 verbatim and re-apply that single edit rather than copying
-the whole set blindly — see that directory's `README.md` for what was deliberately left out, why
-leaving it out is load-bearing, and the drift record.
+A **second, unrelated MIT grant** covers `skills/matt-pocock/`. These files are the engineering
+skills of Matt Pocock, copied from [`mattpocock/skills`](https://github.com/mattpocock/skills).
+The copy lets a clone reproduce the setup without a dependency on an unversioned directory under
+`$HOME`. The files do not belong to upstream or to this fork. Their `LICENSE` stays with them,
+because that is the only condition of the license.
 
-A **third-party Apache-2.0 grant** covers `skills/skill-master/` — a **modified derivative** of
-Anthropic's `skill-creator`, taken from Claude Code's `claude-plugins-official` plugin marketplace
-and retargeted at Pi. Its `LICENSE.txt` travels with it, and its `README.md` states every change,
-which is what Apache-2.0 §4(b) asks of a modified copy. Unlike `skills/matt-pocock/`, this one is
-edited in place and maintained as part of the fork.
+One file in that set **is** changed. `grilling/SKILL.md` has a paragraph from this fork that
+copies its design tree into the Pi `todo` tool. Thus, an update must copy the other 21 files
+verbatim and then apply that one edit again. Do not copy the full set without this check. The
+`README.md` of that directory lists the parts that were not copied, why they must stay out, and
+the drift record.
 
-Modifications made in this fork are additionally marked in their own commits. They do not
-replace or relicense the upstream portions. Anyone redistributing this work must keep the
-same notices.
+A **third-party Apache-2.0 grant** covers `skills/skill-master/`. It is a **changed derivative**
+of the `skill-creator` skill by Anthropic, from the `claude-plugins-official` plugin marketplace
+of Claude Code. The fork changed it to work with Pi. Its `LICENSE.txt` stays with it, and its
+`README.md` states each change, as Apache-2.0 §4(b) requires for a changed copy. This fork edits
+`skills/skill-master/` in place and maintains it, unlike `skills/matt-pocock/`.
+
+The commits of this fork also mark its changes. The changes do not replace or relicense the
+upstream parts. If you distribute this work again, you must keep the same notices.
 
 ## What this fork changes
 
-Only the following divergences exist, and they are all provenance/identity fixes rather
-than behavioral changes:
+**The fork stopped at upstream v2.13.8. It is now an independent project, not a tracking
+fork.** The fork point was v2.11.x. The maintainer merged `upstream/main` @ `2d88b79c` (v2.13.8,
+2026-10-12) as the **final** upstream sync, and then removed the `upstream` remote. The fork has
+no merge path, and none is planned. The maintainer writes any later fixes and features here. To
+examine an upstream commit later, cherry-pick that one commit. Do not merge an upstream branch.
 
-- **Frozen at upstream v2.13.8 — this is a standalone project now, not a tracking fork.**
-  The fork point was v2.11.x; `upstream/main` @ `2d88b79c` (v2.13.8, 2026-10-12) was merged in
-  as the **final** upstream sync, and the `upstream` remote was then removed. There is no
-  merge path any more and none is planned: upstream's later fixes and features are the
-  maintainer's to write here. What rides on top of that revision is the scope rename, the
-  four deletions below, the fork's own install path and provenance docs, and six behavioral
-  changes: the `zh-TW` locale (+ the `LANG` region fix that makes it reachable),
-  guidance-injection throttling, the guidance docs split into auto-injected rules +
-  on-demand `details.md`, `.agents/skills` contract harvesting, project-trust gating for
-  that harvest, and local-path resolution in `/rpiv-setup`.
-  (To consult upstream later without adopting tracking: `git remote add upstream
-  https://github.com/juicesharp/rpiv-mono.git && git fetch upstream`, then `git
-  cherry-pick <sha>` — take a commit; don't merge a branch.)
-- README fork banner; CI/badges no longer point at the upstream repository or Codecov.
-- `packages/rpiv-site/public/CNAME` removed; the site's canonical URL no longer claims
-  `rpiv-pi.com`.
-- `.github/workflows/deploy-site.yml` is deleted (it was manual-only after the fork point,
-  then removed along with `rpiv-site`), so this fork can never publish a site, automatically
-  or otherwise.
-- **Four packages are deleted outright: `rpiv-site`, `rpiv-telemetry`, `rpiv-voice`,
-  `rpiv-warp`.** None of them was loaded by Pi here (all four were opt-in or private), so
-  removing them changes no runtime behavior — it removes the Astro site and its dependency
-  tree, the MLflow instrumentation, the local-dictation extension, and the Warp terminal
-  bridge, along with the guidance files, tests, and CI/config wiring that pointed at them.
-  `rpiv-warp`'s only in-tree consumer was the guarded `workflow-question-warp-bridge.ts` in
-  `rpiv-core`, which is deleted with it. `scripts/fork-pi-install.sh` now takes only
-  `--with btw`. Re-adding one of those packages is a `git revert` of this deletion plus a
-  `pi install`.
-- Codecov upload removed from `.github/workflows/ci.yml` (it required upstream's OIDC
-  identity and failed the build in a fork).
-- **The workspace scope is `@hs1n`, not `@juicesharp`.** Every reference that describes
-  *this* repo's packages — package names, dependencies, peers, source imports, per-package
-  READMEs and docs, per-package agent guidance — was retargeted by
-  `scripts/fork-rename-scope.mjs`, which is parameterized because the authoritative scope is
-  whatever npm account owns it (`npm whoami`). Each `package.json` also carries `author: hs1n`
-  plus a `contributors` entry for juicesharp, so upstream authorship survives in the metadata
-  and not just LICENSE. Files that describe *upstream* — this notice, `README.md`,
-  `.rpiv/guidance/architecture.md`, and the per-package `CHANGELOG.md` bodies — were
-  deliberately left naming `@juicesharp` and upstream's repo URLs, because they are records
-  of or statements about upstream rather than about this fork's artifacts.
-- **There is no npm distribution route.** Upstream's release pipeline is gone:
-  `scripts/release.mjs` is deleted, and the root `publish*` / `release:*` / `version:*`
-  scripts with it. Nothing here is published to a registry; the repo is installed into Pi as
-  a Pi source. The root `package.json` carries a `pi` manifest (the eight extensions +
-  `packages/rpiv-pi/skills`) so `pi install git:github.com/hs1n/pi-monocoque` works — Pi
-  clones the repo, treats the clone root as the package root, and runs
-  `npm install --omit=dev` there, which is why the root `prepare` is `husky || true`. A
-  local-checkout install (`pi install <checkout>`) loads the same manifest live, and
-  `scripts/fork-pi-install.sh` still installs the packages individually by path. Versions
-  stay lockstep with the root `package.json` as their only source (`npm run versions:sync`).
-- **`zh-TW` (繁體中文) joined the locale picker**, with `locales/zh-TW.json` in
-  `rpiv-todo` and `rpiv-ask-user-question`; the ambiguous `zh` label now reads
-  `简体中文`. Upstream's own `zh.json` maps are untouched — note that they are three keys
-  behind `en.json` in `rpiv-ask-user-question` (`review.global_hint`, `review.note_label`,
-  `notes.global_header`), which fall back to English.
-- **`grilling` is the one vendored Matt Pocock skill this fork edits.** Its design tree is
-  mirrored into Pi's `todo` tool — each decision a task, prerequisites as `blockedBy`, the
-  frontier as the unblocked pending set — so the whole tree stays visible in the todo overlay for
-  the session. It is MIT-covered like the rest of that set;
-  `skills/matt-pocock/README.md` and `PROVENANCE.json` record the drift, so a verbatim re-copy
-  does not silently drop it.
+The changes on top of v2.13.8 are in three groups.
 
-Anything added later on top of this list is documented in the commit history.
+**Identity and provenance changes:**
+
+- The README has a fork banner. CI and badges do not point at the upstream repository or at
+  Codecov. Codecov upload was removed from `.github/workflows/ci.yml`, because it needed the OIDC
+  identity of upstream and failed the build in a fork.
+- **The workspace scope is `@hs1n`, not `@juicesharp`.** `scripts/fork-rename-scope.mjs` changed
+  each reference to the packages of *this* repo: package names, dependencies, peers, source
+  imports, package READMEs and docs, and package agent guidance. The script takes the scope as a
+  parameter, because the owner of the npm account (`npm whoami`) sets the correct scope. Each
+  `package.json` has `author: hs1n` and a `contributors` entry for juicesharp. Thus the metadata
+  also records upstream authorship, not only LICENSE.
+- Some files describe *upstream*: this notice, `.rpiv/guidance/architecture.md`, the
+  `CHANGELOG.md` bodies and `docs/upstream/`. These files can still name `@juicesharp` and the
+  upstream repo, because they are records of upstream.
+- **The fork has no npm distribution route.** The upstream release pipeline is gone.
+  `scripts/release.mjs` is deleted, and so are the root `publish*`, `release:*` and `version:*`
+  scripts. Nothing here is published to a registry. You install the repo into Pi as a Pi source.
+- The root `package.json` has a `pi` manifest. The manifest lists the seven extensions and the
+  skill trees (`packages/rpiv-pi/skills`, `skills/matt-pocock`, `skills/skill-master` and
+  `skills/repo-5s`). Because of this manifest, `pi install git:github.com/hs1n/pi-monocoque`
+  works. Pi clones the repo, uses the clone root as the package root, and runs
+  `npm install --omit=dev` there. For this reason, the root `prepare` is `husky || true`.
+- A local-checkout install (`pi install <checkout>`) loads the same manifest live.
+  `scripts/fork-pi-install.sh` installs the packages one at a time from their paths. The root
+  `package.json` is the only source of the lockstep version (`npm run versions:sync`).
+
+**Deletions:**
+
+- **The fork deleted four packages: `rpiv-site`, `rpiv-telemetry`, `rpiv-voice` and
+  `rpiv-warp`.** Pi did not load any of them here, because all four were opt-in or private. Thus
+  the deletion changed no runtime behavior. It removed the Astro site and its dependency tree,
+  the MLflow instrumentation, the local-dictation extension and the Warp terminal bridge. It also
+  removed their guidance files, tests, CI and config. The only consumer of `rpiv-warp` in the
+  tree was `workflow-question-warp-bridge.ts` in `rpiv-core`, and the fork deleted it too.
+  `scripts/fork-pi-install.sh` now accepts only `--with btw`. To add one of the packages again,
+  use `git revert` on the deletion, then `pi install`.
+- The fork deleted `packages/rpiv-site/public/CNAME`, so the site does not claim
+  `rpiv-pi.com`. The fork also deleted `.github/workflows/deploy-site.yml`. Thus this fork cannot
+  publish a site.
+- **In 3.0.0, the fork deleted the `/wf` workflow runtime and the `rpiv-workflow` package.**
+  This removed the typed graph, its four built-in workflows, the lane dock and `/lanes`. Agents
+  now use the Pi `Agent` and `SubagentWorkflow` tools for multi-stage work. `/rpiv-setup` removes
+  an installed `rpiv-workflow`. See
+  [ADR 0005](./docs/adr/0005-the-typed-workflow-runtime-is-removed.md).
+- With the runtime, the fork removed the `contract:` blocks from skill frontmatter and the
+  `stages` and `presets` scopes from `models.json`. It also removed the `annotate-inline` and
+  `migrate-to-guidance` skills, and the `packages/rpiv-pi/scripts/` CLI.
+
+**Behavior changes:**
+
+- **`zh-TW` (繁體中文) is in the locale picker**, with `locales/zh-TW.json` in `rpiv-todo` and
+  `rpiv-ask-user-question`. The fork also fixed the `LANG` region, so the picker can select
+  `zh-TW`. The ambiguous `zh` label now reads `简体中文`. The fork did not change the upstream
+  `zh.json` maps. In `rpiv-ask-user-question`, those maps do not have three keys that `en.json`
+  has (`review.global_hint`, `review.note_label` and `notes.global_header`). These keys show in
+  English.
+- The fork throttles guidance injection. The tool path injects only the deepest guidance file.
+  A repeated `session_start` does not inject again for a session that already has the context.
+- The guidance docs are split into rules that Pi injects and an on-demand `details.md`.
+- `/rpiv-setup` resolves the siblings of this repo to local paths. It accepts `--yes`, so it
+  works with no UI. `/rpiv-models`, `/advisor` and `/languages` also accept arguments.
+- A session shows a warning when a skill copy with a higher precedence hides a bundled skill.
+- **`grilling` is the one copied Matt Pocock skill that this fork edits.** It copies its design
+  tree into the Pi `todo` tool. Each decision is a task, each prerequisite is a `blockedBy`, and
+  the frontier is the set of unblocked pending tasks. Thus the full tree stays visible in the todo
+  overlay for the session. The MIT grant covers it, as it covers the other files of the set.
+  `skills/matt-pocock/README.md` and `PROVENANCE.json` record the drift, so a verbatim copy does
+  not remove it without a warning.
+
+The commit history records each later change.
 
 ## Names and trademarks
 
-`rpiv`, `rpiv-pi`, `juicesharp`, `rpiv-pi.com`, and the npm scope **`@juicesharp`** identify
-the upstream project and its author. This fork:
+`rpiv`, `rpiv-pi`, `juicesharp`, `rpiv-pi.com` and the npm scope **`@juicesharp`** identify the
+upstream project and its author. This fork:
 
-- uses its own scope **`@hs1n`** for the packages it builds, and publishes **nothing** —
-  neither to `@juicesharp` (not our scope) nor anywhere else (there is no publish path left
-  in the repo),
-- does **not** operate `rpiv-pi.com`, and
-- will not present itself as the upstream project.
+- uses its own scope **`@hs1n`** for the packages that it builds, and publishes **nothing**. It
+  does not publish to `@juicesharp` (not our scope) or to a different location (the repo has no
+  publish path).
+- does **not** operate `rpiv-pi.com`.
+- does not show itself as the upstream project.
 
-The GitHub repository name `pi-monocoque` is deliberately distinct from upstream.
+The GitHub repository name `pi-monocoque` is intentionally different from the upstream name.
 
 ## Upstream prose in this repository
 
-`README.md` and the root `docs/` carried upstream's original text, preserved verbatim so
-attribution stays intact. Since the no-publish change, the root `README.md` is this fork's
-own front door and upstream's version is kept at `docs/upstream/README.md` (as is
-`roadmap.md`) — upstream's repo URLs and `@juicesharp` package names inside them are correct
-as written, because they describe upstream. The per-package READMEs and `docs/` files under
-`packages/` keep upstream's prose but have their package-name and repo-URL references
-retargeted to this fork's `@hs1n` scope by `scripts/fork-rename-scope.mjs`. Sections such as
-*Roadmap*, *Who built this*, *Contributions*, and *Status and expectations* — including the
-statements about Codemasters International and the author's professional role — express the
-**upstream author's** views, not those of this fork's maintainer. They are kept as-is for
-provenance, not as an endorsement or as this fork's position.
+The upstream README and roadmap are kept verbatim at `docs/upstream/README.md` and
+`docs/upstream/roadmap.md`, so attribution stays complete. The repo URLs and `@juicesharp`
+package names in them are correct, because they describe upstream. The root `README.md` is the
+front page of this fork.
+
+The package READMEs and the `docs/` files under `packages/` started from upstream prose. The fork
+changed their package names and repo links to the `@hs1n` scope and this repo. The fork also
+rewrote them to describe the fork as it is now.
+
+Some sections in `docs/upstream/` give the views of the **upstream author**, not the views of the
+maintainer of this fork. Examples are *Roadmap*, *Who built this*, *Contributions* and *Status
+and expectations*, with the statements about Codemasters International and the professional role
+of the author. The fork keeps them for provenance. They are not an endorsement, and they do not
+state the position of this fork.
 
 ## Data flows you should know about
 
-This is upstream behavior, unchanged here, but worth stating plainly for anyone running it:
+This is upstream behavior, and the fork did not change it. If you run the software, know these
+facts:
 
-- `rpiv-web-tools` sends queries/URLs to whichever third-party search/fetch provider you
-  configure, under your own API keys.
-- The pipeline sends your source code and prompts to whichever model provider you select.
+- `rpiv-web-tools` sends queries and URLs to the third-party search or fetch provider that you
+  configure, with your own API keys.
+- The pipeline sends your source code and prompts to the model provider that you select.
 
-Each of these is subject to that third party's own terms and privacy policy.
+The terms and the privacy policy of each third party apply.
 
 ## Third-party licenses
 
-MIT covers upstream's own code. It does not cover the dependency tree, and upstream ships
-no `NOTICE`/`COPYING` or third-party inventory. `scripts/fork-license-audit.mjs` walks the
-installed tree and summarizes it; run it after `npm install`:
+MIT covers the code of upstream. It does not cover the dependency tree. Upstream ships no
+`NOTICE` or `COPYING` file and no third-party inventory. `scripts/fork-license-audit.mjs` reads
+the installed tree and gives a summary. Run it after `npm install`:
 
 ```
 node scripts/fork-license-audit.mjs .
 ```
 
-Two snapshots matter, because deleting `rpiv-site` and its Astro/Vite tree took most of the
-inventory with it.
+Two snapshots are important. When the fork deleted `rpiv-site`, it also removed most of the
+inventory with the Astro and Vite tree.
 
-**At the fork point** — 633 deduplicated `name@version` entries:
+**At the fork point**: 633 deduplicated `name@version` entries:
 
 | License | Count |
 | --- | ---: |
@@ -176,25 +195,25 @@ inventory with it.
 | MPL-2.0 | 2 |
 | 0BSD / OFL-1.1 / LGPL-3.0-or-later / Python-2.0 / UNKNOWN | 1 each |
 
-**Today** — 248 entries: MIT 168 · Apache-2.0 39 · BSD-3-Clause 18 · ISC 15 ·
+**Today**: 248 entries: MIT 168 · Apache-2.0 39 · BSD-3-Clause 18 · ISC 15 ·
 MIT OR Apache-2.0 2 · MPL-2.0 2 · BlueOak-1.0.0 2 · 0BSD 1 · Unlicense 1.
 
-Flagged (copyleft / restrictive / unknown) is **down to 2**: `lightningcss@1.33.0` and
-`lightningcss-darwin-arm64@1.33.0`, both MPL-2.0, both reached through `vitest → vite`.
-File-level copyleft; nothing is modified or redistributed, so no obligation is triggered.
+**Two** entries are flagged (copyleft, restrictive or unknown): `lightningcss@1.33.0` and
+`lightningcss-darwin-arm64@1.33.0`. Both use MPL-2.0, and both come through `vitest → vite`.
+MPL-2.0 is copyleft at the file level. This fork does not change or distribute these files, so
+no obligation applies.
 
-Three entries the fork-point audit called out are gone with the packages that carried them.
-`@img/sharp-libvips-darwin-arm64` (LGPL-3.0-or-later), `zod-to-ts` (no `license` field at
-all, reached transitively through `astro`) and `@fontsource/jetbrains-mono` (OFL-1.1) were
-all `rpiv-site` dependencies, so the LGPL question and the missing-license question no
-longer apply to this tree. They would return with a `git revert` of that deletion.
+The fork-point audit flagged three entries that are now gone with their packages:
+`@img/sharp-libvips-darwin-arm64` (LGPL-3.0-or-later), `zod-to-ts` (no `license` field, through
+`astro`) and `@fontsource/jetbrains-mono` (OFL-1.1). All three were `rpiv-site` dependencies.
+Thus the LGPL question and the missing-license question do not apply to this tree. A `git revert`
+of that deletion brings them back.
 
-Re-run the script after dependency changes; treat a new copyleft or `UNKNOWN` entry in a
-package's `dependencies` as a blocker before publishing — while remembering that nothing
-here has a publish path at all.
+Run the script again after dependency changes. A new copyleft or `UNKNOWN` entry in the
+`dependencies` of a package blocks a publish. But nothing here has a publish path.
 
 ## Support and warranty
 
-Upstream is under no obligation to support anything in this fork — please do not file this
-fork's issues upstream. The MIT warranty disclaimer applies: this software is provided
-"as is", without warranty of any kind.
+Upstream has no obligation to support this fork. Do not send issues about this fork to upstream.
+The MIT warranty disclaimer applies: this software is provided "as is", without warranty of any
+kind.

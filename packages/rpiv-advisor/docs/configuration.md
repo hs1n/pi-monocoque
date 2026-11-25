@@ -142,7 +142,6 @@ conflicting evidence with one more `advisor` call rather than silently switching
 | `Advisor selection not found: <choice>` | the model you picked was no longer in the available-model list when `/advisor` resolved the choice |
 | `Previously configured advisor model <key> is no longer available` | the saved model left Pi's registry |
 | `Failed to save advisor selection — selection not persisted` | the write to `advisor.json` failed |
-| `/advisor requires interactive mode` | `/advisor` ran without a TTY |
 
 The `Advisor restored: …` announcement fires at most once per process, so
 programmatic session spawns (workflow stages, subagents) do not repeat it.

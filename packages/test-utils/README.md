@@ -1,27 +1,27 @@
 # @hs1n/rpiv-test-utils
 
-The shared fixture library the tests in this monorepo import — mock [Pi Agent](https://github.com/badlogic/pi-mono) extension APIs, scripted child sessions, synthetic transcripts, and host-environment stubs. It is internal to this repo: `private: true`, never published to npm, and never loaded by the Pi host.
+The shared fixture library for the tests in this monorepo. It has mock [Pi Agent](https://github.com/badlogic/pi-mono) extension APIs, scripted child sessions, synthetic transcripts and host-environment stubs. It is internal to this repo. It is `private: true`, it is not published to npm, and the Pi host does not load it.
 
 ## What it provides
 
-- **A mock Pi you inspect instead of stub** — `createMockPi()` hands back `{ pi, captured }`, and every `registerTool`, `registerCommand`, `registerShortcut`, `registerFlag`, `on` and `events.emit` call lands in a typed bucket you assert on afterwards.
-- **Scripted child sessions** — `createMockSessionChain({ steps })` dequeues one step per `spawnChild()` call (`branch`, `cancelled`, `toolTimeout`, `sessionFile`) and aggregates `sentMessages`, `notifications` and `statusUpdates` across every child.
-- **Synthetic transcripts from plain literals** — `buildSessionEntries()` with `makeUserMessage`, `makeAssistantMessage` and `makeToolResult` gives you `SessionEntry[]` while the `as unknown as` casts stay here, out of your test file.
-- **One host stub per concern** — `stubFetch` (matcher-driven, records every call), `stubGitExec`, `makeSpawnStub`, `writeGuidanceTree`, and `makeTheme`/`makeTui` for ANSI-free view tests.
-- **Structural tool-contract checks** — `assertToolContract(tool, { name, requiredFields, optionalFields })` verifies the name, description, `execute` and the exact `required` set without depending on a schema library.
-- **Ship-manifest verification** — `verifyShipManifest(import.meta.url)` diffs a package's on-disk production `.ts` tree against `package.json` `files` in both directions: `missing` and `stale`.
+- **A mock Pi that you inspect, not stub**: `createMockPi()` gives `{ pi, captured }`. Each `registerTool`, `registerCommand`, `registerShortcut`, `registerFlag`, `on` and `events.emit` call goes into a typed bucket. Your test asserts on the buckets after the call.
+- **Scripted child sessions**: `createMockSessionChain({ steps })` takes one step for each `spawnChild()` call (`branch`, `cancelled`, `toolTimeout`, `sessionFile`). It collects `sentMessages`, `notifications` and `statusUpdates` from all children.
+- **Synthetic transcripts from plain literals**: `buildSessionEntries()` with `makeUserMessage`, `makeAssistantMessage` and `makeToolResult` gives you `SessionEntry[]`. The `as unknown as` casts stay here, not in your test file.
+- **One host stub for each concern**: `stubFetch` (matcher-driven, records each call), `stubGitExec`, `makeSpawnStub`, `writeGuidanceTree`, and `makeTheme`/`makeTui` for view tests with no ANSI codes.
+- **Structural tool-contract checks**: `assertToolContract(tool, { name, requiredFields, optionalFields })` checks the name, the description, `execute` and the exact `required` set. It does not need a schema library.
+- **Ship-manifest checks**: `verifyShipManifest(import.meta.url)` compares the production `.ts` tree of a package on disk with the `files` list in `package.json`, in both directions. It reports `missing` and `stale`.
 
-Full export list with signatures and defaults: [docs/api.md](./docs/api.md). Ship-manifest rules and this package's own manifest: [docs/ship-manifest.md](./docs/ship-manifest.md). Deeper design notes: [architecture.md](../../.rpiv/guidance/packages/test-utils/architecture.md).
+For the full export list with signatures and defaults, see [docs/api.md](./docs/api.md). For the ship-manifest rules and the manifest of this package, see [docs/ship-manifest.md](./docs/ship-manifest.md). For design notes, see [architecture.md](../../.rpiv/guidance/packages/test-utils/architecture.md).
 
 ## Used by
 
-Every workspace package except [rpiv-site](https://github.com/hs1n/pi-monocoque/tree/main/packages/rpiv-site) — 13 packages, 89 files, all of them `*.test.ts`. npm workspaces symlinks the package into `node_modules/`, so no `devDependencies` entry is needed. Import it by bare name:
+Nine workspace packages use it, in 70 `*.test.ts` files. All packages except `rpiv-side-call` and this package import it. npm workspaces put a symlink to the package in `node_modules/`, so you do not need a `devDependencies` entry. Import it by its bare name:
 
 ```ts
 import { createMockPi, stubGitExec } from "@hs1n/rpiv-test-utils";
 ```
 
-The fixtures are vitest-only — every factory calls `vi`, and the package is consumed as TypeScript source, so plain node or another runner will not load it. A test file has to match `packages/*/**/*.test.ts` for the root `vitest.config.ts` to pick it up. Run from the repo root:
+The fixtures work only with vitest. Each factory calls `vi`, and the package is TypeScript source, so plain node or a different runner cannot load it. The root `vitest.config.ts` runs only test files that match `packages/*/**/*.test.ts`. Run the tests from the repo root:
 
 ```sh
 npm test              # whole suite
@@ -30,7 +30,7 @@ npx vitest run packages/test-utils/manifest.test.ts   # one file
 
 ## Conventions
 
-- **Fixtures never enter production code.** Importing them would leak `vi` into the runtime bundle. Type-only imports of a declared dependency's types are the one sanctioned coupling.
-- **`as unknown as` casts are allowed here and nowhere else.** pi-ai and pi-coding-agent do not export every internal discriminator; keeping the casts in fixtures is what stops them leaking into runtime types.
-- **Factories return capture buckets.** If you find yourself overriding one call at a time, add a factory variant instead.
+- **Do not use fixtures in production code.** An import would put `vi` into the runtime bundle. The only permitted coupling is a type-only import of the types of a declared dependency.
+- **Use `as unknown as` casts here and nowhere else.** pi-ai and pi-coding-agent do not export all internal discriminators. When the casts stay in fixtures, they do not go into runtime types.
+- **Factories return capture buckets.** If you override one call at a time, add a factory variant.
 - **Globals restore themselves.** The repo sets `unstubGlobals: true`, so `stubFetch` needs no manual teardown.

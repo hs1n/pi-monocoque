@@ -1,5 +1,14 @@
 # rpiv-mono
 
+> [!NOTE]
+> This file is the upstream record. The fork keeps it as upstream wrote it, and does not
+> update it. In 3.0.0, the fork removed the `/wf` workflow runtime and the `rpiv-workflow`
+> package. Text below about `/wf`, workflows or lanes does not apply to this fork. See
+> [ADR 0005](../adr/0005-the-typed-workflow-runtime-is-removed.md).
+> This file moved to `docs/upstream/`, so its relative links below are broken. Use
+> [FORK_NOTICE.md](../../FORK_NOTICE.md) and [INSTALL-FORK.md](../../INSTALL-FORK.md).
+> `pi install git:github.com/hs1n/pi-monocoque` works now.
+
 > **This repository is a personal fork** of [juicesharp/rpiv-mono](https://github.com/juicesharp/rpiv-mono),
 > maintained as [hs1n/pi-monocoque](https://github.com/hs1n/pi-monocoque). It is not affiliated with,
 > endorsed by, or supported by the upstream author. Everything below is upstream's original text,

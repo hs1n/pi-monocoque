@@ -83,7 +83,7 @@ run() {
 # alias and puts a second live typebox in the process. 0.20.0+ peer-pins it `"*"`.
 # Anything at or above the floor is left alone (never downgraded); bump deliberately.
 PI_SUBAGENTS_FLOOR=0.20.0
-PI_SUBAGENTS_INSTALL=0.21.0
+PI_SUBAGENTS_INSTALL=0.26.3
 SUBAGENTS_MANIFEST="$HOME/.pi/agent/npm/node_modules/@tintinweb/pi-subagents/package.json"
 OUTDATED_SUBAGENTS=$(node -e 'const fs=require("node:fs"),[p,floor]=process.argv.slice(1);let have="";try{have=JSON.parse(fs.readFileSync(p,"utf8")).version||""}catch{};const cmp=(a,b)=>{const A=a.split(".").map(Number),B=b.split(".").map(Number);for(let i=0;i<3;i++){const d=(A[i]||0)-(B[i]||0);if(d)return d}return 0};process.stdout.write(have&&cmp(have,floor)<0?have:"")' "$SUBAGENTS_MANIFEST" "$PI_SUBAGENTS_FLOOR")
 if [ -n "$OUTDATED_SUBAGENTS" ]; then
