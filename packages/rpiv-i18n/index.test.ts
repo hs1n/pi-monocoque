@@ -8,7 +8,7 @@
  * untouched so the next session's detection chain runs cleanly.
  */
 
-import { mkdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { createMockCtx, createMockPi } from "@hs1n/rpiv-test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -17,7 +17,7 @@ vi.mock("./i18n-ui.js", () => ({
 	showLanguagePicker: vi.fn(),
 }));
 
-import { __resetState, applyLocale, getActiveLocale } from "./i18n.js";
+import { __resetState, applyLocale, getActiveLocale, loadLocaleConfig } from "./i18n.js";
 import { showLanguagePicker } from "./i18n-ui.js";
 import registerI18n from "./index.js";
 
@@ -51,13 +51,83 @@ describe("/languages — command shape", () => {
 	});
 });
 
-describe("/languages — !hasUI", () => {
-	it("notifies error and never opens the picker", async () => {
+const USAGE = "Usage: /languages <locale> | /languages system";
+
+describe("/languages — !hasUI, no arguments", () => {
+	it("prints the current locale and usage, and never opens the picker", async () => {
+		applyLocale("de");
 		const { captured } = registerAndCaptureLanguages();
 		const ctx = createMockCtx({ hasUI: false });
 		await captured.commands.get("languages")?.handler("", ctx as never);
-		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("interactive"), "error");
+		expect(ctx.ui.notify).toHaveBeenCalledWith(`Language: de\n${USAGE}`, "info");
 		expect(showLanguagePicker).not.toHaveBeenCalled();
+	});
+
+	it("prints 'system default' when no locale is set", async () => {
+		const { captured } = registerAndCaptureLanguages();
+		const ctx = createMockCtx({ hasUI: false });
+		await captured.commands.get("languages")?.handler("", ctx as never);
+		expect(ctx.ui.notify).toHaveBeenCalledWith(`Language: system default\n${USAGE}`, "info");
+	});
+});
+
+describe("/languages <locale> — argument sets the locale without a UI", () => {
+	it("valid code: persists, applies, notifies", async () => {
+		const { captured } = registerAndCaptureLanguages();
+		const ctx = createMockCtx({ hasUI: false });
+		await captured.commands.get("languages")?.handler(" pt-BR ", ctx as never);
+		expect(getActiveLocale()).toBe("pt-BR");
+		expect(loadLocaleConfig()).toEqual({ locale: "pt-BR" });
+		expect(ctx.ui.notify).toHaveBeenCalledWith("Language: pt-BR", "info");
+		expect(showLanguagePicker).not.toHaveBeenCalled();
+	});
+
+	it("'system' clears the locale (the picker's System default row)", async () => {
+		applyLocale("uk");
+		const { captured } = registerAndCaptureLanguages();
+		const ctx = createMockCtx({ hasUI: false });
+		await captured.commands.get("languages")?.handler("system", ctx as never);
+		expect(getActiveLocale()).toBeUndefined();
+		expect(ctx.ui.notify).toHaveBeenCalledWith("Language: system default", "info");
+	});
+
+	it.each([
+		["xx", "Unknown locale: xx. Valid values: de, en, es, fr, pt, pt-BR, ru, uk, zh, zh-TW, system"],
+		["de fr", `Too many arguments. ${USAGE}`],
+	])("invalid argument %s: error, locale and config unchanged", async (args, message) => {
+		applyLocale("en");
+		const { captured } = registerAndCaptureLanguages();
+		const ctx = createMockCtx({ hasUI: false });
+		await captured.commands.get("languages")?.handler(args, ctx as never);
+		expect(ctx.ui.notify).toHaveBeenCalledWith(message, "error");
+		expect(ctx.ui.notify).toHaveBeenCalledTimes(1);
+		expect(getActiveLocale()).toBe("en");
+		expect(existsSync(LOCALE_CONFIG_PATH)).toBe(false);
+	});
+});
+
+describe("/languages — argument completions", () => {
+	it("offers the locale codes and 'system' that match the prefix", () => {
+		const { captured } = registerAndCaptureLanguages();
+		const complete = captured.commands.get("languages")?.getArgumentCompletions;
+		expect(complete?.("zh")).toEqual([
+			{ value: "zh", label: "zh", description: "简体中文" },
+			{ value: "zh-TW", label: "zh-TW", description: "繁體中文" },
+		]);
+		expect(complete?.("sy")).toEqual([{ value: "system", label: "system", description: "System default" }]);
+		expect(complete?.("qq")).toBeNull();
+	});
+});
+
+describe("/languages — UI, no arguments", () => {
+	it("opens the picker and applies the choice", async () => {
+		vi.mocked(showLanguagePicker).mockResolvedValueOnce("es");
+		const { captured } = registerAndCaptureLanguages();
+		const ctx = createMockCtx({ hasUI: true });
+		await captured.commands.get("languages")?.handler("", ctx as never);
+		expect(showLanguagePicker).toHaveBeenCalledTimes(1);
+		expect(getActiveLocale()).toBe("es");
+		expect(ctx.ui.notify).toHaveBeenCalledWith("Language: es", "info");
 	});
 });
 

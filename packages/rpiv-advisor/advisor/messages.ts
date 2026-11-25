@@ -29,7 +29,7 @@ export const CHECKMARK = " ✓";
 
 // Messages (static)
 export const MSG_ADVISOR_DISABLED = "Advisor disabled";
-export const MSG_REQUIRES_INTERACTIVE = "/advisor requires interactive mode";
+export const MSG_ADVISOR_USAGE = "Usage: /advisor <provider/model-id> [effort] | /advisor off";
 export const MSG_ADVISOR_NUDGE = "Please advise on the executor's situation above.";
 export const MSG_EFFORT_NOT_SET = "Effort not set — advisor uses the model default";
 export const MSG_PERSIST_FAILED = "Failed to save advisor selection — selection not persisted";
@@ -42,6 +42,7 @@ export const ERR_NO_MODEL_SELECTED = "no advisor model selected";
 export const ERR_EMPTY_RESPONSE_DETAIL = "empty response";
 export const ERR_ABORTED_DETAIL = "aborted";
 export const ERR_UNKNOWN = "unknown error";
+export const ERR_TOO_MANY_ARGS = `Too many arguments. ${MSG_ADVISOR_USAGE}`;
 
 // Errors/messages (parameterized)
 export const errMisconfigured = (label: string, err: string) => `Advisor (${label}) is misconfigured: ${err}`;
@@ -59,5 +60,13 @@ export const msgAdvisorRestoredInactive = (label: string, effort: ThinkingLevel 
 	`Advisor restored: ${label}${effort ? `, ${effort}` : ""} (inactive for current executor)`;
 export const msgAdvisorEnabledInactive = (label: string, effort: ThinkingLevel | undefined) =>
 	`Advisor: ${label}${effort ? `, ${effort}` : ""} (inactive for current executor)`;
+export const msgAdvisorCurrent = (label: string | undefined, effort: ThinkingLevel | undefined) =>
+	`${label ? msgAdvisorEnabled(label, effort) : "Advisor: off"}\n${MSG_ADVISOR_USAGE}`;
+export const errUnknownAdvisorModel = (token: string, valid: readonly string[]) =>
+	`Unknown advisor model: ${token}. Valid values: ${valid.join(", ")}`;
+export const errInvalidEffort = (effort: string, label: string, valid: readonly string[]) =>
+	`Effort ${effort} is not valid for ${label}. Valid values: ${valid.join(", ")}`;
+export const errEffortNotSupported = (label: string) =>
+	`Model ${label} does not support effort. Remove the effort argument.`;
 export const msgConsulting = (label: string, effort: ThinkingLevel | undefined) =>
 	`Consulting advisor (${label}${effort ? `, ${effort}` : ""})…`;

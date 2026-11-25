@@ -1,6 +1,7 @@
 /**
- * command — the /advisor slash command. Reads top-down: interactive guard →
- * model picker (buildModelItems) → no-advisor branch (applyDisable) → model
+ * command — the /advisor slash command. Arguments come first: "off" disables
+ * the advisor, "<provider/model-id> [effort]" enables it (applyArgs). Without
+ * arguments: no UI → print the current setting and usage; UI → model picker (buildModelItems) → no-advisor branch (applyDisable) → model
  * lookup → effort picker (buildEffortItems) → enable (applyEnable). The apply
  * helpers persist before mutating in-memory state — a save failure must never
  * leave memory ahead of disk.
@@ -9,7 +10,7 @@
 import type { Api, Model } from "@earendil-works/pi-ai";
 import { getSupportedThinkingLevels } from "@earendil-works/pi-ai";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import type { SelectItem } from "@earendil-works/pi-tui";
+import type { AutocompleteItem, SelectItem } from "@earendil-works/pi-tui";
 import { modelKey } from "@hs1n/rpiv-config";
 import { showAdvisorPicker, showEffortPicker } from "../advisor-ui.js";
 import { saveAdvisorConfig } from "./config.js";
@@ -19,12 +20,16 @@ import {
 	CHECKMARK,
 	DEFAULT_EFFORT,
 	EFFORT_ORDINAL,
+	ERR_TOO_MANY_ARGS,
+	errEffortNotSupported,
+	errInvalidEffort,
 	errSelectionNotFound,
+	errUnknownAdvisorModel,
 	type GradedEffort,
 	MSG_ADVISOR_DISABLED,
 	MSG_EFFORT_NOT_SET,
 	MSG_PERSIST_FAILED,
-	MSG_REQUIRES_INTERACTIVE,
+	msgAdvisorCurrent,
 	msgAdvisorEnabled,
 	msgAdvisorEnabledInactive,
 	NO_ADVISOR_VALUE,
@@ -114,12 +119,104 @@ function applyEnable(
 	);
 }
 
+// Argument words. "off" as the first word disables the advisor (the picker's
+// "No advisor" row). "off" as the effort word sends no reasoning (OFF_VALUE).
+const DISABLE_ARG = "off";
+const OFF_EFFORT_ARG = "off";
+
+// Effort words that the command accepts for a model: the picker's effort rows,
+// with OFF_VALUE shown as "off". Empty for a model without reasoning.
+function effortArgs(picked: Model<Api>): string[] {
+	if (!picked.reasoning) return [];
+	return buildEffortItems(picked).map((item) => (item.value === OFF_VALUE ? OFF_EFFORT_ARG : item.value));
+}
+
+// Argument path. Each error notifies and returns before any save, so an
+// invalid argument never changes the state. A reasoning model without an
+// effort word behaves like Esc at the effort picker (no explicit effort).
+function applyArgs(pi: ExtensionAPI, ctx: ExtensionContext, words: string[]): void {
+	const [modelArg, effortArg, ...rest] = words;
+	if (rest.length > 0 || (modelArg === DISABLE_ARG && effortArg !== undefined)) {
+		ctx.ui.notify(ERR_TOO_MANY_ARGS, "error");
+		return;
+	}
+	if (modelArg === DISABLE_ARG) {
+		applyDisable(pi, ctx);
+		return;
+	}
+
+	const availableModels = ctx.modelRegistry.getAvailable();
+	const picked = availableModels.find((m) => modelKey(m) === modelArg);
+	if (!picked) {
+		ctx.ui.notify(errUnknownAdvisorModel(modelArg, [DISABLE_ARG, ...availableModels.map(modelKey)]), "error");
+		return;
+	}
+
+	if (effortArg === undefined) {
+		if (picked.reasoning) ctx.ui.notify(MSG_EFFORT_NOT_SET, "info");
+		applyEnable(pi, ctx, picked, undefined);
+		return;
+	}
+	const validEfforts = effortArgs(picked);
+	if (validEfforts.length === 0) {
+		ctx.ui.notify(errEffortNotSupported(modelKey(picked)), "error");
+		return;
+	}
+	if (!validEfforts.includes(effortArg)) {
+		ctx.ui.notify(errInvalidEffort(effortArg, modelKey(picked), validEfforts), "error");
+		return;
+	}
+	applyEnable(pi, ctx, picked, effortArg === OFF_EFFORT_ARG ? undefined : (effortArg as GradedEffort));
+}
+
+// Completions for the argument text. The host replaces the full argument text
+// with the item value, so an effort item carries the model word too.
+function completeArgs(prefix: string, models: Model<Api>[]): AutocompleteItem[] | null {
+	const words = prefix.trimStart().split(/\s+/);
+	let items: AutocompleteItem[];
+	if (words.length <= 1) {
+		const first = words[0] ?? "";
+		items = [DISABLE_ARG, ...models.map(modelKey)]
+			.filter((value) => value.startsWith(first))
+			.map((value) => ({ value, label: value }));
+	} else if (words.length === 2) {
+		const [modelArg = "", effortPrefix = ""] = words;
+		const picked = models.find((m) => modelKey(m) === modelArg);
+		items = picked
+			? effortArgs(picked)
+					.filter((effort) => effort.startsWith(effortPrefix))
+					.map((effort) => ({ value: `${modelArg} ${effort}`, label: effort }))
+			: [];
+	} else {
+		items = [];
+	}
+	return items.length > 0 ? items : null;
+}
+
 export function registerAdvisorCommand(pi: ExtensionAPI): void {
+	// Completions get no context. Keep the registry of the last session so
+	// that they can offer the model keys.
+	let registry: ExtensionContext["modelRegistry"] | undefined;
+	pi.on("session_start", async (_event, ctx) => {
+		registry = ctx.modelRegistry;
+	});
+
 	pi.registerCommand("advisor", {
 		description: "Configure the advisor model for the advisor-strategy pattern",
-		handler: async (_args, ctx) => {
+		getArgumentCompletions: (prefix) => completeArgs(prefix, registry?.getAvailable() ?? []),
+		handler: async (args, ctx) => {
+			registry = ctx.modelRegistry;
+			const words = args
+				.trim()
+				.split(/\s+/)
+				.filter((w) => w.length > 0);
+			if (words.length > 0) {
+				applyArgs(pi, ctx, words);
+				return;
+			}
 			if (!ctx.hasUI) {
-				ctx.ui.notify(MSG_REQUIRES_INTERACTIVE, "error");
+				const current = getAdvisorModel();
+				ctx.ui.notify(msgAdvisorCurrent(current ? modelKey(current) : undefined, getAdvisorEffort()), "info");
 				return;
 			}
 

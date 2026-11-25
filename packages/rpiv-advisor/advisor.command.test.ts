@@ -54,12 +54,16 @@ describe("/advisor — command shape", () => {
 	});
 });
 
-describe("/advisor — !hasUI", () => {
-	it("notifies error and skips picker", async () => {
+describe("/advisor — !hasUI, no arguments", () => {
+	it("prints the current setting and usage, and skips the picker", async () => {
+		setAdvisorModel(undefined);
 		const { captured } = register();
 		const ctx = createMockCtx({ hasUI: false });
 		await captured.commands.get("advisor")?.handler("", ctx as never);
-		expect(ctx.ui.notify).toHaveBeenCalledWith(expect.stringContaining("interactive"), "error");
+		expect(ctx.ui.notify).toHaveBeenCalledWith(
+			"Advisor: off\nUsage: /advisor <provider/model-id> [effort] | /advisor off",
+			"info",
+		);
 		expect(showAdvisorPicker).not.toHaveBeenCalled();
 	});
 });
