@@ -38,6 +38,9 @@ jobs:
 
       - run: npm run check
 
+      # `check` runs biome with --write; fail if it had anything to rewrite.
+      - run: git diff --exit-code
+
       - run: npm run coverage -- --reporter=default --reporter=json --outputFile=test-results.json
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
