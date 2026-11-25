@@ -34,7 +34,7 @@ verification): [INSTALL-FORK.md](./INSTALL-FORK.md).
 
 | Package | Role |
 | --- | --- |
-| [`rpiv-pi`](./packages/rpiv-pi) | The pipeline: 29 skills, 15 named subagents, model management. Registers zero tools. |
+| [`rpiv-pi`](./packages/rpiv-pi) | The pipeline: 30 skills, 15 named subagents, model management. Registers zero tools. |
 | [`rpiv-ask-user-question`](./packages/rpiv-ask-user-question) | `ask_user_question` — a structured questionnaire instead of a guess. |
 | [`rpiv-todo`](./packages/rpiv-todo) | `todo` tool + `/todos` + a live overlay that survives `/reload` and compaction. |
 | [`rpiv-advisor`](./packages/rpiv-advisor) | `advisor` — escalate any step to a stronger reviewer model. |

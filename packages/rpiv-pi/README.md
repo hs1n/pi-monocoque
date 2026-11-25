@@ -11,7 +11,7 @@
 
 Turn "build this feature" into a run of named stages — discover → research → design →
 plan → implement → validate → code-review → commit — each one writing a reviewable
-Markdown artifact under `.rpiv/artifacts/` that the next stage consumes. rpiv-pi adds 29
+Markdown artifact under `.rpiv/artifacts/` that the next stage consumes. rpiv-pi adds 30
 skills and 15 specialist subagents to [Pi Agent](https://github.com/badlogic/pi-mono), and
 lets the agent orchestrate them with Pi's own `Agent` and `SubagentWorkflow` tools. It is
 for developers who want structured, reviewable multi-stage work instead of one very long
@@ -98,7 +98,7 @@ no overrides.
 
 ## Reference
 
-- [docs/skills.md](./docs/skills.md) — all 29 skills: what each consumes, what it writes,
+- [docs/skills.md](./docs/skills.md) — all 30 skills: what each consumes, what it writes,
   and which ones the model may pick on its own.
 - [docs/models-config.md](./docs/models-config.md) — giving Pi a provider, then the
   complete `models.json` schema, cascade, and worked examples.

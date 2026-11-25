@@ -1,7 +1,7 @@
 {
 	"name": "@hs1n/rpiv-pi",
 	"version": "3.0.0",
-	"description": "A skill-based development workflow for Pi Agent. 29 skills (discover → research → design → plan → implement → validate → code-review → commit, and more) and the 15 named subagents they dispatch.",
+	"description": "A skill-based development workflow for Pi Agent. 30 skills (discover → research → design → plan → implement → validate → code-review → commit, and more) and the 15 named subagents they dispatch.",
 	"keywords": [
 		"pi-package",
 		"pi-extension",
