@@ -9,6 +9,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Fork: `/languages` takes arguments, so it works without a UI.** `/languages <locale>` sets the locale. `/languages system` sets the locale from the environment again. If you give no arguments and no UI is available, the command shows the current locale and the usage. If an argument is not valid, the command shows the valid values and changes nothing. The command completes its arguments. In print mode (`pi -p`), Pi discards notify output. Thus valid arguments apply, but the command shows nothing.
 - **`zh-TW` (繁體中文) becomes a supported locale.** The picker previously offered a single `zh` entry whose label was just `中文`, which left a Traditional-Chinese reader no way to tell which script they would get — the shipped maps are Simplified. `SUPPORTED_LOCALES` now carries `{ code: "zh-TW", label: "繁體中文" }`, so `--locale zh-TW` and `/languages` both reach it. The SDK needs no registration of its own (the picker reads `SUPPORTED_LOCALES` directly); the consuming packages ship `locales/zh-TW.json`.
 
 ### Changed

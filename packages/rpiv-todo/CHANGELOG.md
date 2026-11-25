@@ -8,6 +8,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Changed
+- **Fork: the `todo` tool type-checks against Pi 1.6.1.** In Pi 1.6, the type of `StringEnum` from pi-ai is a pi-schema `Schema`, which TypeBox `Static` cannot read. The tool parameters now wrap `StringEnum` in `Type.Unsafe`, so the parameters keep their literal unions. The JSON schema that the model receives does not change. The peer range for the host stays `*`.
 - **The `collapseKey` grammar, its display casing, the resolution ladder and the `off` sentinel move to `@hs1n/rpiv-config` (`keyspec.ts`).** This package had its own copy of all four — the second of two, byte-identical but for the `export` keyword its own test needed — and now keeps only what is genuinely its own: the default (`ctrl+shift+t`) and the wiring that applies it. `config.ts` drops from 101 to 56 lines. No behaviour change; `isValidCollapseKeySpec` is no longer exported from here (its only consumer was the test that moved with it), and `COLLAPSE_KEY_OFF`/`CollapseKeySpec` are re-exported so every existing import site is unchanged.
 
 ### Added

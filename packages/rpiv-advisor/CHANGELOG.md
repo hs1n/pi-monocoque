@@ -7,6 +7,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- **Fork: `/advisor` takes arguments, so it works without a UI.** `/advisor <provider/model-id> [effort]` sets the advisor model and the optional effort. `/advisor off` disables the advisor. If you give no arguments and no UI is available, the command shows the current setting and the usage. If an argument is not valid, the command shows the valid values and changes nothing. The command completes its arguments. In print mode (`pi -p`), Pi discards notify output. Thus valid arguments apply, but the command shows nothing.
+
 ### Changed
 - The host-version-tolerant `completeSimple` resolution moves to the shared `@hs1n/rpiv-side-call` package, which now owns the `/compat`-first lookup, the resolution-failure code set and the runtime-facade probe that this package and `rpiv-btw` each implemented separately; `stripToolDeclarations` moves there with it. No behaviour change: the facade is still probed before the missing-key guard, and the global import still resolves inside the call's own error boundary.
 

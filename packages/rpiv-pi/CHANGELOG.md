@@ -5,6 +5,26 @@ All notable changes to `@hs1n/rpiv-pi` are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Fork: `/rpiv-setup --yes` applies the changes with no confirmation.** If you give no argument and no UI is available, `/rpiv-setup` lists the changes. Then it tells you to run `/rpiv-setup --yes`. In print mode (`pi -p`), Pi discards notify output. Thus valid arguments apply, but the command shows nothing.
+
+- **Fork: `/rpiv-models` takes arguments, so it edits `models.json` without a UI.** `/rpiv-models show` shows the configuration. `/rpiv-models set <scope> ...` saves a model for a scope. `/rpiv-models unset <scope> ...` removes it. The command completes its arguments. If the runtime is not bound yet, the completions return nothing and do not throw. In print mode (`pi -p`), Pi discards notify output. Thus valid arguments apply, but the command shows nothing.
+
+- **Fork: a new read-only `status` skill.** 3.0.0 removed the run journal, so no command showed where your work stands. `/skill:status [topic]` lists the newest artifacts in each bucket. For each artifact, it names the skill that wrote it. It also names the likely next skill. The skill writes nothing. Its helper always exits 0. If the root is missing or is a file, the helper prints `missing`. If an artifact is not readable, the helper marks it as unreadable. The helper reads only the first 8 KB of each file.
+
+### Changed
+
+- **Fork: the fork install pins `@tintinweb/pi-subagents` at 0.26.3, not 0.21.0.** `scripts/fork-pi-install.sh` and the READMEs use the new pin. The test suite passes against 0.26.3. The peer range stays `*`.
+
+- **Fork: the package description counts the skills correctly.** It no longer names the `/wf` workflows, which 3.0.0 removed.
+
+### Removed
+
+- **Fork: `skills/elaborate/_helpers/validate-workflow-invariant.mjs`.** The helper imported the deleted `@hs1n/rpiv-workflow` package, so it failed when it ran.
+
 ## [3.0.0] - 2026-11-25
 
 ### Added
